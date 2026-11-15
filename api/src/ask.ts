@@ -49,9 +49,10 @@ origin and destination, each one of
 - "here": where the person is now ("von hier", "from my location"). An origin that is not mentioned at all is also "here".
 - "home": the person's home ("von zuhause", "nach Hause", "heim", "from my street", "my place").
 - "work": the person's workplace ("zur Arbeit", "ins Büro", "from work").
-- "named": any other place. Put it in "text" as the person said it, with the house number and without filler words such as "der" or "zum". If it is one of the stops listed below, put that stop's name in "stop" exactly as listed. That includes abbreviations ("Hbf" is Hauptbahnhof), short forms ("Uni Süd" is Universität Süd) and misheard spellings ("Ehinger Thor" is Ehinger Tor). For an address, a shop, or a place that only resembles a stop, leave "stop" null: the planner searches for those itself.
+- "named": any other place. Put it in "text" as the person said it, with the house number and without filler words such as "der" or "zum". If it is one of the stops listed below, put that stop's name in "stop" exactly as listed. That includes abbreviations ("Hbf" is Hauptbahnhof), short forms ("Uni Süd" is Universität Süd) and misheard spellings ("Ehinger Thor" is Ehinger Tor). For an address, a shop, or a place that only resembles a stop, leave "stop" null: the planner searches for those itself. Leave it null too when what was said could be more than one listed stop ("Kuhberg" could be Kuhberg Schulzentrum or Oberer Kuhberg; "Rathaus" could be any of several): the planner then asks which one.
 - "none": only for a destination that is not mentioned.
 For every kind but "named", "text" and "stop" are null.
+Two places joined by "nach", "zu", "zum", "zur", "to" or an arrow are origin and destination in that order, also without "von" in front: "Karlstraße 33 nach Blaustein Bahnhof" starts at Karlstraße 33.
 
 time
 - kind "now": no time is mentioned, or "jetzt", "gleich", "sofort". "inMinutes", "day" and "clock" are null.
