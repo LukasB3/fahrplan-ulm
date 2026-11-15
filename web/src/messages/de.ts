@@ -15,6 +15,9 @@ export const de = {
     map: 'Karte',
     alerts: 'Meldungen',
   },
+  header: {
+    back: 'Zurück',
+  },
   route: {
     title: 'Fahrplan Ulm',
     lead: 'Bus und Straßenbahn in Ulm und Neu-Ulm: Abfahrten in Echtzeit und der Fahrplan jeder Haltestelle.',
@@ -126,7 +129,6 @@ export const de = {
   },
   stop: {
     kind: 'Haltestelle',
-    back: 'Abfahrten',
     title: (name: string, town: string) => `Haltestelle ${name}, ${town}: Abfahrten & Fahrplan`,
     description: (name: string, town: string, lines: string) => `Abfahrten in Echtzeit und der Fahrplan der Haltestelle ${name} in ${town}. Hier halten die Linien ${lines}.`,
     favourite: 'Als Favorit merken',
@@ -142,7 +144,6 @@ export const de = {
     metres: (metres: number) => `${metres} m`,
   },
   line: {
-    back: 'Linien',
     kinds: { tram: 'Straßenbahn', bus: 'Bus', night: 'Nachtbus' },
     heading: (id: string) => `Linie ${id}`,
     title: (id: string, name: string) => `Linie ${id} Ulm: Fahrplan & Haltestellen (${name})`,
