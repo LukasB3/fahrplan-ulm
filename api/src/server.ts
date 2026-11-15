@@ -2,11 +2,12 @@ import cors from '@fastify/cors'
 import rateLimit from '@fastify/rate-limit'
 import Fastify from 'fastify'
 import { z } from 'zod'
+import type { AlertBoard } from './alerts.js'
 import type { Asker } from './ask.js'
 import type { Config } from './config.js'
 import type { DepartureBoard } from './departures.js'
 import type { TripPlanner } from './trips.js'
-import type { ApiError, AskResult, Departures, Health, Places, Trips } from './types.js'
+import type { Alerts, ApiError, AskResult, Departures, Health, Places, Trips } from './types.js'
 import { UnknownStop } from './upstream.js'
 
 export interface ServerDeps {
@@ -14,6 +15,7 @@ export interface ServerDeps {
   departures: DepartureBoard
   planner: TripPlanner
   ask: Asker
+  alerts: AlertBoard
   // Where the request log goes, if not to standard output.
   logTo?: { write(line: string): void }
 }
@@ -53,7 +55,7 @@ const askRequest = z.object({
 // One IPv6 customer usually owns a whole /64, so that is what gets limited.
 export const visitorKey = (ip: string) => (ip.includes(':') ? ip.split(':').slice(0, 4).join(':') : ip)
 
-export const buildServer = async ({ cfg, departures, planner, ask, logTo }: ServerDeps) => {
+export const buildServer = async ({ cfg, departures, planner, ask, alerts, logTo }: ServerDeps) => {
   // Caddy on the same host is the only client, so its forwarded address is
   // trusted; without it every visitor would share one rate limit.
   // Request logs carry neither the client address nor the query, which can
@@ -77,6 +79,15 @@ export const buildServer = async ({ cfg, departures, planner, ask, logTo }: Serv
       if (problem instanceof UnknownStop) return reply.code(404).send({ error: 'unknown stop' })
       req.log.error(problem)
       return reply.code(502).send({ error: 'departures are unavailable' })
+    }
+  })
+
+  app.get('/api/alerts', async (req, reply): Promise<Alerts | ApiError> => {
+    try {
+      return await alerts()
+    } catch (problem) {
+      req.log.error(problem)
+      return reply.code(502).send({ error: 'alerts are unavailable' })
     }
   })
 

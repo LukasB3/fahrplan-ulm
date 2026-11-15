@@ -90,6 +90,24 @@ export type Trips = {
   note: 'ok' | 'too_late'
 }
 
+// A notice about a disruption, a diversion or stops that are not served.
+export type Alert = {
+  id: string
+  title: string
+  // The notice as plain paragraphs; list items start with a bullet.
+  text: string[]
+  // SWU lines it concerns, as written on the vehicle.
+  lines: string[]
+  // Stops it names, by their id at DING. Empty for a notice about a whole line.
+  stops: string[]
+  from: Iso | null
+  // Missing while no end is known.
+  to: Iso | null
+  published: Iso | null
+}
+
+export type Alerts = { now: Iso; alerts: Alert[] }
+
 // A request in plain words: "in 30 Minuten zum Hauptbahnhof".
 export type AskRequest = {
   text: string

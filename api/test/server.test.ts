@@ -1,10 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import type { AlertBoard } from '../src/alerts.js'
 import type { Asker } from '../src/ask.js'
 import { loadConfig } from '../src/config.js'
 import type { DepartureBoard } from '../src/departures.js'
 import { buildServer } from '../src/server.js'
 import type { TripPlanner } from '../src/trips.js'
-import type { AskRequest, AskResult, Departures, Place, TripRequest, Trips } from '../src/types.js'
+import type { Alerts, AskRequest, AskResult, Departures, Place, TripRequest, Trips } from '../src/types.js'
 import { UnknownStop } from '../src/upstream.js'
 
 const cfg = loadConfig({ WEB_ORIGIN: 'https://fahrplan-ulm.de/' })
@@ -35,10 +36,13 @@ const ask: Asker = (request, visitor) => {
   sentences.push([request, visitor])
   return Promise.resolve(understood)
 }
+const notices: Alerts = { now: '2026-11-15T12:00:00.000Z', alerts: [] }
+let alertsDown = false
+const alerts: AlertBoard = () => (alertsDown ? Promise.reject(new Error('DING is down')) : Promise.resolve(notices))
 let app: Awaited<ReturnType<typeof buildServer>>
 
 beforeAll(async () => {
-  app = await buildServer({ cfg, departures, planner, ask, logTo: { write: () => {} } })
+  app = await buildServer({ cfg, departures, planner, ask, alerts, logTo: { write: () => {} } })
 })
 afterAll(() => app.close())
 
@@ -150,5 +154,16 @@ describe('a request in plain words', () => {
     ['a position on another continent', { text: 'zum Bahnhof', position: { lat: 40.7, lon: -74 }, saved: { home: null, work: null } }],
   ])('turns %s away', async (_, payload) => {
     expect((await post(payload)).statusCode).toBe(400)
+  })
+})
+
+describe('alerts', () => {
+  it('answers with the current notices, and says so when they cannot be had', async () => {
+    const res = await app.inject({ url: '/api/alerts' })
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toEqual(notices)
+    alertsDown = true
+    expect((await app.inject({ url: '/api/alerts' })).statusCode).toBe(502)
+    alertsDown = false
   })
 })
