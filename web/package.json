@@ -10,6 +10,7 @@
     "build": "npm run map-worker && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit --incremental false",
+    "test": "tsx --test src/lib/*.test.ts",
     "data": "tsx scripts/build-data.ts",
     "map-worker": "mkdir -p public && cp node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs public/map-worker.mjs"
   },

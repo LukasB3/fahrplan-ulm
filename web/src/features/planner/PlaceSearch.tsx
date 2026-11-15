@@ -3,7 +3,7 @@
 import type { Place, Places } from '@api/types'
 import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { getJson } from '@/lib/api'
-import { matchRank, plain } from '@/lib/search'
+import { matchRank, plain, searchable } from '@/lib/search'
 import { savePlace, useSavedPlaces } from '@/lib/store'
 import { Icon, type IconName } from '@/shell/icons'
 import type { PlannerLabels } from './Journeys'
@@ -48,11 +48,11 @@ export function PlaceSearch({ query, stops, saving, onSaving, onPick, labels }: 
   const [located, setLocated] = useState<'locating' | 'failed'>()
   const [remote, setRemote] = useState<{ query: string; places: Place[] | 'failed' }>()
 
-  const names = useMemo(() => stops.map((stop) => plain(stop.name)), [stops])
+  const index = useMemo(() => stops.map((stop) => searchable(stop.name, stop.town ?? '')), [stops])
   const wanted = plain(query.trim())
   const local = wanted
     ? stops
-        .map((stop, index) => ({ stop, rank: matchRank(names[index]!, wanted) }))
+        .map((stop, at) => ({ stop, rank: matchRank(index[at]!, query) }))
         .filter((match) => match.rank !== undefined)
         .sort((a, b) => a.rank! - b.rank!)
         .slice(0, LOCAL_MATCHES)
