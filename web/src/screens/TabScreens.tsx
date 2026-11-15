@@ -2,14 +2,15 @@ import Link from 'next/link'
 import { AlertList } from '@/features/alerts/AlertList'
 import { StopRow } from '@/features/departures/StopRow'
 import { StopSearch } from '@/features/departures/StopSearch'
+import { MapLoader } from '@/features/map/MapLoader'
 import { Planner } from '@/features/planner/Planner'
 import { busiestStops, lines, lineStyles, stops } from '@/lib/data'
 import { t, type Locale } from '@/lib/i18n'
-import { href, lineHref } from '@/lib/routes'
+import { href, lineHref, stopHref } from '@/lib/routes'
 import { fetchAlerts } from '@/lib/server-api'
 import { SITE_ORIGIN } from '@/lib/seo'
-import { ComingSoon } from '@/shell/ComingSoon'
 import { Icon } from '@/shell/icons'
+import { InfoButton } from '@/shell/InfoButton'
 import { JsonLd } from '@/shell/JsonLd'
 import { LineBadge } from '@/shell/LineBadge'
 import { ScreenHeader } from '@/shell/ScreenHeader'
@@ -107,14 +108,21 @@ export function DeparturesScreen({ locale }: { locale: Locale }) {
 }
 
 export function MapScreen({ locale }: { locale: Locale }) {
-  const { map } = t(locale)
+  const { map, board } = t(locale)
   return (
-    <>
-      <ScreenHeader locale={locale} title={map.title} />
-      <main className="px-4">
-        <ComingSoon icon="map" title={map.soonTitle} text={map.soonText} />
-      </main>
-    </>
+    <main>
+      {/* The map is the page; its heading is there for screen readers and search engines. */}
+      <h1 className="sr-only">{map.heading}</h1>
+      <MapLoader
+        stops={stops.map((stop) => ({ id: stop.id, code: stop.code, name: stop.name, href: stopHref(locale, stop.slug), lat: stop.lat, lon: stop.lon, lines: stop.lines }))}
+        lineStyles={lineStyles}
+        labels={map}
+        boardLabels={{ now: board.now, minutes: board.minutes, platform: board.platform, track: board.track, planned: board.planned, none: board.none, failed: board.failed, stale: board.stale, loading: board.loading }}
+      />
+      <div className="map-info material">
+        <InfoButton locale={locale} />
+      </div>
+    </main>
   )
 }
 

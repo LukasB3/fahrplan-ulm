@@ -51,11 +51,17 @@ describe('SWU stop list, as recorded', () => {
   })
 
   it('makes a stop a place to travel to, whatever the spelling of its name', async () => {
-    const stops = stopDirectory(answering(fixture('swu-stops')))
+    const stops = stopDirectory((url) => Promise.resolve(fixture(url.includes('/route/') ? 'swu-routes' : 'swu-stops')))
     await stops.refresh()
     expect(stops.names()).toEqual(['Hauptbahnhof', 'Science Park II', 'Science Park III'])
     expect(stops.place(' hauptbahnhof ')).toMatchObject({ kind: 'stop', stop: 'de:08421:1008', name: 'Hauptbahnhof' })
     expect(stops.place('Münster')).toBeUndefined()
+  })
+
+  it('knows what a route number is called, and leaves depot trips unnamed', async () => {
+    const stops = stopDirectory((url) => Promise.resolve(fixture(url.includes('/route/') ? 'swu-routes' : 'swu-stops')))
+    await stops.refresh()
+    expect([stops.lineOf(5), stops.lineOf(901), stops.lineOf(101), stops.lineOf(201)]).toEqual(['5', 'N1', '1', undefined])
   })
 })
 
@@ -88,6 +94,7 @@ describe('the board of a stop', () => {
     const asked: string[] = []
     const getJson: GetJson = (url) => {
       asked.push(new URL(url).pathname.split('/').pop()!)
+      if (url.includes('/route/')) return Promise.resolve({ RouteAttributes: { RouteData: [] } })
       if (url.includes('BaseData')) return Promise.resolve(stopList)
       if (url.includes('XML_DM_REQUEST')) return efa ? Promise.resolve(efa()) : Promise.reject(new Error('DING is down'))
       return Promise.resolve({ StopPassage: { State: 'ok', DepartureData: swu } })

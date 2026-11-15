@@ -1,0 +1,45 @@
+{
+ "VehiclePattern": {
+  "ServiceCategory": "Pattern",
+  "UpdateInterval": "15 seconds",
+  "ContentScope": "Track",
+  "VehicleNumber": 47,
+  "VehicleCategory": 1,
+  "RouteNumber": 1,
+  "RouteName": "1",
+  "RouteColor": "rgb(237,27,36)",
+  "RouteSymbol": "Linie_1_Pikto.gif",
+  "OrderedBy": "SequenceNumber ascending",
+  "State": "ok",
+  "CurrentTimestamp": "2026-11-15T14:35:49+01:00",
+  "PatternData": {
+   "TrackPoints": [
+    {
+     "SequenceNumber": 1,
+     "Longitude": 10.030407222,
+     "Latitude": 48.434338611
+    },
+    {
+     "SequenceNumber": 2,
+     "Longitude": 10.030225278,
+     "Latitude": 48.434396667
+    },
+    {
+     "SequenceNumber": 3,
+     "Longitude": 10.029798611,
+     "Latitude": 48.434524444
+    },
+    {
+     "SequenceNumber": 4,
+     "Longitude": 10.029650278,
+     "Latitude": 48.4345725
+    },
+    {
+     "SequenceNumber": 5,
+     "Longitude": 10.029399722,
+     "Latitude": 48.434643889
+    }
+   ]
+  }
+ }
+}

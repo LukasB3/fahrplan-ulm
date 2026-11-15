@@ -90,6 +90,33 @@ export type Trips = {
   note: 'ok' | 'too_late'
 }
 
+// A tram or bus on the road right now.
+export type Vehicle = {
+  // SWU's number of the vehicle.
+  id: number
+  line: string
+  mode: Mode
+  lat: number
+  lon: number
+  // Where it is heading, in degrees from north.
+  bearing: number
+  // How far behind the timetable it is; negative when early.
+  delaySeconds: number
+  destination: string
+}
+
+export type Vehicles = { now: Iso; vehicles: Vehicle[] }
+
+// One vehicle's trip: the stops still ahead and the way it takes.
+export type VehicleTrip = {
+  id: number
+  line: string
+  mode: Mode
+  destination: string
+  stops: { name: string; code: string; planned: Iso; expected: Iso | null }[]
+  track: [lat: number, lon: number][]
+}
+
 // A notice about a disruption, a diversion or stops that are not served.
 export type Alert = {
   id: string

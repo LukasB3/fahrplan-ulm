@@ -1,0 +1,93 @@
+{
+ "VehicleTrip": {
+  "ServiceCategory": "Trip",
+  "UpdateInterval": "15 seconds",
+  "Filter": "None",
+  "ContentScope": "Standard",
+  "OrderedBy": "VehicleNumber ascending",
+  "CurrentStatus": "OK",
+  "CurrentTimestamp": "2026-11-15T14:35:48+01:00",
+  "TripData": [
+   {
+    "VehicleNumber": 47,
+    "VehicleCategory": 1,
+    "IsActive": true,
+    "PositionData": {
+     "Longitude": 9.992795,
+     "Latitude": 48.40195611111111,
+     "Bearing": 260
+    },
+    "TimeData": {
+     "Deviation": 20,
+     "ReferenceTime": "2026-11-15T14:35:39+01:00"
+    },
+    "JourneyData": {
+     "RouteNumber": 1,
+     "ArrivalDirectionText": "Böfingen",
+     "DepartureDirectionText": "Söflingen",
+     "Direction": 2
+    }
+   },
+   {
+    "VehicleNumber": 52,
+    "VehicleCategory": 1,
+    "IsActive": true,
+    "PositionData": {
+     "Longitude": 10.024241388888889,
+     "Latitude": 48.434513055555556,
+     "Bearing": 76
+    },
+    "TimeData": {
+     "Deviation": -10,
+     "ReferenceTime": "2026-11-15T14:35:39+01:00"
+    },
+    "JourneyData": {
+     "RouteNumber": 1,
+     "ArrivalDirectionText": "Söflingen",
+     "DepartureDirectionText": "Böfingen",
+     "Direction": 1
+    }
+   },
+   {
+    "VehicleNumber": 53,
+    "VehicleCategory": 1,
+    "IsActive": true,
+    "PositionData": {
+     "Longitude": 9.963639722222222,
+     "Latitude": 48.38537916666667,
+     "Bearing": 262
+    },
+    "TimeData": {
+     "Deviation": 0,
+     "ReferenceTime": "2026-11-15T14:35:39+01:00"
+    },
+    "JourneyData": {
+     "RouteNumber": 2,
+     "ArrivalDirectionText": "Science Park II",
+     "DepartureDirectionText": "Kuhberg",
+     "Direction": 2
+    }
+   },
+   {
+    "VehicleNumber": 1,
+    "VehicleCategory": 1,
+    "IsActive": false
+   },
+   {
+    "VehicleNumber": 9999,
+    "VehicleCategory": 1,
+    "IsActive": true,
+    "PositionData": {
+     "Longitude": 9.992795,
+     "Latitude": 48.40195611111111,
+     "Bearing": 260
+    },
+    "TimeData": {
+     "Deviation": 20,
+     "ReferenceTime": "2026-11-15T14:35:39+01:00"
+    },
+    "JourneyData": null
+   }
+  ]
+ }
+}
