@@ -12,7 +12,6 @@ const paths = {
   line: { de: '/linie' },
   imprint: { de: '/impressum' },
   privacy: { de: '/datenschutz' },
-  lab: { de: '/labor' },
 } as const
 
 export type RouteName = keyof typeof paths
