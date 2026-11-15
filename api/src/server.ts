@@ -7,7 +7,7 @@ import type { Asker } from './ask.js'
 import type { Config } from './config.js'
 import type { DepartureBoard } from './departures.js'
 import type { TripPlanner } from './trips.js'
-import type { Alerts, ApiError, AskResult, Departures, Health, Places, Trips, Vehicles, VehicleTrip } from './types.js'
+import type { Alerts, ApiError, AskResult, Departures, Health, Places, Run, Trips, Vehicles, VehicleTrip } from './types.js'
 import { UnknownStop, UnknownVehicle } from './upstream.js'
 import type { VehicleBoard } from './vehicles.js'
 
@@ -25,6 +25,14 @@ export interface ServerDeps {
 const departuresQuery = z.object({
   stop: z.coerce.number().int().positive().max(99_999),
   limit: z.coerce.number().int().min(1).max(40).default(20),
+})
+
+// A departure as the board gave it: its stop, planned time, line and the platform's id at DING.
+const runQuery = z.object({
+  stop: z.coerce.number().int().positive().max(99_999),
+  planned: z.iso.datetime(),
+  line: z.string().trim().min(1).max(20),
+  platform: z.string().max(60).optional(),
 })
 
 const placesQuery = z.object({ q: z.string().trim().min(2).max(80) })
@@ -83,6 +91,20 @@ export const buildServer = async ({ cfg, departures, planner, ask, alerts, vehic
       if (problem instanceof UnknownStop) return reply.code(404).send({ error: 'unknown stop' })
       req.log.error(problem)
       return reply.code(502).send({ error: 'departures are unavailable' })
+    }
+  })
+
+  app.get('/api/run', async (req, reply): Promise<Run | ApiError> => {
+    const query = runQuery.safeParse(req.query)
+    if (!query.success) return reply.code(400).send({ error: 'stop, planned and line say which departure' })
+    const { stop, planned, line, platform } = query.data
+    try {
+      const run = await departures.run(stop, { planned, line, platformId: platform ?? null })
+      return run ?? reply.code(404).send({ error: 'the run of this departure is not known' })
+    } catch (problem) {
+      if (problem instanceof UnknownStop) return reply.code(404).send({ error: 'unknown stop' })
+      req.log.error(problem)
+      return reply.code(502).send({ error: 'the run is unavailable' })
     }
   })
 

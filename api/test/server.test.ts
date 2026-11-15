@@ -5,19 +5,27 @@ import { loadConfig } from '../src/config.js'
 import type { DepartureBoard } from '../src/departures.js'
 import { buildServer } from '../src/server.js'
 import type { TripPlanner } from '../src/trips.js'
-import type { Alerts, AskRequest, AskResult, Departures, Place, TripRequest, Trips } from '../src/types.js'
+import type { Alerts, AskRequest, AskResult, Departures, Place, Run, TripRequest, Trips } from '../src/types.js'
 import { UnknownStop, UnknownVehicle } from '../src/upstream.js'
 import type { VehicleBoard } from '../src/vehicles.js'
 
 const cfg = loadConfig({ WEB_ORIGIN: 'https://fahrplan-ulm.de/' })
 const board: Departures = { now: '2026-11-15T12:00:00.000Z', stale: false, departures: [] }
 const asked: [number, number][] = []
+const run: Run = { stops: [{ name: 'Ehinger Tor', platform: 'B', planned: '2026-11-15T20:27:00Z', expected: null }] }
+const runsAsked: [number, { line: string; planned: string; platformId: string | null }][] = []
 const departures: DepartureBoard = {
   board: (stop, limit) => {
     asked.push([stop, limit])
     if (stop === 404) return Promise.reject(new UnknownStop('no such stop'))
     if (stop === 502) return Promise.reject(new Error('SWU is down'))
     return Promise.resolve(board)
+  },
+  run: (stop, wanted) => {
+    runsAsked.push([stop, wanted])
+    if (stop === 404) return Promise.reject(new UnknownStop('no such stop'))
+    if (stop === 502) return Promise.reject(new Error('DING is down'))
+    return Promise.resolve(wanted.line === '4' ? run : undefined)
   },
 }
 const hbf: Place = { kind: 'stop', stop: 'de:08421:1008', name: 'Hauptbahnhof', town: 'Ulm', lat: 48.39935, lon: 9.98421 }
@@ -96,6 +104,39 @@ describe('departures', () => {
     const res = await app.inject({ url: '/api/departures?stop=502' })
     expect(res.statusCode).toBe(502)
     expect(res.json()).toEqual({ error: 'departures are unavailable' })
+  })
+})
+
+describe('the run of a departure', () => {
+  const row = 'planned=2026-11-15T20:27:00.000Z&line=4'
+
+  it('answers with the stops from this one on, for the departure the board gave', async () => {
+    const res = await app.inject({ url: `/api/run?stop=1350&${row}&platform=de:08421:1350:1:B` })
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toEqual(run)
+    expect(runsAsked.at(-1)).toEqual([1350, { line: '4', planned: '2026-11-15T20:27:00.000Z', platformId: 'de:08421:1350:1:B' }])
+  })
+
+  it('works without a platform', async () => {
+    await app.inject({ url: `/api/run?stop=1350&${row}` })
+    expect(runsAsked.at(-1)?.[1].platformId).toBeNull()
+  })
+
+  it.each(['', '?stop=1350', '?stop=1350&planned=tomorrow&line=4', '?stop=abc&planned=2026-11-15T20:27:00.000Z&line=4', '?stop=1350&planned=2026-11-15T20:27:00.000Z'])('turns "%s" away', async (query) => {
+    expect((await app.inject({ url: `/api/run${query}` })).statusCode).toBe(400)
+  })
+
+  it('says so when the run or the stop is not known', async () => {
+    const unknownRun = await app.inject({ url: '/api/run?stop=1350&planned=2026-11-15T20:27:00.000Z&line=9' })
+    expect(unknownRun.statusCode).toBe(404)
+    expect(unknownRun.json()).toEqual({ error: 'the run of this departure is not known' })
+    expect((await app.inject({ url: `/api/run?stop=404&${row}` })).statusCode).toBe(404)
+  })
+
+  it('says so when DING cannot be reached', async () => {
+    const res = await app.inject({ url: `/api/run?stop=502&${row}` })
+    expect(res.statusCode).toBe(502)
+    expect(res.json()).toEqual({ error: 'the run is unavailable' })
   })
 })
 

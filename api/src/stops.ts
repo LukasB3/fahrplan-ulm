@@ -8,6 +8,7 @@ import type { GetJson } from './upstream.js'
 export const stopDirectory = (getJson: GetJson) => {
   let byNumber = new Map<number, SwuStop>()
   let byName = new Map<string, SwuStop>()
+  let byDhid = new Map<string, SwuStop>()
   let names: string[] = []
   let lines = new Map<number, string>()
 
@@ -18,10 +19,13 @@ export const stopDirectory = (getJson: GetJson) => {
       lines = routes
       byNumber = new Map(stops.map((stop) => [stop.number, stop]))
       byName = new Map(stops.map((stop) => [stop.name.toLowerCase(), stop]))
+      byDhid = new Map(stops.map((stop) => [stop.dhid, stop]))
       // Sorted, so the list reads the same every time it is put into a prompt.
       names = stops.map((stop) => stop.name).sort((a, b) => a.localeCompare(b, 'de'))
     },
     dhidOf: (number: number) => byNumber.get(number)?.dhid,
+    // What SWU calls the stop that has this id at DING.
+    nameAt: (dhid: string) => byDhid.get(dhid)?.name,
     names: () => names,
     lineOf: (route: number) => lines.get(route),
     place: (name: string): Place | undefined => {

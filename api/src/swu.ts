@@ -13,6 +13,7 @@ const departure = z.object({
   DepartureTimeActual: z.iso.datetime({ offset: true }).nullish(),
   DepartureDirectionText: z.string().nullish(),
   PlatformName: z.string().nullish(),
+  StopPointCode: z.string().nullish(),
   VehicleNumber: z.number().int().nullish(),
   VehicleCategory: z.number().int().nullish(),
 })
@@ -49,6 +50,7 @@ export const swuDepartures = async (getJson: GetJson, stop: number, limit: numbe
         planned: iso(entry.DepartureTimeScheduled),
         expected: entry.DepartureTimeActual ? iso(entry.DepartureTimeActual) : null,
         vehicle: entry.VehicleNumber ?? null,
+        platformId: entry.StopPointCode ?? null,
       },
     ]
   })

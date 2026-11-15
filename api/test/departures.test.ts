@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { departureBoard } from '../src/departures.js'
-import { efaDeparturesOfOthers } from '../src/efa.js'
+import { departureBoard, pickRun } from '../src/departures.js'
+import { efaDeparturesOfOthers, efaRuns } from '../src/efa.js'
 import { stopDirectory } from '../src/stops.js'
 import { swuDepartures, swuStops } from '../src/swu.js'
 import { UnknownStop, type GetJson } from '../src/upstream.js'
@@ -20,6 +20,7 @@ describe('SWU departures, as recorded', () => {
       planned: '2026-11-15T12:26:00.000Z',
       expected: expect.stringMatching(/^2026-11-15T12:\d\d:\d\d\.000Z$/),
       vehicle: 173,
+      platformId: 'de:08421:1008:1:2',
     })
     expect(departures.find((departure) => departure.line === '2')?.mode).toBe('tram')
   })
@@ -80,6 +81,80 @@ describe('DING departures, as recorded', () => {
   })
 })
 
+describe('DING departures with their further stops, as recorded at Ehinger Tor', () => {
+  const asked: string[] = []
+  const recorded: GetJson = (url) => {
+    asked.push(url)
+    return Promise.resolve(fixture('efa-departures-runs'))
+  }
+  const runs = () => efaRuns(recorded, 'https://efa.example', 'de:08421:1350', new Date('2026-11-15T20:18:00Z'))
+
+  it('are asked for from the given moment, by the clock in Ulm, with the stop sequences', async () => {
+    await runs()
+    expect(asked.at(-1)).toContain('includeCompleteStopSeq=1')
+    expect(asked.at(-1)).toContain('itdDate=20261115&itdTime=2118')
+  })
+
+  it("include SWU's own lines, each starting at this stop", async () => {
+    const events = await runs()
+    expect(events.map((event) => event.line)).toEqual(['49', '1', '2', '7', '4', '1'])
+    expect(events.every((event) => event.stops[0]?.name === 'Ehinger Tor')).toBe(true)
+  })
+
+  it('give every further stop with the time the vehicle gets there', async () => {
+    const tram = (await runs())[1]!
+    expect(tram.platformId).toBe('de:08421:1350:1:C')
+    expect(tram.stops.map((stop) => stop.name)).toEqual(['Ehinger Tor', 'Hauptbahnhof', 'Theater', 'Justizgebäude', 'Ostpreußenweg'])
+    expect(tram.stops[0]).toMatchObject({ planned: '2026-11-15T20:27:00Z', platform: 'C' })
+    expect(tram.stops.at(-1)).toMatchObject({ planned: '2026-11-15T20:52:00Z' })
+    expect(tram.stops.every((stop, index, all) => index === 0 || stop.planned >= all[index - 1]!.planned)).toBe(true)
+  })
+
+  it('leave out a further stop that has no time, and a departure that has none', async () => {
+    const answer = fixture('efa-departures-runs') as { stopEvents: { departureTimePlanned?: string; onwardLocations: Record<string, unknown>[] }[] }
+    delete answer.stopEvents[0]!.departureTimePlanned
+    answer.stopEvents[1]!.onwardLocations[1] = { name: 'Ulm Theater', type: 'platform' }
+    const events = await efaRuns(answering(answer), 'https://efa.example', 'de:08421:1350', new Date('2026-11-15T20:18:00Z'))
+    expect(events).toHaveLength(5)
+    expect(events[0]!.stops.map((stop) => stop.name)).toEqual(['Ehinger Tor', 'Hauptbahnhof', 'Justizgebäude', 'Ostpreußenweg'])
+  })
+
+  it('name a stop outside Ulm with its town, unless the town is in the name already', async () => {
+    const answer = fixture('efa-departures-runs') as { stopEvents: { onwardLocations: { parent: { disassembledName: string; parent: { name: string } } }[] }[] }
+    const [first, second] = answer.stopEvents[0]!.onwardLocations
+    Object.assign(first!.parent, { disassembledName: 'Bahnhof', parent: { name: 'Ehingen (Donau)' } })
+    Object.assign(second!.parent, { disassembledName: 'Wendlingen (N)', parent: { name: 'Wendlingen (Neckar)' } })
+    const [event] = await efaRuns(answering(answer), 'https://efa.example', 'de:08421:1350', new Date('2026-11-15T20:18:00Z'))
+    expect(event!.stops.slice(1, 3).map((stop) => stop.name)).toEqual(['Ehingen (Donau), Bahnhof', 'Wendlingen (N)'])
+  })
+
+  describe('and the one a board row means', () => {
+    const picked = async (wanted: Parameters<typeof pickRun>[1]) => pickRun(await runs(), wanted)
+    const next = async (wanted: Parameters<typeof pickRun>[1]) => (await picked(wanted))?.stops[1]?.name
+
+    it('is found among four leaving in the same minute, by platform and line', async () => {
+      expect(await next({ line: '4', planned: '2026-11-15T20:27:00.000Z', platformId: 'de:08421:1350:1:B' })).toBe('Steinerne Brücke')
+      expect((await picked({ line: '7', planned: '2026-11-15T20:27:00.000Z', platformId: 'de:08421:1350:1:B' }))?.stops.at(-1)?.name).toBe('Rathaus Jungingen')
+      expect((await picked({ line: '2', planned: '2026-11-15T20:27:00.000Z', platformId: 'de:08421:1350:1:C' }))?.stops.at(-1)?.name).toBe('Science Park II')
+      expect((await picked({ line: '1', planned: '2026-11-15T20:27:00.000Z', platformId: 'de:08421:1350:1:C' }))?.stops.at(-1)?.name).toBe('Ostpreußenweg')
+    })
+
+    it('is found by line and minute when the platform is unknown or differs', async () => {
+      expect(await next({ line: '4', planned: '2026-11-15T20:27:30.000Z', platformId: null })).toBe('Steinerne Brücke')
+      expect(await next({ line: '1', planned: '2026-11-15T20:30:00.000Z', platformId: 'de:08421:1350:9:Z' })).toBe('Blücherstraße')
+    })
+
+    it('is taken as it is when it is alone at its platform and minute, whatever the line is called', async () => {
+      expect(await next({ line: '1E', planned: '2026-11-15T20:30:00.000Z', platformId: 'de:08421:1350:1:D' })).toBe('Blücherstraße')
+    })
+
+    it('is not guessed: another minute, or two candidates and no matching line', async () => {
+      expect(await next({ line: '4', planned: '2026-11-15T20:28:00.000Z', platformId: 'de:08421:1350:1:B' })).toBeUndefined()
+      expect(await next({ line: 'X', planned: '2026-11-15T20:27:00.000Z', platformId: 'de:08421:1350:1:C' })).toBeUndefined()
+    })
+  })
+})
+
 describe('the board of a stop', () => {
   const inMinutes = (minutes: number) => new Date(Date.now() + minutes * 60_000).toISOString()
   const swuEntry = (line: string, minutes: number) => ({ RouteName: line, VehicleCategory: 5, DepartureDirectionText: 'Wiley', PlatformName: 'A', DepartureTimeScheduled: inMinutes(minutes), DepartureTimeActual: inMinutes(minutes) })
@@ -88,7 +163,9 @@ describe('the board of a stop', () => {
     location: { properties: { platformName: 'Bstg. E' } },
     transportation: { number, name: `Regionalbus Linie ${number}`, product: { class: 6 }, destination: { name: 'Illertissen' }, operator: { name: operator } },
   })
-  const stopList = { StopAttributes: { StopData: [{ StopNumber: 1350, StopName: 'Ehinger Tor', StopCoordinates: { Latitude: 48.39, Longitude: 9.98 }, StopPoints: [{ StopPointCode: 'de:08421:1350:0:1' }] }] } }
+  const listed = (number: number, name: string, platform: string) => ({ StopNumber: number, StopName: name, StopCoordinates: { Latitude: 48.39, Longitude: 9.98 }, StopPoints: [{ StopPointCode: platform }] })
+  // SWU calls the second stop "Rathaus"; DING, in the recorded answer, "Rathaus Ulm".
+  const stopList = { StopAttributes: { StopData: [listed(1350, 'Ehinger Tor', 'de:08421:1350:0:1'), listed(1002, 'Rathaus', 'de:08421:1002:0:1')] } }
 
   const setUp = async (swu: unknown[], efa: (() => unknown) | undefined) => {
     const asked: string[] = []
@@ -129,6 +206,27 @@ describe('the board of a stop', () => {
     await board.board(1350, 20)
     await board.board(1350, 20)
     expect(asked.filter((request) => request === 'XML_DM_REQUEST')).toHaveLength(1)
+  })
+
+  it("finds a departure's run at DING, asking once for several rows of a board", async () => {
+    const { board, asked } = await setUp([], () => fixture('efa-departures-runs'))
+    const first = await board.run(1350, { line: '4', planned: '2026-11-15T20:27:00.000Z', platformId: 'de:08421:1350:1:B' })
+    const second = await board.run(1350, { line: '1', planned: '2026-11-15T20:30:00.000Z', platformId: 'de:08421:1350:1:D' })
+    expect(first?.stops.map((stop) => stop.name)).toEqual(['Ehinger Tor', 'Steinerne Brücke', 'Rathaus', 'Hafengasse', 'Egertweg'])
+    expect(second?.stops.at(-1)?.name).toBe('Söflingen')
+    expect(asked.filter((request) => request === 'XML_DM_REQUEST')).toHaveLength(1)
+  })
+
+  it("names the stops of a run as SWU does where SWU knows them, and gives only what the contract has", async () => {
+    const { board } = await setUp([], () => fixture('efa-departures-runs'))
+    const run = await board.run(1350, { line: '4', planned: '2026-11-15T20:27:00.000Z', platformId: 'de:08421:1350:1:B' })
+    expect(run?.stops[2]).toEqual({ name: 'Rathaus', platform: expect.any(String), planned: expect.any(String), expected: expect.any(String) })
+  })
+
+  it('knows no run for a departure DING does not list, and none at a stop it cannot place at DING', async () => {
+    const { board } = await setUp([], () => fixture('efa-departures-runs'))
+    await expect(board.run(1350, { line: '4', planned: '2026-11-15T23:59:00.000Z', platformId: null })).resolves.toBeUndefined()
+    await expect(board.run(1008, { line: '4', planned: '2026-11-15T20:27:00.000Z', platformId: null })).rejects.toBeInstanceOf(UnknownStop)
   })
 
   it('shows SWU lines only for a stop it cannot place at DING', async () => {

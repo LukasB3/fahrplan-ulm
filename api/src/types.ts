@@ -20,6 +20,8 @@ export type Departure = {
   expected: Iso | null
   // SWU's number of the vehicle on this trip, once one is assigned.
   vehicle: number | null
+  // The platform's id at DING ("de:08421:1008:1:2"), which helps to find this departure's run.
+  platformId: string | null
 }
 
 export type Departures = {
@@ -46,6 +48,10 @@ export type Places = { places: Place[] }
 
 // One end of a leg: where, and when by the timetable and by live data.
 export type Stopover = { name: string; platform: string | null; planned: Iso; expected: Iso | null }
+
+// Where a departure goes from the stop it was asked at: that stop first, then
+// every stop that follows, each with the time the vehicle gets there.
+export type Run = { stops: Stopover[] }
 
 export type Walk = {
   kind: 'walk'
