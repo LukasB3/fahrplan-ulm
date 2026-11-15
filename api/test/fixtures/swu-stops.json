@@ -1,0 +1,167 @@
+{
+  "StopAttributes": {
+    "ServiceCategory": "BaseData",
+    "UpdateInterval": "24 hours",
+    "Filter": "None",
+    "ContentScope": "Basic",
+    "OrderedBy": "StopName ascending",
+    "CurrentStatus": "OK",
+    "CurrentTimestamp": "2026-11-15T13:17:21+01:00",
+    "StopData": [
+      {
+        "StopNumber": 1008,
+        "StopCode": "HBF",
+        "StopName": "Hauptbahnhof",
+        "StopCoordinates": {
+          "Longitude": 9.984206666666667,
+          "Latitude": 48.3993525
+        },
+        "StopPoints": [
+          {
+            "StopPointNumber": 1,
+            "StopPointCode": "de:08421:1008:1:1",
+            "PlatformName": "B",
+            "StopPointName": "Hauptbahnhof Steig B",
+            "StopPointCoordinates": {
+              "Longitude": 9.984211944444445,
+              "Latitude": 48.399526944444446,
+              "Bearing": 357
+            }
+          },
+          {
+            "StopPointNumber": 2,
+            "StopPointCode": "de:08421:1008:1:2",
+            "PlatformName": "A",
+            "StopPointName": "Hauptbahnhof Steig A",
+            "StopPointCoordinates": {
+              "Longitude": 9.984205,
+              "Latitude": 48.39863805555556,
+              "Bearing": 177
+            }
+          },
+          {
+            "StopPointNumber": 21,
+            "StopPointCode": "100821",
+            "PlatformName": "B",
+            "StopPointName": "Hauptbahnhof Steig B",
+            "StopPointCoordinates": {
+              "Longitude": 9.984211944444445,
+              "Latitude": 48.399526944444446,
+              "Bearing": 357
+            }
+          },
+          {
+            "StopPointNumber": 22,
+            "StopPointCode": "100822",
+            "PlatformName": "A",
+            "StopPointName": "Hauptbahnhof Steig A",
+            "StopPointCoordinates": {
+              "Longitude": 9.984205,
+              "Latitude": 48.39863805555556,
+              "Bearing": 177
+            }
+          },
+          {
+            "StopPointNumber": 31,
+            "StopPointCode": "100831",
+            "PlatformName": "B",
+            "StopPointName": "Hauptbahnhof Ersatzhalt B",
+            "StopPointCoordinates": {
+              "Longitude": 9.984333888888889,
+              "Latitude": 48.39951805555555,
+              "Bearing": 357
+            }
+          },
+          {
+            "StopPointNumber": 32,
+            "StopPointCode": "100832",
+            "PlatformName": "A",
+            "StopPointName": "Hauptbahnhof Ersatzhalt A",
+            "StopPointCoordinates": {
+              "Longitude": 9.98405,
+              "Latitude": 48.398628055555555,
+              "Bearing": 177
+            }
+          }
+        ]
+      },
+      {
+        "StopNumber": 1249,
+        "StopCode": "SCIP",
+        "StopName": "Science Park II",
+        "StopCoordinates": {
+          "Longitude": 9.936131944444444,
+          "Latitude": 48.421436944444444
+        },
+        "StopPoints": [
+          {
+            "StopPointNumber": 1,
+            "StopPointCode": "de:08421:1250:0:11",
+            "PlatformName": "A",
+            "StopPointName": "Science Park II Steig A",
+            "StopPointCoordinates": {
+              "Longitude": 9.935818888888889,
+              "Latitude": 48.42132888888889,
+              "Bearing": 196
+            }
+          },
+          {
+            "StopPointNumber": 3,
+            "StopPointCode": "de:08421:1250:0:12",
+            "PlatformName": "B",
+            "StopPointName": "Science Park II Steig B",
+            "StopPointCoordinates": {
+              "Longitude": 9.935886944444444,
+              "Latitude": 48.421303055555555,
+              "Bearing": 196
+            }
+          },
+          {
+            "StopPointNumber": 5,
+            "StopPointCode": "de:08421:1250:0:1",
+            "PlatformName": "C",
+            "StopPointName": "Science Park II Steig C",
+            "StopPointCoordinates": {
+              "Longitude": 9.93609,
+              "Latitude": 48.42155388888889,
+              "Bearing": 16
+            }
+          }
+        ]
+      },
+      {
+        "StopNumber": 1250,
+        "StopCode": "SCI3",
+        "StopName": "Science Park III",
+        "StopCoordinates": {
+          "Longitude": 9.93702888888889,
+          "Latitude": 48.424396944444446
+        },
+        "StopPoints": [
+          {
+            "StopPointNumber": 1,
+            "StopPointCode": "de:08421:1249:0:2",
+            "PlatformName": "A",
+            "StopPointName": "Science Park III Steig A",
+            "StopPointCoordinates": {
+              "Longitude": 9.936746944444444,
+              "Latitude": 48.42432111111111,
+              "Bearing": 227
+            }
+          },
+          {
+            "StopPointNumber": 2,
+            "StopPointCode": "de:08421:1249:0:1",
+            "PlatformName": "B",
+            "StopPointName": "Science Park III Steig B",
+            "StopPointCoordinates": {
+              "Longitude": 9.937701111111112,
+              "Latitude": 48.424703055555554,
+              "Bearing": 50
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
