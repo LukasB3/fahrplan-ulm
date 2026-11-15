@@ -2,7 +2,7 @@
 
 import { type ReactNode, useMemo, useState } from 'react'
 import type { LineStyle } from '@/lib/data-types'
-import { metresBetween } from '@/lib/geo'
+import { locate, type LocateProblem, metresBetween } from '@/lib/geo'
 import { matchRank, searchable } from '@/lib/search'
 import { useFavourites } from '@/lib/store'
 import { Icon } from '@/shell/icons'
@@ -17,8 +17,10 @@ export type SearchLabels = {
   favourites: string
   nearby: string
   nearbyStart: string
-  nearbyFailed: string
   nearbyNone: string
+  locating: string
+  locationDenied: string
+  locationUnavailable: string
   popular: string
   metres: string
 }
@@ -46,7 +48,7 @@ function Group({ heading, children }: { heading: string; children: ReactNode }) 
 
 export function StopSearch({ stops, lineStyles, labels }: Props) {
   const [query, setQuery] = useState('')
-  const [nearby, setNearby] = useState<'failed' | { stop: ListedStop; metres: number }[]>()
+  const [nearby, setNearby] = useState<'locating' | LocateProblem | { stop: ListedStop; metres: number }[]>()
   const favourites = useFavourites()
 
   const index = useMemo(() => stops.map((stop) => searchable(stop.name, stop.town ?? HOME_TOWN)), [stops])
@@ -59,21 +61,20 @@ export function StopSearch({ stops, lineStyles, labels }: Props) {
     : undefined
   const favouriteStops = favourites.flatMap((favourite) => stops.find((stop) => stop.code === favourite.code) ?? [])
 
-  const locate = () =>
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        const here = { lat: coords.latitude, lon: coords.longitude }
+  const findNearby = () => {
+    setNearby('locating')
+    locate().then(
+      (here) =>
         setNearby(
           stops
             .map((stop) => ({ stop, metres: metresBetween(here, stop) }))
             .filter((near) => near.metres <= NEARBY_RADIUS_M)
             .sort((a, b) => a.metres - b.metres)
             .slice(0, NEARBY),
-        )
-      },
-      () => setNearby('failed'),
-      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
+        ),
+      (problem: LocateProblem) => setNearby(problem),
     )
+  }
 
   return (
     <div className="space-y-6">
@@ -126,11 +127,11 @@ export function StopSearch({ stops, lineStyles, labels }: Props) {
             </Group>
           ) : (
             <div>
-              <button type="button" onClick={locate} className={`${button.secondary} w-full`}>
-                <Icon name="location" className="size-5" />
-                {labels.nearbyStart}
+              <button type="button" onClick={findNearby} disabled={nearby === 'locating'} className={`${button.secondary} w-full`}>
+                <Icon name="location" className={`size-5 ${nearby === 'locating' ? 'motion-safe:animate-pulse' : ''}`} />
+                {nearby === 'locating' ? labels.locating : labels.nearbyStart}
               </button>
-              {nearby && <p className="px-4 pt-2 text-[0.8125rem] text-label-2">{nearby === 'failed' ? labels.nearbyFailed : labels.nearbyNone}</p>}
+              {nearby && nearby !== 'locating' && <p className="px-4 pt-2 text-[0.8125rem] text-label-2">{nearby === 'denied' ? labels.locationDenied : nearby === 'unavailable' ? labels.locationUnavailable : labels.nearbyNone}</p>}
             </div>
           )}
 

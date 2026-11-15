@@ -76,8 +76,10 @@ export function DeparturesScreen({ locale }: { locale: Locale }) {
             favourites: departures.favourites,
             nearby: departures.nearby,
             nearbyStart: departures.nearbyStart,
-            nearbyFailed: departures.nearbyFailed,
             nearbyNone: departures.nearbyNone,
+            locating: departures.locating,
+            locationDenied: departures.locationDenied,
+            locationUnavailable: departures.locationUnavailable,
             popular: departures.popular,
             metres: 'm',
           }}

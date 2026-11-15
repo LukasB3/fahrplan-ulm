@@ -1,6 +1,11 @@
 // One sentence with everything the sentence request takes: start, destination and time.
 const askExample = 'Von der Virchowstraße zum Hauptbahnhof, um 18:50 da sein'
 
+// Why the phone's position could not be used, and what to do about it.
+const locating = 'Standort wird bestimmt …'
+const locationDenied = 'Der Standort ist für diese Seite nicht freigegeben. Gib ihn in den Einstellungen des Browsers frei und lade die Seite neu. Auf dem iPhone: Einstellungen › Datenschutz & Sicherheit › Ortungsdienste › Safari-Websites.'
+const locationUnavailable = 'Dein Standort ließ sich gerade nicht bestimmen. Versuch es noch einmal, am besten im Freien.'
+
 export const de = {
   site: {
     name: 'Fahrplan Ulm',
@@ -39,7 +44,6 @@ export const de = {
     askUnavailable: 'Die Eingabe per Satz ist gerade nicht verfügbar. Nimm bitte das Formular.',
     askSpeechFailed: 'Die Spracheingabe hat nicht geklappt. Du kannst den Satz auch tippen.',
     askAssumed: 'Als Ankunftszeit verstanden. Tippe auf „Abfahrt“, wenn du dann erst losfahren willst.',
-    askNeedPosition: 'Für den Start brauche ich deinen Standort. Erlaube ihn im Browser oder wähle einen Start.',
     askNeedHome: 'Wo dein Zuhause ist, weiß diese Seite nicht. Gib die Adresse oder Haltestelle ein.',
     askNeedWork: 'Wo deine Arbeit ist, weiß diese Seite nicht. Gib die Adresse oder Haltestelle ein.',
     askNeedPlace: 'Welchen Ort meinst du mit „{said}“?',
@@ -52,8 +56,9 @@ export const de = {
     searchPlaceholder: 'Haltestelle, Adresse oder Ort',
     cancel: 'Abbrechen',
     myLocation: 'Mein Standort',
-    locating: 'Standort wird bestimmt …',
-    locationFailed: 'Der Standort ist nicht verfügbar. Erlaube den Zugriff im Browser oder gib einen Start ein.',
+    locating,
+    locationDenied,
+    locationUnavailable,
     searching: 'Suche …',
     noPlace: 'Nichts gefunden.',
     placesFailed: 'Die Adresssuche ist gerade nicht erreichbar. Haltestellen findest du weiterhin.',
@@ -106,7 +111,9 @@ export const de = {
     favourites: 'Favoriten',
     nearby: 'In der Nähe',
     nearbyStart: 'Haltestellen in der Nähe',
-    nearbyFailed: 'Der Standort ist nicht verfügbar. Erlaube den Zugriff in den Einstellungen des Browsers oder suche die Haltestelle.',
+    locating,
+    locationDenied,
+    locationUnavailable,
     nearbyNone: 'Im Umkreis von 2 km liegt keine Haltestelle der SWU.',
     popular: 'Meistgenutzt',
     allStops: 'Alle Haltestellen',
@@ -169,7 +176,8 @@ export const de = {
     loading: 'Karte wird geladen',
     failed: 'Die Karte kann gerade nicht geladen werden.',
     locate: 'Meinen Standort zeigen',
-    locateFailed: 'Der Standort ist nicht verfügbar.',
+    locationDenied,
+    locationUnavailable,
     close: 'Fertig',
     stopPage: 'Fahrplan und alle Abfahrten',
     towards: 'Richtung',

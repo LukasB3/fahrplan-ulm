@@ -3,6 +3,7 @@
 import type { AskNeed, AskResult, Journey, Place, TripRequest, Trips } from '@api/types'
 import { useEffect, useRef, useState } from 'react'
 import { postJson } from '@/lib/api'
+import { locate, type LocateProblem } from '@/lib/geo'
 import type { LineStyle } from '@/lib/data-types'
 import { forgetHomeAndWork, rememberPlace } from '@/lib/store'
 import { Icon } from '@/shell/icons'
@@ -86,16 +87,15 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
     if (!need) return
     if (need.why === 'position') {
       setNote(null)
-      return navigator.geolocation.getCurrentPosition(
-        ({ coords }) => {
-          setPlanner({ [need.slot]: { kind: 'position', stop: null, name: labels.myLocation, town: null, lat: coords.latitude, lon: coords.longitude } })
+      return void locate().then(
+        (here) => {
+          setPlanner({ [need.slot]: { kind: 'position', stop: null, name: labels.myLocation, town: null, ...here } })
           settle(rest)
         },
-        () => {
-          setNote(labels.askNeedPosition)
+        (problem: LocateProblem) => {
+          setNote(problem === 'denied' ? labels.locationDenied : labels.locationUnavailable)
           setEditing({ role: need.slot, query: '' })
         },
-        { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
       )
     }
     // "Zuhause" and "Arbeit" are no places to search for: the field opens empty.
