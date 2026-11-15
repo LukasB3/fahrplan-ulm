@@ -6,10 +6,13 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { Icon, type IconName } from './icons'
 
-export type Tab = { href: string; label: string; icon: IconName }
+// `section` lists addresses outside the tab's own that still belong to it.
+export type Tab = { href: string; label: string; icon: IconName; section?: string[] }
 
-// A tab owns its own address and every page below it; the start page owns only itself.
-const tabOf = (tabs: Tab[], pathname: string) => tabs.find((tab) => (tab.href === '/' ? pathname === '/' : pathname === tab.href || pathname.startsWith(`${tab.href}/`)))?.href
+const under = (pathname: string, address: string) => pathname === address || pathname.startsWith(`${address}/`)
+
+// A tab owns its own address, every page below it and its section; the start page owns only itself.
+const tabOf = (tabs: Tab[], pathname: string) => tabs.find((tab) => (tab.href === '/' ? pathname === '/' : [tab.href, ...(tab.section ?? [])].some((address) => under(pathname, address))))?.href
 
 export function TabBar({ tabs, label }: { tabs: Tab[]; label: string }) {
   const pathname = usePathname()

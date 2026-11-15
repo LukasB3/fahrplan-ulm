@@ -1,0 +1,219 @@
+{
+  "version": "11.0.6.72",
+  "stopEvents": [
+    {
+      "departureTimePlanned": "2026-11-15T12:15:00Z",
+      "departureTimeEstimated": "2026-11-15T12:19:00Z",
+      "location": {
+        "id": "de:08421:1008:32:2",
+        "name": "Ulm Hauptbahnhof",
+        "properties": {
+          "stopId": "9001008",
+          "area": "32",
+          "platform": "2",
+          "platformName": "2",
+          "plannedPlatformName": "2"
+        }
+      },
+      "transportation": {
+        "id": "ddb:98X42:W:H:j26",
+        "name": "ICE 515 InterCityExpress",
+        "number": "515",
+        "product": {
+          "id": 0,
+          "class": 16,
+          "name": "Zug",
+          "iconId": 6
+        },
+        "operator": {
+          "code": "DBFV",
+          "id": "80",
+          "name": "DB Fernverkehr AG"
+        },
+        "destination": {
+          "id": "91000100",
+          "name": "München Hbf",
+          "type": "stop"
+        }
+      }
+    },
+    {
+      "departureTimePlanned": "2026-11-15T12:17:00Z",
+      "departureTimeEstimated": "2026-11-15T12:17:00Z",
+      "location": {
+        "id": "de:08421:1008:34:7",
+        "name": "Ulm Hauptbahnhof",
+        "properties": {
+          "stopId": "9001008",
+          "area": "34",
+          "platform": "7",
+          "platformName": "7 Nord",
+          "plannedPlatformName": "7 Nord"
+        }
+      },
+      "transportation": {
+        "id": "ddb:90RE5:5:H:j26",
+        "name": "R-Bahn RE55",
+        "number": "RE55",
+        "product": {
+          "id": 8,
+          "class": 13,
+          "name": "R-Bahn",
+          "iconId": 6
+        },
+        "operator": {
+          "code": "DB",
+          "id": "00",
+          "name": "DB AG"
+        },
+        "destination": {
+          "id": "8042111",
+          "name": "Sigmaringen Bahnhof",
+          "type": "stop"
+        }
+      }
+    },
+    {
+      "departureTimePlanned": "2026-11-15T12:26:00Z",
+      "departureTimeEstimated": "2026-11-15T12:26:00Z",
+      "location": {
+        "id": "de:08421:1008:1:2",
+        "name": "Ulm Hauptbahnhof",
+        "properties": {
+          "stopId": "9001008",
+          "area": "1",
+          "platform": "A",
+          "platformName": "Bstg. A",
+          "plannedPlatformName": "Bstg. A"
+        }
+      },
+      "transportation": {
+        "id": "din:87005: :R:j26",
+        "name": "Stadtbus UL/NU Linie 5",
+        "number": "5",
+        "disassembledName": "5",
+        "product": {
+          "id": 2,
+          "class": 5,
+          "name": "Stadtbus UL/NU Linie",
+          "iconId": 3
+        },
+        "operator": {
+          "id": "66",
+          "name": "SWU"
+        },
+        "destination": {
+          "name": "Ludwigsfeld",
+          "type": "stop"
+        }
+      }
+    },
+    {
+      "departureTimePlanned": "2026-11-15T12:26:00Z",
+      "departureTimeEstimated": "2026-11-15T12:26:00Z",
+      "location": {
+        "id": "de:08421:1008:1:2",
+        "name": "Ulm Hauptbahnhof",
+        "properties": {
+          "stopId": "9001008",
+          "area": "1",
+          "platform": "A",
+          "platformName": "Bstg. A",
+          "plannedPlatformName": "Bstg. A"
+        }
+      },
+      "transportation": {
+        "id": "din:87001: :R:j26",
+        "name": "Straßenbahn Linie 1",
+        "number": "1",
+        "disassembledName": "1",
+        "product": {
+          "id": 5,
+          "class": 4,
+          "name": "Straßenbahn Linie",
+          "iconId": 4
+        },
+        "operator": {
+          "id": "66",
+          "name": "SWU"
+        },
+        "destination": {
+          "name": "Söflingen",
+          "type": "stop"
+        }
+      }
+    },
+    {
+      "departureTimePlanned": "2026-11-15T12:49:00Z",
+      "departureTimeEstimated": "2026-11-15T12:49:00Z",
+      "location": {
+        "id": "de:08421:1008:31:1",
+        "name": "Ulm Hauptbahnhof",
+        "properties": {
+          "stopId": "9001008",
+          "area": "31",
+          "platform": "1",
+          "platformName": "1",
+          "plannedPlatformName": "1"
+        }
+      },
+      "transportation": {
+        "id": "ddb:91003:Y:R:j26",
+        "name": "WB 962 WESTbahn",
+        "number": "962",
+        "product": {
+          "id": 0,
+          "class": 0,
+          "name": "Zug",
+          "iconId": 6
+        },
+        "operator": {
+          "code": "WB",
+          "id": "3236",
+          "name": "WESTbahn"
+        },
+        "destination": {
+          "id": "5006115",
+          "name": "Stuttgart Hauptbahnhof",
+          "type": "stop"
+        }
+      }
+    },
+    {
+      "departureTimePlanned": "2026-11-15T12:25:00Z",
+      "departureTimeEstimated": "2026-11-15T12:25:00Z",
+      "location": {
+        "id": "de:08421:1350:1:E_Bau",
+        "name": "Ulm Ehinger Tor",
+        "properties": {
+          "stopId": "9001350",
+          "area": "1",
+          "platform": "E",
+          "platformName": "Bstg. E",
+          "plannedPlatformName": "Bstg. E"
+        }
+      },
+      "transportation": {
+        "id": "din:72037: :H:j26",
+        "name": "Regionalbus Linie 37",
+        "number": "37",
+        "disassembledName": "37",
+        "product": {
+          "id": 6,
+          "class": 6,
+          "name": "Regionalbus Linie",
+          "iconId": 3
+        },
+        "operator": {
+          "id": "67",
+          "name": "RAB"
+        },
+        "destination": {
+          "id": "9002751",
+          "name": "Bermaringen Bockgasse",
+          "type": "stop"
+        }
+      }
+    }
+  ]
+}

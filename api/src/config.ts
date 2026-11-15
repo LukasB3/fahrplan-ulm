@@ -8,6 +8,9 @@ const schema = z.object({
     .url()
     .transform((url) => new URL(url).origin)
     .default('http://localhost:3000'),
+  // DING's journey planner. MobiData BW runs the same software with the same
+  // ids (https://www.efa-bw.de/mobidata-bw), slower, should DING turn us away.
+  EFA_BASE: z.url().default('https://www.ding.eu/ding3'),
 })
 
 export type Config = z.infer<typeof schema>
