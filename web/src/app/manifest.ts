@@ -8,6 +8,9 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: site.name,
     description: site.description,
     lang: 'de',
+    // The app's identity and reach, so an installed copy stays the same app if the start address ever changes.
+    id: '/',
+    scope: '/',
     start_url: '/',
     display: 'standalone',
     background_color: '#f2f2f7',

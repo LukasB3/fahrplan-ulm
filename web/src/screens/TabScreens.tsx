@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { preconnect } from 'react-dom'
 import { AlertList } from '@/features/alerts/AlertList'
 import { StopRow } from '@/features/departures/StopRow'
 import { StopSearch } from '@/features/departures/StopSearch'
@@ -109,6 +110,8 @@ export function DeparturesScreen({ locale }: { locale: Locale }) {
 
 export function MapScreen({ locale }: { locale: Locale }) {
   const { map, board } = t(locale)
+  // The map's style, tiles and lettering come from there; the connection can open while the map's code loads.
+  preconnect('https://tiles.stadiamaps.com', { crossOrigin: 'anonymous' })
   return (
     <main>
       {/* The map is the page; its heading is there for screen readers and search engines. */}
