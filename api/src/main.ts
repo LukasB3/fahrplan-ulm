@@ -6,6 +6,7 @@ import { buildServer } from './server.js'
 import { stopDirectory } from './stops.js'
 import { tripPlanner } from './trips.js'
 import { getJson } from './upstream.js'
+import { vehicleBoard } from './vehicles.js'
 
 const cfg = loadConfig()
 const stops = stopDirectory(getJson)
@@ -22,10 +23,11 @@ const ask = asker({
   log: (problem) => console.error('reading a sentence failed:', problem instanceof Error ? `${problem.name} ${(problem as { status?: number }).status ?? ''}` : typeof problem),
 })
 const alerts = alertBoard({ getJson, efaBase: cfg.EFA_BASE })
-const app = await buildServer({ cfg, departures, planner, ask, alerts })
+const vehicles = vehicleBoard({ getJson, stops })
+const app = await buildServer({ cfg, departures, planner, ask, alerts, vehicles })
 
-// SWU renames and renumbers stops rarely; once a day is plenty. A failure keeps the last list.
-const refreshStops = () => stops.refresh().catch((problem: unknown) => console.error('loading the stop list failed', problem))
+// SWU renames stops and lines rarely; once a day is plenty. A failure keeps the last lists.
+const refreshStops = () => stops.refresh().catch((problem: unknown) => console.error('loading the stop and line lists failed', problem))
 // Loaded before the first request, so the first boards are complete and the first sentence knows the stops.
 await refreshStops()
 setInterval(() => void refreshStops(), 24 * 3_600_000).unref()

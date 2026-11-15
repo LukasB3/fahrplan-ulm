@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import type { Departure } from './types.js'
-import { UnknownStop, type GetJson } from './upstream.js'
+import type { Departure, Vehicle, VehicleTrip } from './types.js'
+import { UnknownStop, UnknownVehicle, type GetJson } from './upstream.js'
 
 const BASE = 'https://api.swu.de/mobility/v1'
 const TRAM = 1
@@ -71,4 +71,98 @@ export const swuStops = async (getJson: GetJson): Promise<SwuStop[]> => {
     const dhid = (stop.StopPoints ?? []).map((point) => dhidOf(point.StopPointCode ?? '')).find((id) => id !== undefined)
     return dhid ? [{ number: stop.StopNumber, name: stop.StopName, dhid, lat: stop.StopCoordinates.Latitude, lon: stop.StopCoordinates.Longitude }] : []
   })
+}
+
+// --- Lines ------------------------------------------------------------------------
+
+const routeList = z.object({ RouteAttributes: z.object({ RouteData: z.array(z.unknown()) }) })
+const listedRoute = z.object({ RouteNumber: z.number().int(), RouteName: z.string() })
+
+// What SWU's route numbers are called on the vehicle: 5 is "5", 901 is "N1".
+// Routes without a real name, which are depot and special trips, are left out.
+export const swuRouteNames = async (getJson: GetJson): Promise<Map<number, string>> => {
+  const { RouteAttributes } = routeList.parse(await getJson(`${BASE}/route/attributes/BaseData`))
+  return new Map(
+    RouteAttributes.RouteData.flatMap((item): [number, string][] => {
+      const parsed = listedRoute.safeParse(item)
+      return parsed.success && /[A-Za-z0-9]/.test(parsed.data.RouteName) ? [[parsed.data.RouteNumber, parsed.data.RouteName]] : []
+    }),
+  )
+}
+
+// --- Vehicles ----------------------------------------------------------------------
+
+const vehicleList = z.object({ VehicleTrip: z.object({ TripData: z.array(z.unknown()).optional() }) })
+
+// A vehicle between trips is listed without position or route; only what is on a trip is shown.
+const movingVehicle = z.object({
+  VehicleNumber: z.number().int(),
+  VehicleCategory: z.number().int().nullish(),
+  IsActive: z.literal(true),
+  PositionData: z.object({ Latitude: z.number(), Longitude: z.number(), Bearing: z.number().nullish() }),
+  TimeData: z.object({ Deviation: z.number().nullish() }).nullish(),
+  JourneyData: z.object({ RouteNumber: z.number().int(), DepartureDirectionText: z.string().nullish() }),
+})
+
+export const swuVehicles = async (getJson: GetJson, lineOf: (route: number) => string | undefined): Promise<Vehicle[]> => {
+  const { VehicleTrip: answer } = vehicleList.parse(await getJson(`${BASE}/vehicle/trip/Trip`))
+  return (answer.TripData ?? []).flatMap((item): Vehicle[] => {
+    const parsed = movingVehicle.safeParse(item)
+    if (!parsed.success) return []
+    const vehicle = parsed.data
+    const line = lineOf(vehicle.JourneyData.RouteNumber)
+    if (!line) return []
+    return [
+      {
+        id: vehicle.VehicleNumber,
+        line,
+        mode: vehicle.VehicleCategory === TRAM ? 'tram' : 'bus',
+        lat: vehicle.PositionData.Latitude,
+        lon: vehicle.PositionData.Longitude,
+        bearing: vehicle.PositionData.Bearing ?? 0,
+        delaySeconds: vehicle.TimeData?.Deviation ?? 0,
+        destination: vehicle.JourneyData.DepartureDirectionText ?? '',
+      },
+    ]
+  })
+}
+
+const passageAnswer = z.object({
+  VehiclePassage: z.object({ State: z.string(), VehicleCategory: z.number().int().nullish(), RouteName: z.string().nullish(), PassageData: z.array(z.unknown()).optional() }),
+})
+
+const call = z.object({
+  StopName: z.string(),
+  StopCode: z.string(),
+  ArrivalTimeScheduled: z.iso.datetime({ offset: true }),
+  ArrivalTimeActual: z.iso.datetime({ offset: true }).nullish(),
+  ArrivalCountdown: z.number().nullish(),
+})
+
+const patternAnswer = z.object({ VehiclePattern: z.object({ PatternData: z.object({ TrackPoints: z.array(z.object({ Latitude: z.number(), Longitude: z.number() })).nullish() }).nullish() }) })
+
+// The stops a vehicle still has ahead on this trip, and the way it takes.
+export const swuVehicleTrip = async (getJson: GetJson, vehicle: number): Promise<VehicleTrip> => {
+  const [passage, pattern] = await Promise.all([
+    getJson(`${BASE}/vehicle/trip/Passage?VehicleNumber=${vehicle}`).then((answer) => passageAnswer.parse(answer).VehiclePassage),
+    // The way is a nicety: the stops are shown without it too.
+    getJson(`${BASE}/vehicle/trip/Pattern?VehicleNumber=${vehicle}&ContentScope=Track`)
+      .then((answer) => patternAnswer.parse(answer).VehiclePattern.PatternData?.TrackPoints ?? [])
+      .catch(() => []),
+  ])
+  if (passage.State !== 'ok' || !passage.RouteName) throw new UnknownVehicle(`SWU has no trip for vehicle ${vehicle}`)
+  const calls = (passage.PassageData ?? []).flatMap((item) => {
+    const parsed = call.safeParse(item)
+    return parsed.success ? [parsed.data] : []
+  })
+  return {
+    id: vehicle,
+    line: passage.RouteName,
+    mode: passage.VehicleCategory === TRAM ? 'tram' : 'bus',
+    destination: calls.at(-1)?.StopName ?? '',
+    stops: calls
+      .filter((stop) => (stop.ArrivalCountdown ?? 0) >= 0)
+      .map((stop) => ({ name: stop.StopName, code: stop.StopCode, planned: iso(stop.ArrivalTimeScheduled), expected: stop.ArrivalTimeActual ? iso(stop.ArrivalTimeActual) : null })),
+    track: pattern.map((point) => [point.Latitude, point.Longitude]),
+  }
 }

@@ -1,0 +1,126 @@
+{
+ "RouteAttributes": {
+  "RouteData": [
+   {
+    "RouteNumber": 1,
+    "RouteName": "1",
+    "RouteCategory": 1
+   },
+   {
+    "RouteNumber": 2,
+    "RouteName": "2",
+    "RouteCategory": 1
+   },
+   {
+    "RouteNumber": 4,
+    "RouteName": "4",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 5,
+    "RouteName": "5",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 6,
+    "RouteName": "6",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 7,
+    "RouteName": "7",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 8,
+    "RouteName": "8",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 9,
+    "RouteName": "9",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 10,
+    "RouteName": "10",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 11,
+    "RouteName": "11",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 12,
+    "RouteName": "12",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 13,
+    "RouteName": "13",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 14,
+    "RouteName": "14",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 15,
+    "RouteName": "15",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 101,
+    "RouteName": "1",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 102,
+    "RouteName": "2",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 201,
+    "RouteName": "-",
+    "RouteCategory": 1
+   },
+   {
+    "RouteNumber": 202,
+    "RouteName": "-",
+    "RouteCategory": 1
+   },
+   {
+    "RouteNumber": 901,
+    "RouteName": "N1",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 902,
+    "RouteName": "N2",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 903,
+    "RouteName": "N3",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 904,
+    "RouteName": "N4",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 907,
+    "RouteName": "N7",
+    "RouteCategory": 5
+   },
+   {
+    "RouteNumber": 908,
+    "RouteName": "N8",
+    "RouteCategory": 5
+   }
+  ]
+ }
+}

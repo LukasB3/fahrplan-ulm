@@ -7,8 +7,9 @@ import type { Asker } from './ask.js'
 import type { Config } from './config.js'
 import type { DepartureBoard } from './departures.js'
 import type { TripPlanner } from './trips.js'
-import type { Alerts, ApiError, AskResult, Departures, Health, Places, Trips } from './types.js'
-import { UnknownStop } from './upstream.js'
+import type { Alerts, ApiError, AskResult, Departures, Health, Places, Trips, Vehicles, VehicleTrip } from './types.js'
+import { UnknownStop, UnknownVehicle } from './upstream.js'
+import type { VehicleBoard } from './vehicles.js'
 
 export interface ServerDeps {
   cfg: Config
@@ -16,6 +17,7 @@ export interface ServerDeps {
   planner: TripPlanner
   ask: Asker
   alerts: AlertBoard
+  vehicles: VehicleBoard
   // Where the request log goes, if not to standard output.
   logTo?: { write(line: string): void }
 }
@@ -55,7 +57,9 @@ const askRequest = z.object({
 // One IPv6 customer usually owns a whole /64, so that is what gets limited.
 export const visitorKey = (ip: string) => (ip.includes(':') ? ip.split(':').slice(0, 4).join(':') : ip)
 
-export const buildServer = async ({ cfg, departures, planner, ask, alerts, logTo }: ServerDeps) => {
+const vehicleParams = z.object({ id: z.coerce.number().int().positive().max(99_999) })
+
+export const buildServer = async ({ cfg, departures, planner, ask, alerts, vehicles, logTo }: ServerDeps) => {
   // Caddy on the same host is the only client, so its forwarded address is
   // trusted; without it every visitor would share one rate limit.
   // Request logs carry neither the client address nor the query, which can
@@ -79,6 +83,27 @@ export const buildServer = async ({ cfg, departures, planner, ask, alerts, logTo
       if (problem instanceof UnknownStop) return reply.code(404).send({ error: 'unknown stop' })
       req.log.error(problem)
       return reply.code(502).send({ error: 'departures are unavailable' })
+    }
+  })
+
+  app.get('/api/vehicles', async (req, reply): Promise<Vehicles | ApiError> => {
+    try {
+      return await vehicles.all()
+    } catch (problem) {
+      req.log.error(problem)
+      return reply.code(502).send({ error: 'vehicle positions are unavailable' })
+    }
+  })
+
+  app.get('/api/vehicles/:id', async (req, reply): Promise<VehicleTrip | ApiError> => {
+    const params = vehicleParams.safeParse(req.params)
+    if (!params.success) return reply.code(400).send({ error: 'id must be a vehicle number' })
+    try {
+      return await vehicles.trip(params.data.id)
+    } catch (problem) {
+      if (problem instanceof UnknownVehicle) return reply.code(404).send({ error: 'this vehicle is not on a trip' })
+      req.log.error(problem)
+      return reply.code(502).send({ error: 'the trip is unavailable' })
     }
   })
 

@@ -11,3 +11,6 @@ export const getJson: GetJson = async (url) => {
 
 // The stop that was asked for does not exist at the operator.
 export class UnknownStop extends Error {}
+
+// No vehicle with that number is on a trip.
+export class UnknownVehicle extends Error {}

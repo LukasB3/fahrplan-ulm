@@ -6,7 +6,8 @@ import type { DepartureBoard } from '../src/departures.js'
 import { buildServer } from '../src/server.js'
 import type { TripPlanner } from '../src/trips.js'
 import type { Alerts, AskRequest, AskResult, Departures, Place, TripRequest, Trips } from '../src/types.js'
-import { UnknownStop } from '../src/upstream.js'
+import { UnknownStop, UnknownVehicle } from '../src/upstream.js'
+import type { VehicleBoard } from '../src/vehicles.js'
 
 const cfg = loadConfig({ WEB_ORIGIN: 'https://fahrplan-ulm.de/' })
 const board: Departures = { now: '2026-11-15T12:00:00.000Z', stale: false, departures: [] }
@@ -39,10 +40,15 @@ const ask: Asker = (request, visitor) => {
 const notices: Alerts = { now: '2026-11-15T12:00:00.000Z', alerts: [] }
 let alertsDown = false
 const alerts: AlertBoard = () => (alertsDown ? Promise.reject(new Error('DING is down')) : Promise.resolve(notices))
+const tram = { id: 47, line: '1', mode: 'tram' as const, lat: 48.4, lon: 9.99, bearing: 260, delaySeconds: 10, destination: 'Söflingen' }
+const vehicles: VehicleBoard = {
+  all: () => Promise.resolve({ now: '2026-11-15T12:00:00.000Z', vehicles: [tram] }),
+  trip: (id) => (id === 47 ? Promise.resolve({ id, line: '1', mode: 'tram', destination: 'Söflingen', stops: [], track: [] }) : Promise.reject(new UnknownVehicle('not on a trip'))),
+}
 let app: Awaited<ReturnType<typeof buildServer>>
 
 beforeAll(async () => {
-  app = await buildServer({ cfg, departures, planner, ask, alerts, logTo: { write: () => {} } })
+  app = await buildServer({ cfg, departures, planner, ask, alerts, vehicles, logTo: { write: () => {} } })
 })
 afterAll(() => app.close())
 
@@ -165,5 +171,19 @@ describe('alerts', () => {
     alertsDown = true
     expect((await app.inject({ url: '/api/alerts' })).statusCode).toBe(502)
     alertsDown = false
+  })
+})
+
+describe('vehicles', () => {
+  it('answers with the vehicles on the road', async () => {
+    const res = await app.inject({ url: '/api/vehicles' })
+    expect(res.statusCode).toBe(200)
+    expect(res.json().vehicles).toEqual([tram])
+  })
+
+  it('answers with one vehicle\'s trip, or says that it is on none', async () => {
+    expect((await app.inject({ url: '/api/vehicles/47' })).json()).toMatchObject({ id: 47, line: '1' })
+    expect((await app.inject({ url: '/api/vehicles/48' })).statusCode).toBe(404)
+    expect((await app.inject({ url: '/api/vehicles/abc' })).statusCode).toBe(400)
   })
 })

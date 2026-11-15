@@ -1,18 +1,21 @@
-import { swuStops, type SwuStop } from './swu.js'
+import { swuRouteNames, swuStops, type SwuStop } from './swu.js'
 import type { Place } from './types.js'
 import type { GetJson } from './upstream.js'
 
-// The stops SWU serves, kept in memory: which stop is which at DING, and
-// what the stops are called, for the sentence request.
+// What SWU's stops and lines are called, kept in memory: which stop is which
+// at DING, the stop names for the sentence request, and the name of each
+// route number for the vehicles on the map.
 export const stopDirectory = (getJson: GetJson) => {
   let byNumber = new Map<number, SwuStop>()
   let byName = new Map<string, SwuStop>()
   let names: string[] = []
+  let lines = new Map<number, string>()
 
   return {
     // A failure leaves the last list in place.
     refresh: async () => {
-      const stops = await swuStops(getJson)
+      const [stops, routes] = await Promise.all([swuStops(getJson), swuRouteNames(getJson)])
+      lines = routes
       byNumber = new Map(stops.map((stop) => [stop.number, stop]))
       byName = new Map(stops.map((stop) => [stop.name.toLowerCase(), stop]))
       // Sorted, so the list reads the same every time it is put into a prompt.
@@ -20,6 +23,7 @@ export const stopDirectory = (getJson: GetJson) => {
     },
     dhidOf: (number: number) => byNumber.get(number)?.dhid,
     names: () => names,
+    lineOf: (route: number) => lines.get(route),
     place: (name: string): Place | undefined => {
       const stop = byName.get(name.trim().toLowerCase())
       return stop && { kind: 'stop', stop: stop.dhid, name: stop.name, town: null, lat: stop.lat, lon: stop.lon }
