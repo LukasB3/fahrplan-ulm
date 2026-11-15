@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { AccountButton } from '@/features/account/AccountButton'
+import { preconnect } from 'react-dom'
 import { AlertList } from '@/features/alerts/AlertList'
 import { StopRow } from '@/features/departures/StopRow'
 import { StopSearch } from '@/features/departures/StopSearch'
@@ -11,6 +11,7 @@ import { href, lineHref, stopHref } from '@/lib/routes'
 import { fetchAlerts } from '@/lib/server-api'
 import { SITE_ORIGIN } from '@/lib/seo'
 import { Icon } from '@/shell/icons'
+import { InfoButton } from '@/shell/InfoButton'
 import { JsonLd } from '@/shell/JsonLd'
 import { LineBadge } from '@/shell/LineBadge'
 import { ScreenHeader } from '@/shell/ScreenHeader'
@@ -109,6 +110,8 @@ export function DeparturesScreen({ locale }: { locale: Locale }) {
 
 export function MapScreen({ locale }: { locale: Locale }) {
   const { map, board } = t(locale)
+  // The map's style, tiles and lettering come from there; the connection can open while the map's code loads.
+  preconnect('https://tiles.stadiamaps.com', { crossOrigin: 'anonymous' })
   return (
     <main>
       {/* The map is the page; its heading is there for screen readers and search engines. */}
@@ -120,7 +123,7 @@ export function MapScreen({ locale }: { locale: Locale }) {
         boardLabels={{ now: board.now, minutes: board.minutes, platform: board.platform, track: board.track, planned: board.planned, none: board.none, failed: board.failed, stale: board.stale, loading: board.loading }}
       />
       <div className="map-info material">
-        <AccountButton locale={locale} />
+        <InfoButton locale={locale} />
       </div>
     </main>
   )

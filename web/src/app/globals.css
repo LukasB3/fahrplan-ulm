@@ -1,21 +1,26 @@
 @import 'tailwindcss';
 
-/* Colours follow the system palette of iOS, with secondary text and the tint
-   darkened to reach a 4.5:1 contrast on white. */
+/* Colours follow the system palette of iOS, adjusted until text reaches a
+   4.5:1 contrast on every ground it stands on: secondary text and the tint on
+   the page, on cards and on the grey fill of buttons, white on the solid
+   colours. A solid colour carries white text; in the dark it is deeper than
+   the tint, which there has to be light enough to read as text. */
 :root {
   color-scheme: light dark;
   --bg: #f2f2f7;
   --surface: #ffffff;
   --label: #000000;
-  --label-2: rgb(60 60 67 / 0.74);
+  --label-2: rgb(60 60 67 / 0.78);
   --label-3: rgb(60 60 67 / 0.45);
   --separator: rgb(60 60 67 / 0.18);
   --fill: rgb(120 120 128 / 0.12);
   --fill-strong: rgb(120 120 128 / 0.2);
-  --tint: #0068d9;
+  --tint: #005cbf;
+  --tint-solid: #005cbf;
   --on-tint: #ffffff;
   --ok: #1a7f37;
   --late: #d70015;
+  --late-solid: #d70015;
   --material: rgb(255 255 255 / 0.72);
   --material-edge: rgb(255 255 255 / 0.65);
   --material-border: rgb(0 0 0 / 0.06);
@@ -33,7 +38,8 @@
     --separator: rgb(84 84 88 / 0.6);
     --fill: rgb(120 120 128 / 0.24);
     --fill-strong: rgb(120 120 128 / 0.36);
-    --tint: #0a84ff;
+    --tint: #4da3ff;
+    --tint-solid: #0a6fd6;
     --ok: #30d158;
     --late: #ff453a;
     --material: rgb(36 36 38 / 0.72);
@@ -69,9 +75,11 @@
   --color-fill: var(--fill);
   --color-fill-strong: var(--fill-strong);
   --color-tint: var(--tint);
+  --color-tint-solid: var(--tint-solid);
   --color-on-tint: var(--on-tint);
   --color-ok: var(--ok);
   --color-late: var(--late);
+  --color-late-solid: var(--late-solid);
   --radius-card: 1.25rem;
 }
 
@@ -277,9 +285,9 @@
   height: 100%;
 }
 
-.map-host .maplibregl-ctrl-attrib {
-  /* Clear of the tab bar. */
-  margin-bottom: calc(max(0.75rem, env(safe-area-inset-bottom) - 0.625rem) + 4.25rem);
+/* The map's credits, bottom left and clear of the tab bar. */
+.map-host .maplibregl-ctrl-bottom-left {
+  bottom: calc(max(0.75rem, env(safe-area-inset-bottom) - 0.625rem) + 4.25rem);
 }
 
 /* A vehicle on the map: the line's badge with a point showing where it is heading. */
@@ -293,7 +301,7 @@
   border: 2px solid var(--surface);
   border-radius: 9999px;
   background: var(--vehicle-color, var(--label-2));
-  color: var(--vehicle-text, #fff);
+  color: var(--vehicle-text, var(--surface));
   font: 700 0.8125rem/1 var(--font-sans);
   font-variant-numeric: tabular-nums;
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
@@ -348,6 +356,8 @@
 
 .map-note {
   left: 0.75rem;
+  /* Above the map's credits. */
+  bottom: calc(max(0.75rem, env(safe-area-inset-bottom) - 0.625rem) + 7.25rem);
 }
 
 .here {

@@ -158,7 +158,7 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
                 {place.town && place.town !== 'Ulm' && <span className="text-label-2"> · {place.town}</span>}
               </>
             ) : (
-              <span className="text-label-3">{empty}</span>
+              <span className="text-label-2">{empty}</span>
             )}
           </button>
         )}

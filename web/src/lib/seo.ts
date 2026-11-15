@@ -30,5 +30,11 @@ export const siteViewport: Viewport = {
 export const notIndexed = { index: false, follow: true }
 
 // A page's own metadata: every page names its one address, so copies under
-// other addresses (www, query strings) count for it.
-export const pageMetadata = (path: string, title?: Metadata['title'], description?: string): Metadata => ({ title, description, alternates: { canonical: path } })
+// other addresses (www, query strings) count for it. A page without a title
+// or description of its own must not name the key at all: an `undefined`
+// there replaces the site's, and the page ends up with none.
+export const pageMetadata = (path: string, title?: Metadata['title'], description?: string): Metadata => ({
+  ...(title !== undefined && { title }),
+  ...(description !== undefined && { description }),
+  alternates: { canonical: path },
+})
