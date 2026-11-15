@@ -4,22 +4,32 @@ import type { Departure, Departures } from '@api/types'
 import { useEffect, useState } from 'react'
 import { getJson } from '@/lib/api'
 import type { LineStyle } from '@/lib/data-types'
+import { Icon } from '@/shell/icons'
 import { LineBadge } from '@/shell/LineBadge'
+import { type RunLabels, RunSheet } from './Run'
 
 export type BoardLabels = { now: string; minutes: string; platform: string; track: string; planned: string; none: string; failed: string; stale: string; loading: string }
 
-type Props = { stopId: number; lineStyles: Record<string, LineStyle>; labels: BoardLabels; rows?: number }
+type Props = {
+  stopId: number
+  lineStyles: Record<string, LineStyle>
+  labels: BoardLabels
+  rows?: number
+  // With these a departure can be tapped and shows where it goes from here. Left out where the board itself sits in a sheet.
+  run?: RunLabels
+}
 
 const POLL_MS = 20_000
 const clock = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })
 
-function Row({ departure, now, lineStyles, labels }: { departure: Departure; now: number; lineStyles: Record<string, LineStyle>; labels: BoardLabels }) {
+function Row({ departure, now, lineStyles, labels, onOpen }: { departure: Departure; now: number; lineStyles: Record<string, LineStyle>; labels: BoardLabels; onOpen?: () => void }) {
   const leaves = Date.parse(departure.expected ?? departure.planned)
   const minutes = Math.floor((leaves - now) / 60_000)
   const lateBy = departure.expected ? Math.round((leaves - Date.parse(departure.planned)) / 60_000) : 0
   const where = departure.platform && `${departure.mode === 'train' ? labels.track : labels.platform} ${departure.platform}`
-  return (
-    <li className="flex min-h-[3.75rem] items-center gap-3 border-t border-separator px-4 py-2 first:border-t-0">
+  const layout = 'flex min-h-[3.75rem] items-center gap-3 px-4 py-2'
+  const row = (
+    <>
       <span className="flex w-14 shrink-0 justify-start">
         <LineBadge line={departure.line} style={departure.mode === 'train' ? undefined : lineStyles[departure.line]} />
       </span>
@@ -48,15 +58,29 @@ function Row({ departure, now, lineStyles, labels }: { departure: Departure; now
           <span className="font-semibold">{clock.format(leaves)}</span>
         )}
       </span>
+      {onOpen && <Icon name="chevron" className="size-4 shrink-0 text-label-3" />}
+    </>
+  )
+  return (
+    <li className="border-t border-separator first:border-t-0">
+      {onOpen ? (
+        <button type="button" aria-haspopup="dialog" onClick={onOpen} className={`pressable w-full text-left ${layout}`}>
+          {row}
+        </button>
+      ) : (
+        <div className={layout}>{row}</div>
+      )}
     </li>
   )
 }
 
 // The live board of a stop. It asks again every 20 seconds while the page is
 // on screen and counts down in between.
-export function DepartureBoard({ stopId, lineStyles, labels, rows = 10 }: Props) {
+export function DepartureBoard({ stopId, lineStyles, labels, rows = 10, run }: Props) {
   // `skew` is how far the phone's clock is off the server's.
   const [state, setState] = useState<{ board?: Departures; skew: number; failed: boolean }>({ skew: 0, failed: false })
+  // The departure whose run is shown. It is kept when the sheet closes, so the sheet leaves with its content.
+  const [opened, setOpened] = useState<{ departure: Departure; open: boolean }>()
   const [, setTick] = useState(0)
 
   useEffect(() => {
@@ -117,11 +141,19 @@ export function DepartureBoard({ stopId, lineStyles, labels, rows = 10 }: Props)
       ) : (
         <ol className="overflow-hidden rounded-card bg-surface">
           {upcoming.map((departure, index) => (
-            <Row key={`${departure.line} ${departure.destination} ${departure.planned} ${index}`} departure={departure} now={now} lineStyles={lineStyles} labels={labels} />
+            <Row
+              key={`${departure.line} ${departure.destination} ${departure.planned} ${index}`}
+              departure={departure}
+              now={now}
+              lineStyles={lineStyles}
+              labels={labels}
+              onOpen={run && (() => setOpened({ departure, open: true }))}
+            />
           ))}
         </ol>
       )}
       {(failed || board?.stale) && <p className="px-4 pt-2 text-[0.8125rem] text-label-2">{failed ? labels.failed : labels.stale}</p>}
+      {run && <RunSheet stopId={stopId} departure={opened?.departure} open={opened?.open ?? false} onClose={() => setOpened((before) => before && { ...before, open: false })} lineStyles={lineStyles} labels={run} />}
     </>
   )
 }
