@@ -168,7 +168,7 @@ function JourneyCard({ journey, now, from, to, open, onToggle, lineStyles, label
                 {wait !== undefined && (
                   <p className="flex gap-3 text-[0.8125rem] text-label-2">
                     <span className="w-12 shrink-0" />
-                    {labels.changeHere} · {fill(labels.wait, { n: wait })}
+                    {labels.changeHere} · {wait < 1 ? labels.connection : fill(labels.wait, { n: wait })}
                   </p>
                 )}
               </li>

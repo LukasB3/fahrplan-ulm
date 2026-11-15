@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { departureBoard } from '../src/departures.js'
 import { efaDeparturesOfOthers } from '../src/efa.js'
-import { swuDepartures, swuStopIds } from '../src/swu.js'
+import { stopDirectory } from '../src/stops.js'
+import { swuDepartures, swuStops } from '../src/swu.js'
 import { UnknownStop, type GetJson } from '../src/upstream.js'
 
 const fixture = (name: string): unknown => JSON.parse(readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), 'utf8'))
@@ -42,11 +43,19 @@ describe('SWU departures, as recorded', () => {
 
 describe('SWU stop list, as recorded', () => {
   it("gives each stop's id at DING from its platforms, not from its number", async () => {
-    const ids = await swuStopIds(answering(fixture('swu-stops')))
+    const ids = new Map((await swuStops(answering(fixture('swu-stops')))).map((stop) => [stop.number, stop.dhid]))
     expect(ids.get(1008)).toBe('de:08421:1008')
     // SWU and DING number these two the other way round.
     expect(ids.get(1249)).toBe('de:08421:1250')
     expect(ids.get(1250)).toBe('de:08421:1249')
+  })
+
+  it('makes a stop a place to travel to, whatever the spelling of its name', async () => {
+    const stops = stopDirectory(answering(fixture('swu-stops')))
+    await stops.refresh()
+    expect(stops.names()).toEqual(['Hauptbahnhof', 'Science Park II', 'Science Park III'])
+    expect(stops.place(' hauptbahnhof ')).toMatchObject({ kind: 'stop', stop: 'de:08421:1008', name: 'Hauptbahnhof' })
+    expect(stops.place('Münster')).toBeUndefined()
   })
 })
 
@@ -73,19 +82,20 @@ describe('the board of a stop', () => {
     location: { properties: { platformName: 'Bstg. E' } },
     transportation: { number, name: `Regionalbus Linie ${number}`, product: { class: 6 }, destination: { name: 'Illertissen' }, operator: { name: operator } },
   })
-  const stops = { StopAttributes: { StopData: [{ StopNumber: 1350, StopPoints: [{ StopPointCode: 'de:08421:1350:0:1' }] }] } }
+  const stopList = { StopAttributes: { StopData: [{ StopNumber: 1350, StopName: 'Ehinger Tor', StopCoordinates: { Latitude: 48.39, Longitude: 9.98 }, StopPoints: [{ StopPointCode: 'de:08421:1350:0:1' }] }] } }
 
   const setUp = async (swu: unknown[], efa: (() => unknown) | undefined) => {
     const asked: string[] = []
     const getJson: GetJson = (url) => {
       asked.push(new URL(url).pathname.split('/').pop()!)
-      if (url.includes('BaseData')) return Promise.resolve(stops)
+      if (url.includes('BaseData')) return Promise.resolve(stopList)
       if (url.includes('XML_DM_REQUEST')) return efa ? Promise.resolve(efa()) : Promise.reject(new Error('DING is down'))
       return Promise.resolve({ StopPassage: { State: 'ok', DepartureData: swu } })
     }
     const problems: unknown[] = []
-    const board = departureBoard({ getJson, efaBase: 'https://efa.example', log: (problem) => problems.push(problem) })
-    await board.refreshStops()
+    const stops = stopDirectory(getJson)
+    await stops.refresh()
+    const board = departureBoard({ getJson, efaBase: 'https://efa.example', stops, log: (problem) => problems.push(problem) })
     return { board, asked, problems }
   }
 

@@ -39,6 +39,10 @@ export const legalDe = {
         text: 'Start, Ziel und Zeit einer Verbindungssuche sowie Ihre Eingaben in der Adresssuche werden an meinen Server übermittelt und von dort an die Fahrplanauskunft der Donau-Iller-Nahverkehrsverbund-GmbH (DING) weitergegeben, die die Verbindung berechnet. Der DING sieht dabei meinen Server, nicht Ihre IP-Adresse. Mein Server speichert die Anfragen nicht; Antworten werden für kurze Zeit ohne Bezug zu Ihnen zwischengespeichert. Rechtsgrundlage ist mein berechtigtes Interesse an der Bereitstellung der Auskunft (Art. 6 Abs. 1 lit. f DSGVO).',
       },
       {
+        heading: 'Fahrtwunsch in einem Satz',
+        text: 'Wenn Sie Ihren Fahrtwunsch als Satz eingeben oder sprechen, wird dieser Satz an meinen Server übermittelt und von dort an die Anthropic PBC (San Francisco, USA) weitergegeben. Deren Sprachmodell Claude entnimmt dem Satz Start, Ziel und Zeit. Ihr Standort und Ihre gespeicherten Orte werden nicht an Anthropic übermittelt; der Satz enthält aber, was Sie hineinschreiben, etwa eine Adresse. Mein Server speichert und protokolliert den Satz nicht. Für gleiche Sätze merkt er sich das Ergebnis bis zu einer Stunde ohne Bezug zu Ihnen. Rechtsgrundlage ist mein berechtigtes Interesse an einer einfachen Bedienung (Art. 6 Abs. 1 lit. f DSGVO). Wer das nicht möchte, nutzt das Formular darunter: Es kommt ohne das Sprachmodell aus.',
+      },
+      {
         heading: 'Standort',
         text: 'Die Seite fragt Ihren Standort nur ab, wenn Sie das selbst auslösen und im Browser zustimmen. Für die Haltestellen in der Nähe werden die Entfernungen auf Ihrem Gerät berechnet; der Standort wird dabei nicht übertragen. Wählen Sie „Mein Standort“ als Start oder Ziel einer Verbindung, wird er wie jeder andere Ort für die Verbindungssuche übermittelt (siehe oben) und nicht gespeichert.',
       },

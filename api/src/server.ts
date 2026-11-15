@@ -2,16 +2,18 @@ import cors from '@fastify/cors'
 import rateLimit from '@fastify/rate-limit'
 import Fastify from 'fastify'
 import { z } from 'zod'
+import type { Asker } from './ask.js'
 import type { Config } from './config.js'
 import type { DepartureBoard } from './departures.js'
 import type { TripPlanner } from './trips.js'
-import type { ApiError, Departures, Health, Places, Trips } from './types.js'
+import type { ApiError, AskResult, Departures, Health, Places, Trips } from './types.js'
 import { UnknownStop } from './upstream.js'
 
 export interface ServerDeps {
   cfg: Config
   departures: DepartureBoard
   planner: TripPlanner
+  ask: Asker
   // Where the request log goes, if not to standard output.
   logTo?: { write(line: string): void }
 }
@@ -42,7 +44,16 @@ const tripRequest = z.object({
   time: z.object({ mode: z.enum(['depart', 'arrive']), at: z.iso.datetime().nullable() }),
 })
 
-export const buildServer = async ({ cfg, departures, planner, logTo }: ServerDeps) => {
+const askRequest = z.object({
+  text: z.string().trim().min(1).max(300),
+  position: z.object({ lat: z.number().min(47).max(50), lon: z.number().min(8).max(12) }).nullable(),
+  saved: z.object({ home: place.nullable(), work: place.nullable() }),
+})
+
+// One IPv6 customer usually owns a whole /64, so that is what gets limited.
+export const visitorKey = (ip: string) => (ip.includes(':') ? ip.split(':').slice(0, 4).join(':') : ip)
+
+export const buildServer = async ({ cfg, departures, planner, ask, logTo }: ServerDeps) => {
   // Caddy on the same host is the only client, so its forwarded address is
   // trusted; without it every visitor would share one rate limit.
   // Request logs carry neither the client address nor the query, which can
@@ -73,7 +84,7 @@ export const buildServer = async ({ cfg, departures, planner, logTo }: ServerDep
     const query = placesQuery.safeParse(req.query)
     if (!query.success) return reply.code(400).send({ error: 'q must be 2 to 80 characters' })
     try {
-      return { places: await planner.places(query.data.q) }
+      return { places: (await planner.matches(query.data.q)).map((match) => match.place) }
     } catch (problem) {
       req.log.error(problem)
       return reply.code(502).send({ error: 'the place search is unavailable' })
@@ -91,6 +102,14 @@ export const buildServer = async ({ cfg, departures, planner, logTo }: ServerDep
       req.log.error(problem)
       return reply.code(502).send({ error: 'the journey planner is unavailable' })
     }
+  })
+
+  // The sentence is read by a language model, which costs money per request:
+  // hence the tightest limit. The sentence itself is never logged.
+  app.post('/api/ask', { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (req, reply): Promise<AskResult | ApiError> => {
+    const request = askRequest.safeParse(req.body)
+    if (!request.success) return reply.code(400).send({ error: 'text of 1 to 300 characters, position and saved are required' })
+    return ask(request.data, visitorKey(req.ip))
   })
 
   return app

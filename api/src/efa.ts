@@ -75,8 +75,11 @@ const foundPlace = z.object({
 
 const placeAnswer = z.object({ locations: z.array(z.unknown()).optional() })
 
+export type PlaceMatch = { place: Place; quality: number }
+
 // Stops, addresses and points of interest matching what someone typed, best match first.
-export const efaPlaces = async (getJson: GetJson, base: string, query: string, limit = 8): Promise<Place[]> => {
+// `quality` is the planner's own score, up to 1000.
+export const efaPlaces = async (getJson: GetJson, base: string, query: string, limit = 8): Promise<PlaceMatch[]> => {
   // Without a town the planner answers with matches from anywhere, Aachen first.
   const wanted = /ulm/i.test(query) ? query : `Ulm ${query}`
   const { locations = [] } = placeAnswer.parse(await getJson(`${base}/XML_STOPFINDER_REQUEST?${COMMON}&type_sf=any&name_sf=${encodeURIComponent(wanted)}`))
@@ -93,7 +96,6 @@ export const efaPlaces = async (getJson: GetJson, base: string, query: string, l
     })
     .sort((a, b) => b.quality - a.quality || Number(b.place.kind === 'stop') - Number(a.place.kind === 'stop'))
     .slice(0, limit)
-    .map(({ place }) => place)
 }
 
 // --- Journeys ---------------------------------------------------------------

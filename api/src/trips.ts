@@ -23,6 +23,16 @@ const worthShowing = (journeys: Journey[]) => {
   return unique.filter((journey) => !unique.some((other) => beats(other, journey)))
 }
 
+// Walking all the way is the answer only when it gets there first. Otherwise
+// it goes to the end of the list: someone asking a timetable wants a ride.
+const walkLast = (ordered: Journey[]) => {
+  const onFoot = (journey: Journey) => journey.legs.every((leg) => leg.kind === 'walk')
+  const rides = ordered.filter((journey) => !onFoot(journey))
+  const walks = ordered.filter(onFoot)
+  const firstRideIn = Math.min(...rides.map(arrivesAt))
+  return [...walks.filter((walk) => arrivesAt(walk) < firstRideIn), ...rides, ...walks.filter((walk) => arrivesAt(walk) >= firstRideIn)]
+}
+
 const reference = ({ stop, lat, lon }: Place) => ({ stop, lat: Number(lat.toFixed(5)), lon: Number(lon.toFixed(5)) })
 
 type Deps = { getJson: GetJson; efaBase: string }
@@ -42,24 +52,26 @@ export const tripPlanner = ({ getJson, efaBase }: Deps) => {
   const places = cached((query) => efaPlaces(getJson, efaBase, query), { freshMs: 24 * 60 * MINUTE, staleMs: 7 * 24 * 60 * MINUTE })
 
   return {
-    places: async (query: string): Promise<Place[]> => (await places(query.trim().toLowerCase().replace(/\s+/g, ' '))).value,
+    matches: async (query: string) => (await places(query.trim().toLowerCase().replace(/\s+/g, ' '))).value,
 
     trips: async (request: TripRequest, now = Date.now()): Promise<Trips> => {
       const at = request.time.at ? Date.parse(request.time.at) : now
       const upcoming = (found: Journey[]) => found.filter((journey) => leavesAt(journey) >= now - MINUTE)
       const leaving = (found: Journey[], from: number) =>
-        upcoming(found)
-          .filter((journey) => leavesAt(journey) >= from - MINUTE)
-          .sort((a, b) => leavesAt(a) - leavesAt(b) || arrivesAt(a) - arrivesAt(b))
-          .slice(0, SHOWN)
+        walkLast(
+          upcoming(found)
+            .filter((journey) => leavesAt(journey) >= from - MINUTE)
+            .sort((a, b) => leavesAt(a) - leavesAt(b) || arrivesAt(a) - arrivesAt(b)),
+        ).slice(0, SHOWN)
 
       if (request.time.mode === 'depart') return { now: new Date(now).toISOString(), journeys: leaving(await ask(request, 'depart', at), at), note: 'ok' }
 
       // Arriving by a time: the journey to leave latest comes first.
-      const inTime = upcoming(await ask(request, 'arrive', at))
-        .filter((journey) => arrivesAt(journey) <= at + MINUTE)
-        .sort((a, b) => leavesAt(b) - leavesAt(a) || arrivesAt(a) - arrivesAt(b))
-        .slice(0, SHOWN)
+      const inTime = walkLast(
+        upcoming(await ask(request, 'arrive', at))
+          .filter((journey) => arrivesAt(journey) <= at + MINUTE)
+          .sort((a, b) => leavesAt(b) - leavesAt(a) || arrivesAt(a) - arrivesAt(b)),
+      ).slice(0, SHOWN)
       if (inTime.length) return { now: new Date(now).toISOString(), journeys: inTime, note: 'ok' }
       // Nothing gets there in time any more: show what leaves next and say so.
       return { now: new Date(now).toISOString(), journeys: leaving(await ask(request, 'depart', now), now), note: 'too_late' }
