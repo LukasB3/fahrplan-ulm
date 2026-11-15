@@ -317,6 +317,27 @@
     box-shadow: 0 0 0 3px var(--tint), 0 1px 4px rgb(0 0 0 / 0.35);
   }
 
+  /* The minutes it is late, like the count on an app's icon. Empty when it is on time. */
+  & > b {
+    position: absolute;
+    top: -0.6rem;
+    right: -0.8rem;
+    display: grid;
+    place-items: center;
+    min-width: 1.0625rem;
+    height: 1.0625rem;
+    padding: 0 0.2rem;
+    border-radius: 9999px;
+    background: var(--late-solid);
+    color: #fff;
+    font-size: 0.6875rem;
+    box-shadow: 0 0 0 1.5px var(--surface);
+
+    &:empty {
+      display: none;
+    }
+  }
+
   & > i {
     position: absolute;
     top: 50%;
