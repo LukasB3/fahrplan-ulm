@@ -3,11 +3,11 @@
 import { type ReactNode, useMemo, useState } from 'react'
 import type { LineStyle } from '@/lib/data-types'
 import { metresBetween } from '@/lib/geo'
-import { matchRank, plain } from '@/lib/search'
+import { matchRank, searchable } from '@/lib/search'
 import { useFavourites } from '@/lib/store'
 import { Icon } from '@/shell/icons'
 import { button, groupHeading } from '@/shell/styles'
-import { type ListedStop, StopRow } from './StopRow'
+import { HOME_TOWN, type ListedStop, StopRow } from './StopRow'
 
 export type SearchLabels = {
   searchLabel: string
@@ -49,11 +49,10 @@ export function StopSearch({ stops, lineStyles, labels }: Props) {
   const [nearby, setNearby] = useState<'failed' | { stop: ListedStop; metres: number }[]>()
   const favourites = useFavourites()
 
-  const names = useMemo(() => stops.map((stop) => plain(stop.name)), [stops])
-  const wanted = plain(query.trim())
-  const matches = wanted
+  const index = useMemo(() => stops.map((stop) => searchable(stop.name, stop.town ?? HOME_TOWN)), [stops])
+  const matches = query.trim()
     ? stops
-        .map((stop, index) => ({ stop, rank: matchRank(names[index]!, wanted) }))
+        .map((stop, at) => ({ stop, rank: matchRank(index[at]!, query) }))
         .filter((match) => match.rank !== undefined)
         .sort((a, b) => a.rank! - b.rank!)
         .slice(0, MATCHES)

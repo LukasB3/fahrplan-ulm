@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { RelevantAlerts } from '@/features/alerts/RelevantAlerts'
 import { DepartureBoard } from '@/features/departures/DepartureBoard'
 import { FavouriteButton } from '@/features/departures/FavouriteButton'
-import { StopRow } from '@/features/departures/StopRow'
+import { HOME_TOWN, StopRow } from '@/features/departures/StopRow'
 import { Timetable } from '@/features/departures/Timetable'
 import { lineStyles, meta, nearestStops, timetableOf } from '@/lib/data'
 import type { Stop } from '@/lib/data-types'
@@ -17,7 +17,7 @@ import { groupHeading } from '@/shell/styles'
 const NEARBY = 4
 
 // The city everyone means is not repeated in every row.
-export const listed = (locale: Locale, stop: Stop) => ({ code: stop.code, href: stopHref(locale, stop.slug), name: stop.name, town: stop.town === 'Ulm' ? null : stop.town, lines: stop.lines, lat: stop.lat, lon: stop.lon })
+export const listed = (locale: Locale, stop: Stop) => ({ code: stop.code, href: stopHref(locale, stop.slug), name: stop.name, town: stop.town === HOME_TOWN ? null : stop.town, lines: stop.lines, lat: stop.lat, lon: stop.lon })
 
 export async function StopScreen({ locale, stop }: { locale: Locale; stop: Stop }) {
   const { stop: copy, board, site, hubs, alerts, tabs } = t(locale)

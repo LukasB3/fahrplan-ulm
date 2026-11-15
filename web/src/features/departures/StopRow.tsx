@@ -3,6 +3,9 @@ import type { LineStyle } from '@/lib/data-types'
 import { Icon } from '@/shell/icons'
 import { LineBadge } from '@/shell/LineBadge'
 
+// The city everyone means. Its name is not repeated in every row.
+export const HOME_TOWN = 'Ulm'
+
 // What a list needs to know about a stop. `town` is left out for the city everyone means.
 export type ListedStop = { code: string; href: string; name: string; town: string | null; lines: string[]; lat: number; lon: number }
 
