@@ -9,8 +9,8 @@ import { Icon } from '@/shell/icons'
 import type { PlannerLabels } from './Journeys'
 
 type Props = {
-  // What the server needs besides the sentence: a known position and the saved places.
-  context: () => Pick<AskRequest, 'position' | 'saved'>
+  // What the server needs besides the sentence: a position that is already known.
+  context: () => Pick<AskRequest, 'position'>
   onResult: (result: AskResult) => void
   // What to tell the person about the last request, if anything.
   note: string | null

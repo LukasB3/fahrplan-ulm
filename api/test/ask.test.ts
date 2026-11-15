@@ -8,7 +8,6 @@ import type { AskRequest, Place } from '../src/types.js'
 const NOW = new Date('2026-11-15T12:00:00Z')
 
 const hbf: Place = { kind: 'stop', stop: 'de:08421:1008', name: 'Hauptbahnhof', town: null, lat: 48.39935, lon: 9.98421 }
-const home: Place = { kind: 'address', stop: null, name: 'Frauenstraße 20', town: 'Ulm', lat: 48.398554, lon: 9.996488 }
 const address = (name: string, town: string, quality: number): PlaceMatch => ({ place: { kind: 'address', stop: null, name, town, lat: 48.4, lon: 9.99 }, quality })
 
 const here = { kind: 'here', text: null, stop: null } as const
@@ -116,7 +115,7 @@ describe('a request in plain words', () => {
     })
     return { ask, read, searched, problems, limits }
   }
-  const request = (text: string, extra: Partial<AskRequest> = {}): AskRequest => ({ text, position: null, saved: { home: null, work: null }, ...extra })
+  const request = (text: string, extra: Partial<AskRequest> = {}): AskRequest => ({ text, position: null, ...extra })
   const position = { lat: 48.4011, lon: 9.9937 }
 
   it('goes from here to a stop the model recognised, without searching', async () => {
@@ -136,10 +135,11 @@ describe('a request in plain words', () => {
     expect(await ask(request('zum hbf'), 'visitor', NOW)).toMatchObject({ status: 'ok', from: null, to: hbf, needs: [{ slot: 'from', why: 'position' }] })
   })
 
-  it('fills in home when it is saved and asks for it when it is not', async () => {
-    const intent = trip({ kind: 'home', text: null, stop: null }, named('Hbf', 'Hauptbahnhof'))
-    expect(await setUp({ intent }).ask(request('von zuhause zum hbf', { saved: { home, work: null } }), 'visitor', NOW)).toMatchObject({ from: home, needs: [] })
-    expect(await setUp({ intent }).ask(request('von zuhause zum hbf'), 'visitor', NOW)).toMatchObject({ from: null, needs: [{ slot: 'from', why: 'home' }] })
+  it('asks where home or work is: the site does not know', async () => {
+    const fromHome = trip({ kind: 'home', text: null, stop: null }, named('Hbf', 'Hauptbahnhof'))
+    expect(await setUp({ intent: fromHome }).ask(request('von zuhause zum hbf'), 'visitor', NOW)).toMatchObject({ from: null, to: hbf, needs: [{ slot: 'from', why: 'home' }] })
+    const toWork = trip(named('Hbf', 'Hauptbahnhof'), { kind: 'work', text: null, stop: null })
+    expect(await setUp({ intent: toWork }).ask(request('vom hbf zur arbeit'), 'visitor', NOW)).toMatchObject({ from: hbf, to: null, needs: [{ slot: 'to', why: 'work' }] })
   })
 
   it('searches for an address and takes a clear match', async () => {

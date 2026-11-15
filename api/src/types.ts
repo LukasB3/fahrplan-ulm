@@ -146,15 +146,14 @@ export type AskRequest = {
   text: string
   // Where the phone is, if the person has allowed that before. Never sent to the language model.
   position: { lat: number; lon: number } | null
-  // The person's own places, so "von zuhause" can be filled in. Never sent to the language model.
-  saved: { home: Place | null; work: Place | null }
 }
 
 // Something the sentence left open, for the person to settle.
 export type AskNeed = {
   slot: 'from' | 'to'
   // 'position': "here" was meant but the phone's position is not known.
-  // 'home' / 'work': that place is not saved yet. 'unknown': nothing by that name.
+  // 'home' / 'work': the person's home or workplace was meant, which the site does not know.
+  // 'unknown': nothing by that name.
   // 'ambiguous': several places by that name. 'missing': no destination was said.
   why: 'position' | 'home' | 'work' | 'unknown' | 'ambiguous' | 'missing'
   // The place as the person said it.
