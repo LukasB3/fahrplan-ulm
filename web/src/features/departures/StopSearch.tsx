@@ -3,6 +3,7 @@
 import { type ReactNode, useMemo, useState } from 'react'
 import type { LineStyle } from '@/lib/data-types'
 import { metresBetween } from '@/lib/geo'
+import { matchRank, plain } from '@/lib/search'
 import { useFavourites } from '@/lib/store'
 import { Icon } from '@/shell/icons'
 import { button, groupHeading } from '@/shell/styles'
@@ -33,17 +34,6 @@ const POPULAR = 8
 const NEARBY = 5
 const NEARBY_RADIUS_M = 2_000
 const MATCHES = 20
-
-// "Söflingen" is found by "soflingen" and "Straße" by "strasse".
-const plain = (text: string) =>
-  text
-    .toLowerCase()
-    .replace(/ß/g, 'ss')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-
-// Names starting with the query first, then names with a word starting with it, then the rest.
-const matchRank = (name: string, query: string) => (name.startsWith(query) ? 0 : name.split(/[\s\-/.]+/).some((word) => word.startsWith(query)) ? 1 : name.includes(query) ? 2 : undefined)
 
 function Group({ heading, children }: { heading: string; children: ReactNode }) {
   return (

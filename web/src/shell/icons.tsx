@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-export type IconName = 'route' | 'departures' | 'map' | 'alerts' | 'info' | 'chevron' | 'back' | 'mic' | 'location' | 'search' | 'star' | 'clear'
+export type IconName = 'route' | 'departures' | 'map' | 'alerts' | 'info' | 'chevron' | 'back' | 'mic' | 'location' | 'search' | 'star' | 'clear' | 'walk' | 'swap' | 'home' | 'work' | 'pin' | 'recent' | 'stop'
 
 // Closed shapes get a soft fill when the icon is active, as in a selected tab.
 const shapes: Record<IconName, (fill: string) => ReactNode> = {
@@ -57,6 +57,38 @@ const shapes: Record<IconName, (fill: string) => ReactNode> = {
     </>
   ),
   location: (fill) => <path d="M20 4 3.5 11l7 2.5L13 20.5 20 4Z" fill={fill} />,
+  walk: () => (
+    <>
+      <circle cx="13" cy="4.5" r="1.7" fill="currentColor" stroke="none" />
+      <path d="m9 21 2.5-6.5-2-2.5 1.5-4 3 2.5 3 1M8 10.5l2.5-2M13 13l2.5 3 1 5" />
+    </>
+  ),
+  swap: () => <path d="M7.5 4v15m0 0-3.5-3.5M7.5 19l3.5-3.5M16.5 20V5m0 0L13 8.5M16.5 5 20 8.5" />,
+  home: (fill) => <path d="M4 11 12 4l8 7v8.5a.5.5 0 0 1-.5.5H15v-6H9v6H4.5a.5.5 0 0 1-.5-.5V11Z" fill={fill} />,
+  work: (fill) => (
+    <>
+      <rect x="3.5" y="7.5" width="17" height="12" rx="2" fill={fill} />
+      <path d="M9 7.5V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v1.5M3.5 13h17" />
+    </>
+  ),
+  pin: (fill) => (
+    <>
+      <path d="M12 21s6.5-5.6 6.5-10.5a6.5 6.5 0 0 0-13 0C5.500 15.4 12 21 12 21Z" fill={fill} />
+      <circle cx="12" cy="10.5" r="2.2" />
+    </>
+  ),
+  stop: (fill) => (
+    <>
+      <circle cx="12" cy="12" r="9" fill={fill} />
+      <path d="M9 8v8m6-8v8m-6-4h6" />
+    </>
+  ),
+  recent: () => (
+    <>
+      <path d="M4 12a8 8 0 1 0 2.6-5.9L4 8.5M4 4.5v4h4" />
+      <path d="M12 8v4.2l2.8 1.6" />
+    </>
+  ),
 }
 
 export function Icon({ name, active = false, className }: { name: IconName; active?: boolean; className?: string }) {

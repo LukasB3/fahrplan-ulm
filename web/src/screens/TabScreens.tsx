@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { StopRow } from '@/features/departures/StopRow'
 import { StopSearch } from '@/features/departures/StopSearch'
+import { Planner } from '@/features/planner/Planner'
 import { busiestStops, lines, lineStyles, stops } from '@/lib/data'
 import { t, type Locale } from '@/lib/i18n'
 import { href, lineHref } from '@/lib/routes'
@@ -27,14 +28,14 @@ function MoreLink({ to, label }: { to: string; label: string }) {
 }
 
 export function RouteScreen({ locale }: { locale: Locale }) {
-  const { route, lab, site, departures } = t(locale)
+  const { route, lab, site, departures, planner } = t(locale)
   return (
     <>
       <ScreenHeader locale={locale} title={route.title} />
       <main className="space-y-7 px-4">
         <div className="space-y-4">
           <p className="-mt-2 text-label-2">{route.lead}</p>
-          <ComingSoon icon="route" title={route.soonTitle} text={route.soonText} />
+          <Planner stops={busiestStops(stops.length).map((stop) => ({ kind: 'stop', stop: stop.dhid, name: stop.name, town: stop.town, lat: stop.lat, lon: stop.lon }))} lineStyles={lineStyles} labels={planner} />
         </div>
 
         <section>
