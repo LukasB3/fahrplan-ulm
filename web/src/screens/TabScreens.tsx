@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { preconnect } from 'react-dom'
 import { AlertList } from '@/features/alerts/AlertList'
-import { StopRow } from '@/features/departures/StopRow'
 import { StopSearch } from '@/features/departures/StopSearch'
 import { MapLoader } from '@/features/map/MapLoader'
 import { Planner } from '@/features/planner/Planner'
@@ -18,44 +17,27 @@ import { ScreenHeader } from '@/shell/ScreenHeader'
 import { groupHeading } from '@/shell/styles'
 import { listed } from './StopScreen'
 
-const POPULAR = 8
-
-function MoreLink({ to, label }: { to: string; label: string }) {
+function MoreLink({ to, label, className }: { to: string; label: string; className: string }) {
   return (
-    <li className="border-t border-separator first:border-t-0">
-      <Link href={to} className="pressable flex min-h-11 items-center justify-between px-4 py-2.5">
-        {label}
-        <Icon name="chevron" className="size-4 text-label-3" />
-      </Link>
-    </li>
+    <Link href={to} className={`pressable flex min-h-11 items-center justify-between px-4 py-2.5 ${className}`}>
+      {label}
+      <Icon name="chevron" className="size-4 text-label-3" />
+    </Link>
   )
 }
 
 export function RouteScreen({ locale }: { locale: Locale }) {
-  const { route, site, departures, planner } = t(locale)
+  const { route, site, planner } = t(locale)
   return (
     <>
       <ScreenHeader locale={locale} title={route.title} />
       <main className="space-y-7 px-4">
-        <div className="space-y-4">
-          <p className="-mt-2 text-label-2">{route.lead}</p>
-          <Planner stops={busiestStops(stops.length).map((stop) => ({ kind: 'stop', stop: stop.dhid, name: stop.name, town: stop.town, lat: stop.lat, lon: stop.lon }))} lineStyles={lineStyles} labels={planner} privacyHref={href(locale, 'privacy')} />
-        </div>
-
-        <section>
-          <h2 className={groupHeading}>{route.popularStops}</h2>
-          <ul className="overflow-hidden rounded-card bg-surface">
-            {busiestStops(POPULAR).map((stop) => (
-              <StopRow key={stop.code} stop={listed(locale, stop)} lineStyles={lineStyles} />
-            ))}
-            <MoreLink to={href(locale, 'stops')} label={departures.allStops} />
-          </ul>
-        </section>
+        <Planner stops={busiestStops(stops.length).map((stop) => ({ kind: 'stop', stop: stop.dhid, name: stop.name, town: stop.town, lat: stop.lat, lon: stop.lon }))} lineStyles={lineStyles} labels={planner} privacyHref={href(locale, 'privacy')} />
 
         <section>
           <h2 className={groupHeading}>{route.lines}</h2>
-          <div className="rounded-card bg-surface p-4">
-            <ul className="flex flex-wrap gap-x-2">
+          <div className="overflow-hidden rounded-card bg-surface">
+            <ul className="flex flex-wrap gap-x-2 p-4">
               {lines.map((line) => (
                 <li key={line.id}>
                   <Link href={lineHref(locale, line.id)} prefetch={false} className="pressable inline-flex py-1.5">
@@ -64,9 +46,12 @@ export function RouteScreen({ locale }: { locale: Locale }) {
                 </li>
               ))}
             </ul>
+            <MoreLink to={href(locale, 'lines')} label={route.allLines} className="border-t border-separator" />
           </div>
         </section>
 
+        {/* What the site is, in a sentence: for a first visit and for search engines, below what people came to use. */}
+        <p className="px-4 text-[0.8125rem] text-label-2">{route.lead}</p>
       </main>
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebSite', name: site.name, url: SITE_ORIGIN, inLanguage: locale, description: site.description }} />
     </>
@@ -96,10 +81,7 @@ export function DeparturesScreen({ locale }: { locale: Locale }) {
             metres: 'm',
           }}
         />
-        <ul className="overflow-hidden rounded-card bg-surface">
-          <MoreLink to={href(locale, 'stops')} label={departures.allStops} />
-          <MoreLink to={href(locale, 'lines')} label={departures.allLines} />
-        </ul>
+        <MoreLink to={href(locale, 'stops')} label={departures.allStops} className="rounded-card bg-surface" />
       </main>
     </>
   )
