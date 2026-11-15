@@ -1,10 +1,12 @@
 import Link from 'next/link'
+import { AlertList } from '@/features/alerts/AlertList'
 import { StopRow } from '@/features/departures/StopRow'
 import { StopSearch } from '@/features/departures/StopSearch'
 import { Planner } from '@/features/planner/Planner'
 import { busiestStops, lines, lineStyles, stops } from '@/lib/data'
 import { t, type Locale } from '@/lib/i18n'
 import { href, lineHref } from '@/lib/routes'
+import { fetchAlerts } from '@/lib/server-api'
 import { SITE_ORIGIN } from '@/lib/seo'
 import { ComingSoon } from '@/shell/ComingSoon'
 import { Icon } from '@/shell/icons'
@@ -116,13 +118,21 @@ export function MapScreen({ locale }: { locale: Locale }) {
   )
 }
 
-export function AlertsScreen({ locale }: { locale: Locale }) {
-  const { alerts } = t(locale)
+export async function AlertsScreen({ locale }: { locale: Locale }) {
+  const { alerts: copy } = t(locale)
+  const { alerts, now } = await fetchAlerts()
   return (
     <>
-      <ScreenHeader locale={locale} title={alerts.title} />
-      <main className="px-4">
-        <ComingSoon icon="alerts" title={alerts.soonTitle} text={alerts.soonText} />
+      <ScreenHeader locale={locale} title={copy.title} />
+      <main className="space-y-4 px-4">
+        <p className="-mt-2 text-label-2">{copy.heading}</p>
+        <AlertList
+          initial={alerts}
+          builtAt={Date.parse(now)}
+          lineStyles={lineStyles}
+          labels={{ since: copy.since, from: copy.from, until: copy.until, fromTo: copy.fromTo, yours: copy.yours, all: copy.all, none: copy.none }}
+        />
+        <p className="px-4 text-[0.8125rem] text-label-2">{copy.source}</p>
       </main>
     </>
   )

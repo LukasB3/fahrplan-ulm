@@ -1,6 +1,7 @@
 import { z } from 'zod'
+import { paragraphs, tidy } from './text.js'
 import { berlinClock } from './time.js'
-import type { Departure, Journey, Leg, Mode, Place, Stopover } from './types.js'
+import type { Alert, Departure, Journey, Leg, Mode, Place, Stopover } from './types.js'
 import type { GetJson } from './upstream.js'
 
 // DING's journey planner (EFA). It is the public backend of ding.eu, not a
@@ -196,4 +197,49 @@ export const efaJourneys = async (getJson: GetJson, base: string, { from, to, mo
   const url = `${base}/XML_TRIP_REQUEST2?${COMMON}&${endpoint('origin', from)}&${endpoint('destination', to)}&itdDate=${clock.date}&itdTime=${clock.time}&itdTripDateTimeDepArr=${mode === 'depart' ? 'dep' : 'arr'}&useRealtime=1&calcNumberOfTrips=4&calcOneDirection=1`
   const { journeys = [] } = tripAnswer.parse(await getJson(url))
   return journeys.flatMap((item) => journeyOf(item) ?? [])
+}
+
+// --- Alerts -------------------------------------------------------------------
+
+const when = z.iso.datetime().nullish()
+const efaAlert = z.object({
+  id: z.string().min(1),
+  timestamps: z.object({ creation: when, lastModification: when, validity: z.array(z.object({ from: when, to: when })).nullish() }).nullish(),
+  affected: z.object({
+    lines: z.array(z.object({ number: z.string().nullish(), operator: z.object({ name: z.string().nullish() }).nullish() })).nullish(),
+    stops: z.array(z.object({ id: z.string() })).nullish(),
+  }),
+  infoLinks: z.array(z.object({ urlText: z.string().nullish(), subtitle: z.string().nullish(), content: z.string().nullish() })).min(1),
+})
+
+const alertAnswer = z.object({ infos: z.object({ current: z.array(z.unknown()).optional() }) })
+
+// The notices that concern SWU's lines. The answer covers the whole state
+// and every operator, so nearly all of it is dropped here.
+export const efaAlerts = async (getJson: GetJson, base: string): Promise<Alert[]> => {
+  const { infos } = alertAnswer.parse(await getJson(`${base}/XML_ADDINFO_REQUEST?${COMMON}&filterPublished=1`))
+  return (infos.current ?? []).flatMap((item): Alert[] => {
+    const parsed = efaAlert.safeParse(item)
+    if (!parsed.success) return []
+    const { id, timestamps, affected, infoLinks } = parsed.data
+    // Lines in the order of the network map: numbers first, lettered lines next, night lines last.
+    const rank = (line: string) => (line.startsWith('N') ? 2_000 : /^\d+$/.test(line) ? 0 : 1_000) + (Number(line.replace(/\D/g, '')) || 0)
+    const lines = [...new Set((affected.lines ?? []).filter((line) => line.operator?.name === 'SWU' && line.number).map((line) => line.number!))].sort((a, b) => rank(a) - rank(b))
+    const [notice] = infoLinks
+    const title = tidy(notice!.urlText ?? notice!.subtitle ?? '')
+    if (!lines.length || !title) return []
+    const validity = timestamps?.validity?.[0]
+    return [
+      {
+        id,
+        title,
+        text: paragraphs(notice!.content ?? ''),
+        lines,
+        stops: [...new Set((affected.stops ?? []).map((stop) => stop.id))],
+        from: validity?.from ?? null,
+        to: validity?.to ?? null,
+        published: timestamps?.lastModification ?? timestamps?.creation ?? null,
+      },
+    ]
+  })
 }

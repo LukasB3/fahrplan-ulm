@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { RelevantAlerts } from '@/features/alerts/RelevantAlerts'
 import { DepartureBoard } from '@/features/departures/DepartureBoard'
 import { FavouriteButton } from '@/features/departures/FavouriteButton'
 import { StopRow } from '@/features/departures/StopRow'
@@ -19,7 +20,7 @@ const NEARBY = 4
 export const listed = (locale: Locale, stop: Stop) => ({ code: stop.code, href: stopHref(locale, stop.slug), name: stop.name, town: stop.town === 'Ulm' ? null : stop.town, lines: stop.lines, lat: stop.lat, lon: stop.lon })
 
 export async function StopScreen({ locale, stop }: { locale: Locale; stop: Stop }) {
-  const { stop: copy, board, site, hubs } = t(locale)
+  const { stop: copy, board, site, hubs, alerts } = t(locale)
   const tables = await timetableOf(stop)
   const validUntil = new Date(meta.validUntil).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
   const url = `${SITE_ORIGIN}${stopHref(locale, stop.slug)}`
@@ -30,7 +31,7 @@ export async function StopScreen({ locale, stop }: { locale: Locale; stop: Stop 
         locale={locale}
         title={stop.name}
         back={{ href: href(locale, 'departures'), label: copy.back }}
-        actions={<FavouriteButton code={stop.code} labels={{ add: copy.favourite, remove: copy.unfavourite }} />}
+        actions={<FavouriteButton stop={{ code: stop.code, dhid: stop.dhid, lines: stop.lines }} labels={{ add: copy.favourite, remove: copy.unfavourite }} />}
       />
       <main className="space-y-7 px-4">
         <div className="-mt-2 space-y-3">
@@ -47,6 +48,8 @@ export async function StopScreen({ locale, stop }: { locale: Locale; stop: Stop 
             ))}
           </ul>
         </div>
+
+        <RelevantAlerts about={{ dhid: stop.dhid, lines: stop.lines }} href={href(locale, 'alerts')} heading={alerts.forStop} />
 
         <section>
           <h2 className={groupHeading}>{board.heading}</h2>

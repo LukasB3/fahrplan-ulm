@@ -51,14 +51,37 @@ const remembered = <T>(key: string, empty: T, tidy: (stored: unknown) => T) => {
   return { read, write, use: () => useSyncExternalStore(subscribe, read, () => empty) }
 }
 
-// Favourite stops, as stop codes, newest first.
-const favourites = remembered<string[]>('fahrplan-ulm:favourites', [], (stored) => (Array.isArray(stored) ? stored.filter((code) => typeof code === 'string') : []))
+// Favourite stops, newest first. Besides the stop's code each carries its id
+// at DING and its lines, which is what service alerts are matched by.
+export type Favourite = { code: string; dhid: string | null; lines: string[] }
+
+const favourites = remembered<Favourite[]>('fahrplan-ulm:favourites', [], (stored) =>
+  (Array.isArray(stored) ? stored : []).flatMap((entry: unknown): Favourite[] => {
+    // The first version stored bare codes.
+    if (typeof entry === 'string') return [{ code: entry, dhid: null, lines: [] }]
+    const favourite = entry as Partial<Favourite> | null
+    if (typeof favourite?.code !== 'string') return []
+    return [{ code: favourite.code, dhid: typeof favourite.dhid === 'string' ? favourite.dhid : null, lines: Array.isArray(favourite.lines) ? favourite.lines.filter((line) => typeof line === 'string') : [] }]
+  }),
+)
 
 export const useFavourites = favourites.use
 
-export const toggleFavourite = (code: string) => {
+export const toggleFavourite = (stop: Favourite) => {
   const current = favourites.read()
-  favourites.write(current.includes(code) ? current.filter((other) => other !== code) : [code, ...current])
+  favourites.write(current.some((other) => other.code === stop.code) ? current.filter((other) => other.code !== stop.code) : [stop, ...current])
+}
+
+// Alerts the person has had on screen, by id. Old ids fall off the end.
+const SEEN = 300
+const seenAlerts = remembered<string[]>('fahrplan-ulm:seen-alerts', [], (stored) => (Array.isArray(stored) ? stored.filter((id) => typeof id === 'string').slice(0, SEEN) : []))
+
+export const useSeenAlerts = seenAlerts.use
+
+export const markAlertsSeen = (ids: string[]) => {
+  const seen = seenAlerts.read()
+  const fresh = ids.filter((id) => !seen.includes(id))
+  if (fresh.length) seenAlerts.write([...fresh, ...seen].slice(0, SEEN))
 }
 
 // Home, work and the places chosen last in the planner.

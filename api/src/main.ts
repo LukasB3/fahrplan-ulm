@@ -1,3 +1,4 @@
+import { alertBoard } from './alerts.js'
 import { asker, askLimits, claudeReader } from './ask.js'
 import { loadConfig } from './config.js'
 import { departureBoard } from './departures.js'
@@ -20,7 +21,8 @@ const ask = asker({
   // The error's kind and status say enough; its message could quote the sentence.
   log: (problem) => console.error('reading a sentence failed:', problem instanceof Error ? `${problem.name} ${(problem as { status?: number }).status ?? ''}` : typeof problem),
 })
-const app = await buildServer({ cfg, departures, planner, ask })
+const alerts = alertBoard({ getJson, efaBase: cfg.EFA_BASE })
+const app = await buildServer({ cfg, departures, planner, ask, alerts })
 
 // SWU renames and renumbers stops rarely; once a day is plenty. A failure keeps the last list.
 const refreshStops = () => stops.refresh().catch((problem: unknown) => console.error('loading the stop list failed', problem))

@@ -58,7 +58,7 @@ export function StopSearch({ stops, lineStyles, labels }: Props) {
         .sort((a, b) => a.rank! - b.rank!)
         .slice(0, MATCHES)
     : undefined
-  const favouriteStops = favourites.flatMap((code) => stops.find((stop) => stop.code === code) ?? [])
+  const favouriteStops = favourites.flatMap((favourite) => stops.find((stop) => stop.code === favourite.code) ?? [])
 
   const locate = () =>
     navigator.geolocation.getCurrentPosition(

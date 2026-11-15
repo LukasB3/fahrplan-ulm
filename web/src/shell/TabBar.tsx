@@ -3,11 +3,11 @@
 import { MotionConfig, motion } from 'motion/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { Icon, type IconName } from './icons'
 
 // `section` lists addresses outside the tab's own that still belong to it.
-export type Tab = { href: string; label: string; icon: IconName; section?: string[] }
+export type Tab = { href: string; label: string; icon: IconName; section?: string[]; badge?: ReactNode }
 
 const under = (pathname: string, address: string) => pathname === address || pathname.startsWith(`${address}/`)
 
@@ -36,6 +36,7 @@ export function TabBar({ tabs, label }: { tabs: Tab[]; label: string }) {
                   className={`pressable relative flex h-full flex-col items-center justify-center gap-0.5 ${active ? 'text-tint' : 'text-label-2'}`}
                 >
                   <Icon name={tab.icon} active={active} />
+                  {tab.badge}
                   <span className="text-[0.6875rem] leading-none font-semibold">{tab.label}</span>
                 </Link>
               </li>
