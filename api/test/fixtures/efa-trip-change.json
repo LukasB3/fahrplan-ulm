@@ -1,0 +1,1637 @@
+{
+ "version": "11.0.6.72",
+ "systemMessages": [
+  {
+   "type": "warning",
+   "module": "BROKER",
+   "code": -10015,
+   "text": "itp",
+   "subType": "itp-monomodal"
+  }
+ ],
+ "journeys": [
+  {
+   "interchanges": 1,
+   "isAdditional": false,
+   "legs": [
+    {
+     "origin": {
+      "id": "de:08421:1070:0:11",
+      "type": "platform",
+      "name": "Ulm Ostpreußenweg",
+      "disassembledName": "Bstg. A",
+      "coord": [
+       48.434339,
+       10.030508
+      ],
+      "departureTimePlanned": "2026-11-15T12:49:00Z",
+      "departureTimeEstimated": "2026-11-15T12:49:00Z",
+      "parent": {
+       "id": "de:08421:1070",
+       "type": "stop",
+       "name": "Ulm Ostpreußenweg",
+       "disassembledName": "Ostpreußenweg",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "A",
+       "platformName": "Bstg. A"
+      }
+     },
+     "destination": {
+      "id": "de:08421:1010:0:B",
+      "type": "platform",
+      "name": "Ulm Theater",
+      "disassembledName": "Bstg. A",
+      "coord": [
+       48.400808,
+       9.986337
+      ],
+      "arrivalTimePlanned": "2026-11-15T13:08:00Z",
+      "arrivalTimeEstimated": "2026-11-15T13:08:00Z",
+      "parent": {
+       "id": "de:08421:1010",
+       "type": "stop",
+       "name": "Ulm Theater",
+       "disassembledName": "Theater",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "A",
+       "platformName": "Bstg. A"
+      }
+     },
+     "transportation": {
+      "id": "din:87001: :R:j26",
+      "name": "Straßenbahn Linie 1",
+      "number": "1",
+      "disassembledName": "1",
+      "product": {
+       "id": 5,
+       "class": 4,
+       "name": "Straßenbahn Linie",
+       "iconId": 4
+      },
+      "operator": {
+       "id": "66",
+       "name": "SWU"
+      },
+      "destination": {
+       "name": "Söflingen"
+      }
+     },
+     "duration": 1140,
+     "isRealtimeControlled": true,
+     "coords": [
+      [
+       48.434313,
+       10.030488
+      ],
+      [
+       48.434531,
+       10.029797
+      ],
+      [
+       48.434655,
+       10.029415
+      ]
+     ],
+     "stopSequence": [
+      {
+       "name": "Ulm Ostpreußenweg"
+      },
+      {
+       "name": "Ulm Mecklenburgweg"
+      },
+      {
+       "name": "Ulm Thüringenweg"
+      },
+      {
+       "name": "Ulm Haslacher Weg"
+      },
+      {
+       "name": "Ulm Egertweg"
+      },
+      {
+       "name": "Ulm Alfred-Delp-Weg"
+      },
+      {
+       "name": "Ulm Eugen-Bolz-Straße"
+      },
+      {
+       "name": "Ulm Donauhalle"
+      },
+      {
+       "name": "Ulm Wohnpark Friedrichsau"
+      },
+      {
+       "name": "Ulm Donaustadion"
+      },
+      {
+       "name": "Ulm Staufenring"
+      },
+      {
+       "name": "Ulm Willy-Brandt-Platz"
+      },
+      {
+       "name": "Ulm Justizgebäude"
+      },
+      {
+       "name": "Ulm Theater"
+      }
+     ]
+    },
+    {
+     "origin": {
+      "id": "de:08421:1010:0:A",
+      "type": "platform",
+      "name": "Ulm Theater",
+      "disassembledName": "Bstg. B",
+      "coord": [
+       48.400832,
+       9.986724
+      ],
+      "departureTimePlanned": "2026-11-15T13:17:00Z",
+      "departureTimeEstimated": "2026-11-15T13:17:00Z",
+      "parent": {
+       "id": "de:08421:1010",
+       "type": "stop",
+       "name": "Ulm Theater",
+       "disassembledName": "Theater",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "B",
+       "platformName": "Bstg. B"
+      }
+     },
+     "destination": {
+      "id": "de:08421:1240:1:F",
+      "type": "platform",
+      "name": "Ulm Universität Süd",
+      "disassembledName": "Bstg. F",
+      "coord": [
+       48.422149,
+       9.956927
+      ],
+      "arrivalTimePlanned": "2026-11-15T13:24:00Z",
+      "arrivalTimeEstimated": "2026-11-15T13:24:00Z",
+      "parent": {
+       "id": "de:08421:1240",
+       "type": "stop",
+       "name": "Ulm Universität Süd",
+       "disassembledName": "Universität Süd",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "F",
+       "platformName": "Bstg. F"
+      }
+     },
+     "transportation": {
+      "id": "din:87002: :H:j26",
+      "name": "Straßenbahn Linie 2",
+      "number": "2",
+      "disassembledName": "2",
+      "product": {
+       "id": 5,
+       "class": 4,
+       "name": "Straßenbahn Linie",
+       "iconId": 4
+      },
+      "operator": {
+       "id": "66",
+       "name": "SWU"
+      },
+      "destination": {
+       "name": "Science Park II"
+      }
+     },
+     "duration": 420,
+     "isRealtimeControlled": true,
+     "coords": [
+      [
+       48.400848,
+       9.98672
+      ],
+      [
+       48.400927,
+       9.987011
+      ],
+      [
+       48.400949,
+       9.987081
+      ]
+     ],
+     "stopSequence": [
+      {
+       "name": "Ulm Theater"
+      },
+      {
+       "name": "Ulm Stadtwerke"
+      },
+      {
+       "name": "Ulm Lehrer Tal"
+      },
+      {
+       "name": "Ulm Multscherschule"
+      },
+      {
+       "name": "Ulm Eselsberg Hasenkopf"
+      },
+      {
+       "name": "Ulm Universität Süd"
+      }
+     ]
+    },
+    {
+     "origin": {
+      "id": "de:08421:1240:1:F",
+      "type": "platform",
+      "name": "Ulm Universität Süd",
+      "disassembledName": "Bstg. F",
+      "coord": [
+       48.422149,
+       9.956927
+      ],
+      "departureTimePlanned": "2026-11-15T13:24:00Z",
+      "departureTimeEstimated": "2026-11-15T13:24:00Z",
+      "parent": {
+       "id": "de:08421:1240",
+       "type": "stop",
+       "name": "Ulm Universität Süd",
+       "disassembledName": "Universität Süd",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "F",
+       "platformName": "Bstg. F"
+      }
+     },
+     "destination": {
+      "id": "coord:1107950:5822806:MRCV:Eselsberg, Albert-Einstein-Allee 25:0",
+      "type": "address",
+      "name": "Eselsberg, Albert-Einstein-Allee 25",
+      "disassembledName": "Albert-Einstein-Allee 25",
+      "coord": [
+       48.42107,
+       9.952884
+      ],
+      "arrivalTimePlanned": "2026-11-15T13:30:00Z",
+      "arrivalTimeEstimated": "2026-11-15T13:30:00Z",
+      "parent": {
+       "id": "placeID:8421000:-1",
+       "type": "locality",
+       "name": "Eselsberg"
+      },
+      "properties": {}
+     },
+     "transportation": {
+      "product": {
+       "class": 100,
+       "name": "footpath",
+       "iconId": 100
+      }
+     },
+     "duration": 360,
+     "distance": 390,
+     "coords": [
+      [
+       48.422131,
+       9.956936
+      ],
+      [
+       48.421762,
+       9.956442
+      ],
+      [
+       48.421732,
+       9.956397
+      ],
+      [
+       48.421744,
+       9.95637
+      ],
+      [
+       48.421786,
+       9.956307
+      ],
+      [
+       48.421815,
+       9.956253
+      ],
+      [
+       48.421774,
+       9.956199
+      ],
+      [
+       48.421744,
+       9.956154
+      ],
+      [
+       48.421696,
+       9.9561
+      ],
+      [
+       48.421637,
+       9.956028
+      ],
+      [
+       48.421595,
+       9.955992
+      ],
+      [
+       48.421607,
+       9.955938
+      ],
+      [
+       48.421619,
+       9.955912
+      ],
+      [
+       48.421631,
+       9.955876
+      ],
+      [
+       48.421643,
+       9.955849
+      ],
+      [
+       48.421625,
+       9.955822
+      ],
+      [
+       48.421571,
+       9.95575
+      ],
+      [
+       48.421428,
+       9.955579
+      ],
+      [
+       48.421374,
+       9.955462
+      ],
+      [
+       48.42135,
+       9.955355
+      ],
+      [
+       48.421339,
+       9.955238
+      ],
+      [
+       48.421368,
+       9.955049
+      ],
+      [
+       48.421392,
+       9.954968
+      ],
+      [
+       48.421344,
+       9.954852
+      ],
+      [
+       48.421315,
+       9.954753
+      ],
+      [
+       48.421237,
+       9.954519
+      ],
+      [
+       48.421154,
+       9.954321
+      ],
+      [
+       48.42104,
+       9.95398
+      ],
+      [
+       48.420903,
+       9.953854
+      ],
+      [
+       48.42079,
+       9.953549
+      ],
+      [
+       48.420802,
+       9.953432
+      ],
+      [
+       48.420927,
+       9.953315
+      ],
+      [
+       48.421017,
+       9.953181
+      ],
+      [
+       48.421064,
+       9.953019
+      ],
+      [
+       48.42107,
+       9.95292
+      ],
+      [
+       48.42107,
+       9.952884
+      ]
+     ],
+     "stopSequence": [
+      {
+       "name": "Ulm Universität Süd"
+      }
+     ]
+    }
+   ],
+   "fare": {
+    "tickets": [
+     {
+      "name": "Einzelfahrschein Erw Handy (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 3.05,
+      "currency": "EUR"
+     },
+     {
+      "name": "Einzelfahrschein Erwachsene (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 3.3,
+      "currency": "EUR"
+     },
+     {
+      "name": "Einzelfahrschein Kind bar (Stadttarif Ulm/Neu-Ulm)",
+      "person": "CHILD",
+      "priceBrutto": 2.0,
+      "currency": "EUR"
+     },
+     {
+      "name": "Tageskarte Gruppe (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 11.1,
+      "currency": "EUR"
+     },
+     {
+      "name": "Tageskarte Single (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 6.1,
+      "currency": "EUR"
+     },
+     {
+      "name": "Wochenkarte Erwachsene (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 30.0,
+      "currency": "EUR"
+     },
+     {
+      "name": "Monatskarte Erwachsene (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 87.9,
+      "currency": "EUR"
+     },
+     {
+      "name": "Schülermonatskarte (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 65.9,
+      "currency": "EUR"
+     },
+     {
+      "name": "Jahreskarte (Einmalzahler) (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 886.8,
+      "currency": "EUR"
+     },
+     {
+      "name": "Jahreskarte (Monatsbetrag) (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 73.9,
+      "currency": "EUR"
+     },
+     {
+      "name": "Bayerisches Ermäßigungsticket",
+      "person": "ADULT",
+      "priceBrutto": 43.0,
+      "currency": "EUR"
+     },
+     {
+      "name": "D-TICKET JugendBW",
+      "person": "ADULT",
+      "priceBrutto": 45.0,
+      "currency": "EUR"
+     },
+     {
+      "name": "Deutschland-Ticket",
+      "person": "ADULT",
+      "priceBrutto": 63.0,
+      "currency": "EUR"
+     }
+    ]
+   }
+  },
+  {
+   "interchanges": 1,
+   "isAdditional": false,
+   "legs": [
+    {
+     "origin": {
+      "id": "de:08421:1070:0:11",
+      "type": "platform",
+      "name": "Ulm Ostpreußenweg",
+      "disassembledName": "Bstg. A",
+      "coord": [
+       48.434339,
+       10.030508
+      ],
+      "departureTimePlanned": "2026-11-15T13:04:00Z",
+      "departureTimeEstimated": "2026-11-15T13:04:00Z",
+      "parent": {
+       "id": "de:08421:1070",
+       "type": "stop",
+       "name": "Ulm Ostpreußenweg",
+       "disassembledName": "Ostpreußenweg",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "A",
+       "platformName": "Bstg. A"
+      }
+     },
+     "destination": {
+      "id": "de:08421:1010:0:B",
+      "type": "platform",
+      "name": "Ulm Theater",
+      "disassembledName": "Bstg. A",
+      "coord": [
+       48.400808,
+       9.986337
+      ],
+      "arrivalTimePlanned": "2026-11-15T13:23:00Z",
+      "arrivalTimeEstimated": "2026-11-15T13:23:00Z",
+      "parent": {
+       "id": "de:08421:1010",
+       "type": "stop",
+       "name": "Ulm Theater",
+       "disassembledName": "Theater",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "A",
+       "platformName": "Bstg. A"
+      }
+     },
+     "transportation": {
+      "id": "din:87001: :R:j26",
+      "name": "Straßenbahn Linie 1",
+      "number": "1",
+      "disassembledName": "1",
+      "product": {
+       "id": 5,
+       "class": 4,
+       "name": "Straßenbahn Linie",
+       "iconId": 4
+      },
+      "operator": {
+       "id": "66",
+       "name": "SWU"
+      },
+      "destination": {
+       "name": "Söflingen"
+      }
+     },
+     "duration": 1140,
+     "isRealtimeControlled": true,
+     "coords": [
+      [
+       48.434313,
+       10.030488
+      ],
+      [
+       48.434531,
+       10.029797
+      ],
+      [
+       48.434655,
+       10.029415
+      ]
+     ],
+     "stopSequence": [
+      {
+       "name": "Ulm Ostpreußenweg"
+      },
+      {
+       "name": "Ulm Mecklenburgweg"
+      },
+      {
+       "name": "Ulm Thüringenweg"
+      },
+      {
+       "name": "Ulm Haslacher Weg"
+      },
+      {
+       "name": "Ulm Egertweg"
+      },
+      {
+       "name": "Ulm Alfred-Delp-Weg"
+      },
+      {
+       "name": "Ulm Eugen-Bolz-Straße"
+      },
+      {
+       "name": "Ulm Donauhalle"
+      },
+      {
+       "name": "Ulm Wohnpark Friedrichsau"
+      },
+      {
+       "name": "Ulm Donaustadion"
+      },
+      {
+       "name": "Ulm Staufenring"
+      },
+      {
+       "name": "Ulm Willy-Brandt-Platz"
+      },
+      {
+       "name": "Ulm Justizgebäude"
+      },
+      {
+       "name": "Ulm Theater"
+      }
+     ]
+    },
+    {
+     "origin": {
+      "id": "de:08421:1010:0:A",
+      "type": "platform",
+      "name": "Ulm Theater",
+      "disassembledName": "Bstg. B",
+      "coord": [
+       48.400832,
+       9.986724
+      ],
+      "departureTimePlanned": "2026-11-15T13:32:00Z",
+      "departureTimeEstimated": "2026-11-15T13:32:00Z",
+      "parent": {
+       "id": "de:08421:1010",
+       "type": "stop",
+       "name": "Ulm Theater",
+       "disassembledName": "Theater",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "B",
+       "platformName": "Bstg. B"
+      }
+     },
+     "destination": {
+      "id": "de:08421:1240:1:F",
+      "type": "platform",
+      "name": "Ulm Universität Süd",
+      "disassembledName": "Bstg. F",
+      "coord": [
+       48.422149,
+       9.956927
+      ],
+      "arrivalTimePlanned": "2026-11-15T13:39:00Z",
+      "arrivalTimeEstimated": "2026-11-15T13:39:00Z",
+      "parent": {
+       "id": "de:08421:1240",
+       "type": "stop",
+       "name": "Ulm Universität Süd",
+       "disassembledName": "Universität Süd",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "F",
+       "platformName": "Bstg. F"
+      }
+     },
+     "transportation": {
+      "id": "din:87002: :H:j26",
+      "name": "Straßenbahn Linie 2",
+      "number": "2",
+      "disassembledName": "2",
+      "product": {
+       "id": 5,
+       "class": 4,
+       "name": "Straßenbahn Linie",
+       "iconId": 4
+      },
+      "operator": {
+       "id": "66",
+       "name": "SWU"
+      },
+      "destination": {
+       "name": "Science Park II"
+      }
+     },
+     "duration": 420,
+     "isRealtimeControlled": true,
+     "coords": [
+      [
+       48.400848,
+       9.98672
+      ],
+      [
+       48.400927,
+       9.987011
+      ],
+      [
+       48.400949,
+       9.987081
+      ]
+     ],
+     "stopSequence": [
+      {
+       "name": "Ulm Theater"
+      },
+      {
+       "name": "Ulm Stadtwerke"
+      },
+      {
+       "name": "Ulm Lehrer Tal"
+      },
+      {
+       "name": "Ulm Multscherschule"
+      },
+      {
+       "name": "Ulm Eselsberg Hasenkopf"
+      },
+      {
+       "name": "Ulm Universität Süd"
+      }
+     ]
+    },
+    {
+     "origin": {
+      "id": "de:08421:1240:1:F",
+      "type": "platform",
+      "name": "Ulm Universität Süd",
+      "disassembledName": "Bstg. F",
+      "coord": [
+       48.422149,
+       9.956927
+      ],
+      "departureTimePlanned": "2026-11-15T13:39:00Z",
+      "departureTimeEstimated": "2026-11-15T13:39:00Z",
+      "parent": {
+       "id": "de:08421:1240",
+       "type": "stop",
+       "name": "Ulm Universität Süd",
+       "disassembledName": "Universität Süd",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "F",
+       "platformName": "Bstg. F"
+      }
+     },
+     "destination": {
+      "id": "coord:1107950:5822806:MRCV:Eselsberg, Albert-Einstein-Allee 25:0",
+      "type": "address",
+      "name": "Eselsberg, Albert-Einstein-Allee 25",
+      "disassembledName": "Albert-Einstein-Allee 25",
+      "coord": [
+       48.42107,
+       9.952884
+      ],
+      "arrivalTimePlanned": "2026-11-15T13:45:00Z",
+      "arrivalTimeEstimated": "2026-11-15T13:45:00Z",
+      "parent": {
+       "id": "placeID:8421000:-1",
+       "type": "locality",
+       "name": "Eselsberg"
+      },
+      "properties": {}
+     },
+     "transportation": {
+      "product": {
+       "class": 100,
+       "name": "footpath",
+       "iconId": 100
+      }
+     },
+     "duration": 360,
+     "distance": 390,
+     "coords": [
+      [
+       48.422131,
+       9.956936
+      ],
+      [
+       48.421762,
+       9.956442
+      ],
+      [
+       48.421732,
+       9.956397
+      ],
+      [
+       48.421744,
+       9.95637
+      ],
+      [
+       48.421786,
+       9.956307
+      ],
+      [
+       48.421815,
+       9.956253
+      ],
+      [
+       48.421774,
+       9.956199
+      ],
+      [
+       48.421744,
+       9.956154
+      ],
+      [
+       48.421696,
+       9.9561
+      ],
+      [
+       48.421637,
+       9.956028
+      ],
+      [
+       48.421595,
+       9.955992
+      ],
+      [
+       48.421607,
+       9.955938
+      ],
+      [
+       48.421619,
+       9.955912
+      ],
+      [
+       48.421631,
+       9.955876
+      ],
+      [
+       48.421643,
+       9.955849
+      ],
+      [
+       48.421625,
+       9.955822
+      ],
+      [
+       48.421571,
+       9.95575
+      ],
+      [
+       48.421428,
+       9.955579
+      ],
+      [
+       48.421374,
+       9.955462
+      ],
+      [
+       48.42135,
+       9.955355
+      ],
+      [
+       48.421339,
+       9.955238
+      ],
+      [
+       48.421368,
+       9.955049
+      ],
+      [
+       48.421392,
+       9.954968
+      ],
+      [
+       48.421344,
+       9.954852
+      ],
+      [
+       48.421315,
+       9.954753
+      ],
+      [
+       48.421237,
+       9.954519
+      ],
+      [
+       48.421154,
+       9.954321
+      ],
+      [
+       48.42104,
+       9.95398
+      ],
+      [
+       48.420903,
+       9.953854
+      ],
+      [
+       48.42079,
+       9.953549
+      ],
+      [
+       48.420802,
+       9.953432
+      ],
+      [
+       48.420927,
+       9.953315
+      ],
+      [
+       48.421017,
+       9.953181
+      ],
+      [
+       48.421064,
+       9.953019
+      ],
+      [
+       48.42107,
+       9.95292
+      ],
+      [
+       48.42107,
+       9.952884
+      ]
+     ],
+     "stopSequence": [
+      {
+       "name": "Ulm Universität Süd"
+      }
+     ]
+    }
+   ],
+   "fare": {
+    "tickets": [
+     {
+      "name": "Einzelfahrschein Erw Handy (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 3.05,
+      "currency": "EUR"
+     },
+     {
+      "name": "Einzelfahrschein Erwachsene (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 3.3,
+      "currency": "EUR"
+     },
+     {
+      "name": "Einzelfahrschein Kind bar (Stadttarif Ulm/Neu-Ulm)",
+      "person": "CHILD",
+      "priceBrutto": 2.0,
+      "currency": "EUR"
+     },
+     {
+      "name": "Tageskarte Gruppe (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 11.1,
+      "currency": "EUR"
+     },
+     {
+      "name": "Tageskarte Single (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 6.1,
+      "currency": "EUR"
+     },
+     {
+      "name": "Wochenkarte Erwachsene (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 30.0,
+      "currency": "EUR"
+     },
+     {
+      "name": "Monatskarte Erwachsene (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 87.9,
+      "currency": "EUR"
+     },
+     {
+      "name": "Schülermonatskarte (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 65.9,
+      "currency": "EUR"
+     },
+     {
+      "name": "Jahreskarte (Einmalzahler) (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 886.8,
+      "currency": "EUR"
+     },
+     {
+      "name": "Jahreskarte (Monatsbetrag) (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 73.9,
+      "currency": "EUR"
+     },
+     {
+      "name": "Bayerisches Ermäßigungsticket",
+      "person": "ADULT",
+      "priceBrutto": 43.0,
+      "currency": "EUR"
+     },
+     {
+      "name": "D-TICKET JugendBW",
+      "person": "ADULT",
+      "priceBrutto": 45.0,
+      "currency": "EUR"
+     },
+     {
+      "name": "Deutschland-Ticket",
+      "person": "ADULT",
+      "priceBrutto": 63.0,
+      "currency": "EUR"
+     }
+    ]
+   }
+  },
+  {
+   "interchanges": 1,
+   "isAdditional": false,
+   "legs": [
+    {
+     "origin": {
+      "id": "de:08421:1070:0:11",
+      "type": "platform",
+      "name": "Ulm Ostpreußenweg",
+      "disassembledName": "Bstg. A",
+      "coord": [
+       48.434339,
+       10.030508
+      ],
+      "departureTimePlanned": "2026-11-15T13:19:00Z",
+      "departureTimeEstimated": "2026-11-15T13:19:00Z",
+      "parent": {
+       "id": "de:08421:1070",
+       "type": "stop",
+       "name": "Ulm Ostpreußenweg",
+       "disassembledName": "Ostpreußenweg",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "A",
+       "platformName": "Bstg. A"
+      }
+     },
+     "destination": {
+      "id": "de:08421:1010:0:B",
+      "type": "platform",
+      "name": "Ulm Theater",
+      "disassembledName": "Bstg. A",
+      "coord": [
+       48.400808,
+       9.986337
+      ],
+      "arrivalTimePlanned": "2026-11-15T13:38:00Z",
+      "arrivalTimeEstimated": "2026-11-15T13:38:00Z",
+      "parent": {
+       "id": "de:08421:1010",
+       "type": "stop",
+       "name": "Ulm Theater",
+       "disassembledName": "Theater",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "A",
+       "platformName": "Bstg. A"
+      }
+     },
+     "transportation": {
+      "id": "din:87001: :R:j26",
+      "name": "Straßenbahn Linie 1",
+      "number": "1",
+      "disassembledName": "1",
+      "product": {
+       "id": 5,
+       "class": 4,
+       "name": "Straßenbahn Linie",
+       "iconId": 4
+      },
+      "operator": {
+       "id": "66",
+       "name": "SWU"
+      },
+      "destination": {
+       "name": "Söflingen"
+      }
+     },
+     "duration": 1140,
+     "isRealtimeControlled": true,
+     "coords": [
+      [
+       48.434313,
+       10.030488
+      ],
+      [
+       48.434531,
+       10.029797
+      ],
+      [
+       48.434655,
+       10.029415
+      ]
+     ],
+     "stopSequence": [
+      {
+       "name": "Ulm Ostpreußenweg"
+      },
+      {
+       "name": "Ulm Mecklenburgweg"
+      },
+      {
+       "name": "Ulm Thüringenweg"
+      },
+      {
+       "name": "Ulm Haslacher Weg"
+      },
+      {
+       "name": "Ulm Egertweg"
+      },
+      {
+       "name": "Ulm Alfred-Delp-Weg"
+      },
+      {
+       "name": "Ulm Eugen-Bolz-Straße"
+      },
+      {
+       "name": "Ulm Donauhalle"
+      },
+      {
+       "name": "Ulm Wohnpark Friedrichsau"
+      },
+      {
+       "name": "Ulm Donaustadion"
+      },
+      {
+       "name": "Ulm Staufenring"
+      },
+      {
+       "name": "Ulm Willy-Brandt-Platz"
+      },
+      {
+       "name": "Ulm Justizgebäude"
+      },
+      {
+       "name": "Ulm Theater"
+      }
+     ]
+    },
+    {
+     "origin": {
+      "id": "de:08421:1010:0:A",
+      "type": "platform",
+      "name": "Ulm Theater",
+      "disassembledName": "Bstg. B",
+      "coord": [
+       48.400832,
+       9.986724
+      ],
+      "departureTimePlanned": "2026-11-15T13:47:00Z",
+      "departureTimeEstimated": "2026-11-15T13:47:00Z",
+      "parent": {
+       "id": "de:08421:1010",
+       "type": "stop",
+       "name": "Ulm Theater",
+       "disassembledName": "Theater",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "B",
+       "platformName": "Bstg. B"
+      }
+     },
+     "destination": {
+      "id": "de:08421:1240:1:F",
+      "type": "platform",
+      "name": "Ulm Universität Süd",
+      "disassembledName": "Bstg. F",
+      "coord": [
+       48.422149,
+       9.956927
+      ],
+      "arrivalTimePlanned": "2026-11-15T13:54:00Z",
+      "arrivalTimeEstimated": "2026-11-15T13:54:00Z",
+      "parent": {
+       "id": "de:08421:1240",
+       "type": "stop",
+       "name": "Ulm Universität Süd",
+       "disassembledName": "Universität Süd",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "F",
+       "platformName": "Bstg. F"
+      }
+     },
+     "transportation": {
+      "id": "din:87002: :H:j26",
+      "name": "Straßenbahn Linie 2",
+      "number": "2",
+      "disassembledName": "2",
+      "product": {
+       "id": 5,
+       "class": 4,
+       "name": "Straßenbahn Linie",
+       "iconId": 4
+      },
+      "operator": {
+       "id": "66",
+       "name": "SWU"
+      },
+      "destination": {
+       "name": "Science Park II"
+      }
+     },
+     "duration": 420,
+     "isRealtimeControlled": true,
+     "coords": [
+      [
+       48.400848,
+       9.98672
+      ],
+      [
+       48.400927,
+       9.987011
+      ],
+      [
+       48.400949,
+       9.987081
+      ]
+     ],
+     "stopSequence": [
+      {
+       "name": "Ulm Theater"
+      },
+      {
+       "name": "Ulm Stadtwerke"
+      },
+      {
+       "name": "Ulm Lehrer Tal"
+      },
+      {
+       "name": "Ulm Multscherschule"
+      },
+      {
+       "name": "Ulm Eselsberg Hasenkopf"
+      },
+      {
+       "name": "Ulm Universität Süd"
+      }
+     ]
+    },
+    {
+     "origin": {
+      "id": "de:08421:1240:1:F",
+      "type": "platform",
+      "name": "Ulm Universität Süd",
+      "disassembledName": "Bstg. F",
+      "coord": [
+       48.422149,
+       9.956927
+      ],
+      "departureTimePlanned": "2026-11-15T13:54:00Z",
+      "departureTimeEstimated": "2026-11-15T13:54:00Z",
+      "parent": {
+       "id": "de:08421:1240",
+       "type": "stop",
+       "name": "Ulm Universität Süd",
+       "disassembledName": "Universität Süd",
+       "parent": {
+        "id": "placeID:8421000:20",
+        "type": "locality",
+        "name": "Ulm"
+       }
+      },
+      "properties": {
+       "platform": "F",
+       "platformName": "Bstg. F"
+      }
+     },
+     "destination": {
+      "id": "coord:1107950:5822806:MRCV:Eselsberg, Albert-Einstein-Allee 25:0",
+      "type": "address",
+      "name": "Eselsberg, Albert-Einstein-Allee 25",
+      "disassembledName": "Albert-Einstein-Allee 25",
+      "coord": [
+       48.42107,
+       9.952884
+      ],
+      "arrivalTimePlanned": "2026-11-15T14:00:00Z",
+      "arrivalTimeEstimated": "2026-11-15T14:00:00Z",
+      "parent": {
+       "id": "placeID:8421000:-1",
+       "type": "locality",
+       "name": "Eselsberg"
+      },
+      "properties": {}
+     },
+     "transportation": {
+      "product": {
+       "class": 100,
+       "name": "footpath",
+       "iconId": 100
+      }
+     },
+     "duration": 360,
+     "distance": 390,
+     "coords": [
+      [
+       48.422131,
+       9.956936
+      ],
+      [
+       48.421762,
+       9.956442
+      ],
+      [
+       48.421732,
+       9.956397
+      ],
+      [
+       48.421744,
+       9.95637
+      ],
+      [
+       48.421786,
+       9.956307
+      ],
+      [
+       48.421815,
+       9.956253
+      ],
+      [
+       48.421774,
+       9.956199
+      ],
+      [
+       48.421744,
+       9.956154
+      ],
+      [
+       48.421696,
+       9.9561
+      ],
+      [
+       48.421637,
+       9.956028
+      ],
+      [
+       48.421595,
+       9.955992
+      ],
+      [
+       48.421607,
+       9.955938
+      ],
+      [
+       48.421619,
+       9.955912
+      ],
+      [
+       48.421631,
+       9.955876
+      ],
+      [
+       48.421643,
+       9.955849
+      ],
+      [
+       48.421625,
+       9.955822
+      ],
+      [
+       48.421571,
+       9.95575
+      ],
+      [
+       48.421428,
+       9.955579
+      ],
+      [
+       48.421374,
+       9.955462
+      ],
+      [
+       48.42135,
+       9.955355
+      ],
+      [
+       48.421339,
+       9.955238
+      ],
+      [
+       48.421368,
+       9.955049
+      ],
+      [
+       48.421392,
+       9.954968
+      ],
+      [
+       48.421344,
+       9.954852
+      ],
+      [
+       48.421315,
+       9.954753
+      ],
+      [
+       48.421237,
+       9.954519
+      ],
+      [
+       48.421154,
+       9.954321
+      ],
+      [
+       48.42104,
+       9.95398
+      ],
+      [
+       48.420903,
+       9.953854
+      ],
+      [
+       48.42079,
+       9.953549
+      ],
+      [
+       48.420802,
+       9.953432
+      ],
+      [
+       48.420927,
+       9.953315
+      ],
+      [
+       48.421017,
+       9.953181
+      ],
+      [
+       48.421064,
+       9.953019
+      ],
+      [
+       48.42107,
+       9.95292
+      ],
+      [
+       48.42107,
+       9.952884
+      ]
+     ],
+     "stopSequence": [
+      {
+       "name": "Ulm Universität Süd"
+      }
+     ]
+    }
+   ],
+   "fare": {
+    "tickets": [
+     {
+      "name": "Einzelfahrschein Erw Handy (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 3.05,
+      "currency": "EUR"
+     },
+     {
+      "name": "Einzelfahrschein Erwachsene (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 3.3,
+      "currency": "EUR"
+     },
+     {
+      "name": "Einzelfahrschein Kind bar (Stadttarif Ulm/Neu-Ulm)",
+      "person": "CHILD",
+      "priceBrutto": 2.0,
+      "currency": "EUR"
+     },
+     {
+      "name": "Tageskarte Gruppe (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 11.1,
+      "currency": "EUR"
+     },
+     {
+      "name": "Tageskarte Single (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 6.1,
+      "currency": "EUR"
+     },
+     {
+      "name": "Wochenkarte Erwachsene (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 30.0,
+      "currency": "EUR"
+     },
+     {
+      "name": "Monatskarte Erwachsene (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 87.9,
+      "currency": "EUR"
+     },
+     {
+      "name": "Schülermonatskarte (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 65.9,
+      "currency": "EUR"
+     },
+     {
+      "name": "Jahreskarte (Einmalzahler) (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 886.8,
+      "currency": "EUR"
+     },
+     {
+      "name": "Jahreskarte (Monatsbetrag) (Stadttarif Ulm/Neu-Ulm)",
+      "person": "ADULT",
+      "priceBrutto": 73.9,
+      "currency": "EUR"
+     },
+     {
+      "name": "Bayerisches Ermäßigungsticket",
+      "person": "ADULT",
+      "priceBrutto": 43.0,
+      "currency": "EUR"
+     },
+     {
+      "name": "D-TICKET JugendBW",
+      "person": "ADULT",
+      "priceBrutto": 45.0,
+      "currency": "EUR"
+     },
+     {
+      "name": "Deutschland-Ticket",
+      "person": "ADULT",
+      "priceBrutto": 63.0,
+      "currency": "EUR"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,40 @@
+{
+ "version": "11.0.6.72",
+ "locations": [
+  {
+   "id": "de:08421:1354",
+   "isGlobalId": true,
+   "name": "Ulm, Blautal-Center",
+   "disassembledName": "Blautal-Center",
+   "coord": [
+    48.400576,
+    9.961418
+   ],
+   "type": "stop",
+   "matchQuality": 1000,
+   "isBest": true,
+   "parent": {
+    "id": "placeID:8421000:20",
+    "name": "Ulm",
+    "type": "locality"
+   }
+  },
+  {
+   "id": "poiID:1083224:8421000:-1:Blautal-Center:Ulm:Blautal-Center:ANY:POI:1108983:5826305:MRCV:DIN",
+   "name": "Ulm, Blautal-Center",
+   "disassembledName": "Blautal-Center",
+   "coord": [
+    48.400206,
+    9.962164
+   ],
+   "type": "poi",
+   "matchQuality": 1000,
+   "isBest": false,
+   "parent": {
+    "id": "placeID:8421000:-1",
+    "name": "Ulm",
+    "type": "locality"
+   }
+  }
+ ]
+}

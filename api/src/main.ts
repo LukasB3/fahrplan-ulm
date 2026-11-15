@@ -1,11 +1,13 @@
 import { loadConfig } from './config.js'
 import { departureBoard } from './departures.js'
 import { buildServer } from './server.js'
+import { tripPlanner } from './trips.js'
 import { getJson } from './upstream.js'
 
 const cfg = loadConfig()
 const departures = departureBoard({ getJson, efaBase: cfg.EFA_BASE, log: (problem) => console.error('DING departures failed', problem) })
-const app = await buildServer({ cfg, departures })
+const planner = tripPlanner({ getJson, efaBase: cfg.EFA_BASE })
+const app = await buildServer({ cfg, departures, planner })
 
 // SWU renumbers stops rarely; once a day is plenty. A failure keeps the last list.
 const refreshStops = () => departures.refreshStops().catch((problem: unknown) => console.error('loading the stop list failed', problem))
