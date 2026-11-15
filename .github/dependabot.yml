@@ -4,6 +4,10 @@ updates:
     directory: /web
     schedule:
       interval: weekly
+    # The types follow the Node version that runs (22), not the newest one.
+    ignore:
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     groups:
       web:
         patterns: ['*']
@@ -11,6 +15,9 @@ updates:
     directory: /api
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     groups:
       api:
         patterns: ['*']
