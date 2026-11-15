@@ -20,10 +20,13 @@ const departure = z.object({
 // SWU answers errors with status 200 and says what happened in `State`.
 const passage = z.object({ StopPassage: z.object({ State: z.string(), DepartureData: z.array(z.unknown()).optional() }) })
 
-const stopList = z.object({
-  StopAttributes: z.object({
-    StopData: z.array(z.object({ StopNumber: z.number().int(), StopPoints: z.array(z.object({ StopPointCode: z.string().nullish() })).nullish() })),
-  }),
+const stopList = z.object({ StopAttributes: z.object({ StopData: z.array(z.unknown()) }) })
+
+const listedStop = z.object({
+  StopNumber: z.number().int(),
+  StopName: z.string().min(1),
+  StopCoordinates: z.object({ Latitude: z.number(), Longitude: z.number() }),
+  StopPoints: z.array(z.object({ StopPointCode: z.string().nullish() })).nullish(),
 })
 
 const iso = (time: string) => new Date(time).toISOString()
@@ -54,14 +57,18 @@ export const swuDepartures = async (getJson: GetJson, stop: number, limit: numbe
 // "de:08421:1008:1:2" is a platform; its first three parts are the stop at DING.
 const dhidOf = (platform: string) => /^(de:\d+:\d+)(?::|$)/.exec(platform)?.[1]
 
-// SWU's stop number → the same stop's id at DING. The two numbers differ for
-// some stops, so the id is read from the platforms and never built from the number.
-export const swuStopIds = async (getJson: GetJson): Promise<Map<number, string>> => {
-  const { StopAttributes } = stopList.parse(await getJson(`${BASE}/stop/attributes/BaseData`))
-  const ids = new Map<number, string>()
-  for (const stop of StopAttributes.StopData) {
+export type SwuStop = { number: number; name: string; dhid: string; lat: number; lon: number }
+
+// The stops passengers use, each with its id at DING. SWU's and DING's stop
+// numbers differ for some stops, so the id is read from the platforms and
+// never built from the number. Stops without such an id are left out.
+export const swuStops = async (getJson: GetJson): Promise<SwuStop[]> => {
+  const { StopAttributes } = stopList.parse(await getJson(`${BASE}/stop/attributes/BaseData?ContentScope=extended`))
+  return StopAttributes.StopData.flatMap((item): SwuStop[] => {
+    const parsed = listedStop.safeParse(item)
+    if (!parsed.success) return []
+    const stop = parsed.data
     const dhid = (stop.StopPoints ?? []).map((point) => dhidOf(point.StopPointCode ?? '')).find((id) => id !== undefined)
-    if (dhid) ids.set(stop.StopNumber, dhid)
-  }
-  return ids
+    return dhid ? [{ number: stop.StopNumber, name: stop.StopName, dhid, lat: stop.StopCoordinates.Latitude, lon: stop.StopCoordinates.Longitude }] : []
+  })
 }

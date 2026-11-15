@@ -21,13 +21,13 @@ describe('the clock in Ulm', () => {
 
 describe('place search, as recorded', () => {
   it('finds a house address and leaves out the same street in another town far away', async () => {
-    const places = await efaPlaces(answering(fixture('efa-places-address')), 'https://efa.example', 'Frauenstraße 20')
+    const places = (await efaPlaces(answering(fixture('efa-places-address')), 'https://efa.example', 'Frauenstraße 20')).map((match) => match.place)
     expect(places[0]).toEqual({ kind: 'address', stop: null, name: 'Frauenstraße 20', town: 'Ulm', lat: 48.398554, lon: 9.996488 })
     expect(places.map((place) => place.town)).toEqual(['Ulm', 'Vöhringen (Kreis Neu-Ulm)', 'Ulm', 'Ulm'])
   })
 
   it('puts the stop before the shop of the same name and keeps its id', async () => {
-    const places = await efaPlaces(answering(fixture('efa-places-stop')), 'https://efa.example', 'Blautal-Center')
+    const places = (await efaPlaces(answering(fixture('efa-places-stop')), 'https://efa.example', 'Blautal-Center')).map((match) => match.place)
     expect(places.map((place) => [place.kind, place.stop])).toEqual([
       ['stop', 'de:08421:1354'],
       ['poi', null],

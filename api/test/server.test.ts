@@ -1,16 +1,16 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import type { Asker } from '../src/ask.js'
 import { loadConfig } from '../src/config.js'
 import type { DepartureBoard } from '../src/departures.js'
 import { buildServer } from '../src/server.js'
 import type { TripPlanner } from '../src/trips.js'
-import type { Departures, Place, TripRequest, Trips } from '../src/types.js'
+import type { AskRequest, AskResult, Departures, Place, TripRequest, Trips } from '../src/types.js'
 import { UnknownStop } from '../src/upstream.js'
 
 const cfg = loadConfig({ WEB_ORIGIN: 'https://fahrplan-ulm.de/' })
 const board: Departures = { now: '2026-11-15T12:00:00.000Z', stale: false, departures: [] }
 const asked: [number, number][] = []
 const departures: DepartureBoard = {
-  refreshStops: () => Promise.resolve(),
   board: (stop, limit) => {
     asked.push([stop, limit])
     if (stop === 404) return Promise.reject(new UnknownStop('no such stop'))
@@ -23,16 +23,22 @@ const home: Place = { kind: 'address', stop: null, name: 'Frauenstraße 20', tow
 const trips: Trips = { now: '2026-11-15T12:00:00.000Z', journeys: [], note: 'ok' }
 const planned: TripRequest[] = []
 const planner: TripPlanner = {
-  places: (query) => (query === 'down' ? Promise.reject(new Error('DING is down')) : Promise.resolve([hbf])),
+  matches: (query) => (query === 'down' ? Promise.reject(new Error('DING is down')) : Promise.resolve([{ place: hbf, quality: 1000 }])),
   trips: (request) => {
     planned.push(request)
     return request.from.name === 'down' ? Promise.reject(new Error('DING is down')) : Promise.resolve(trips)
   },
 }
+const understood: AskResult = { status: 'ok', from: null, to: hbf, time: { mode: 'depart', at: null }, timeAssumed: false, needs: [] }
+const sentences: [AskRequest, string][] = []
+const ask: Asker = (request, visitor) => {
+  sentences.push([request, visitor])
+  return Promise.resolve(understood)
+}
 let app: Awaited<ReturnType<typeof buildServer>>
 
 beforeAll(async () => {
-  app = await buildServer({ cfg, departures, planner, logTo: { write: () => {} } })
+  app = await buildServer({ cfg, departures, planner, ask, logTo: { write: () => {} } })
 })
 afterAll(() => app.close())
 
@@ -122,5 +128,27 @@ describe('trips', () => {
   it('says so when the planner cannot be reached', async () => {
     const res = await post({ from: { ...home, name: 'down' }, to: hbf, time: { mode: 'depart', at: null } })
     expect(res.statusCode).toBe(502)
+  })
+})
+
+describe('a request in plain words', () => {
+  const post = (payload: unknown, remoteAddress?: string) => app.inject({ method: 'POST', url: '/api/ask', payload: payload as object, remoteAddress })
+
+  it('is passed on with the visitor it came from', async () => {
+    const request: AskRequest = { text: 'in 30 Minuten zum Hauptbahnhof', position: null, saved: { home, work: null } }
+    const res = await post(request, '2001:db8:1:2:3:4:5:6')
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toEqual(understood)
+    // Every address of one IPv6 household counts as one visitor.
+    expect(sentences.at(-1)).toEqual([request, '2001:db8:1:2'])
+  })
+
+  it.each([
+    ['nothing', {}],
+    ['an empty sentence', { text: '  ', position: null, saved: { home: null, work: null } }],
+    ['a novel', { text: 'x'.repeat(301), position: null, saved: { home: null, work: null } }],
+    ['a position on another continent', { text: 'zum Bahnhof', position: { lat: 40.7, lon: -74 }, saved: { home: null, work: null } }],
+  ])('turns %s away', async (_, payload) => {
+    expect((await post(payload)).statusCode).toBe(400)
   })
 })

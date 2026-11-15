@@ -90,4 +90,39 @@ export type Trips = {
   note: 'ok' | 'too_late'
 }
 
+// A request in plain words: "in 30 Minuten zum Hauptbahnhof".
+export type AskRequest = {
+  text: string
+  // Where the phone is, if the person has allowed that before. Never sent to the language model.
+  position: { lat: number; lon: number } | null
+  // The person's own places, so "von zuhause" can be filled in. Never sent to the language model.
+  saved: { home: Place | null; work: Place | null }
+}
+
+// Something the sentence left open, for the person to settle.
+export type AskNeed = {
+  slot: 'from' | 'to'
+  // 'position': "here" was meant but the phone's position is not known.
+  // 'home' / 'work': that place is not saved yet. 'unknown': nothing by that name.
+  // 'ambiguous': several places by that name. 'missing': no destination was said.
+  why: 'position' | 'home' | 'work' | 'unknown' | 'ambiguous' | 'missing'
+  // The place as the person said it.
+  said: string | null
+  candidates: Place[]
+}
+
+export type AskResult =
+  | {
+      status: 'ok'
+      from: Place | null
+      to: Place | null
+      time: TripRequest['time']
+      // True when the sentence gave a time without saying whether to leave or to arrive then.
+      timeAssumed: boolean
+      needs: AskNeed[]
+    }
+  // 'other': not a request for a journey. 'limit': this visitor has used up the day.
+  // 'unavailable': the language model is switched off, over budget or down; the form still works.
+  | { status: 'other' | 'limit' | 'unavailable' }
+
 export type ApiError = { error: string }

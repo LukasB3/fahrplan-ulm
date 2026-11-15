@@ -42,7 +42,7 @@ export const tripPlanner = ({ getJson, efaBase }: Deps) => {
   const places = cached((query) => efaPlaces(getJson, efaBase, query), { freshMs: 24 * 60 * MINUTE, staleMs: 7 * 24 * 60 * MINUTE })
 
   return {
-    places: async (query: string): Promise<Place[]> => (await places(query.trim().toLowerCase().replace(/\s+/g, ' '))).value,
+    matches: async (query: string) => (await places(query.trim().toLowerCase().replace(/\s+/g, ' '))).value,
 
     trips: async (request: TripRequest, now = Date.now()): Promise<Trips> => {
       const at = request.time.at ? Date.parse(request.time.at) : now
