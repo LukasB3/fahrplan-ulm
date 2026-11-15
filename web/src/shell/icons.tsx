@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-export type IconName = 'route' | 'departures' | 'map' | 'alerts' | 'info' | 'chevron' | 'mic' | 'location'
+export type IconName = 'route' | 'departures' | 'map' | 'alerts' | 'info' | 'chevron' | 'back' | 'mic' | 'location' | 'search' | 'star' | 'clear'
 
 // Closed shapes get a soft fill when the icon is active, as in a selected tab.
 const shapes: Record<IconName, (fill: string) => ReactNode> = {
@@ -36,6 +36,20 @@ const shapes: Record<IconName, (fill: string) => ReactNode> = {
     </>
   ),
   chevron: () => <path d="m9 5 7 7-7 7" />,
+  back: () => <path d="m15 5-7 7 7 7" />,
+  search: () => (
+    <>
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="m15.5 15.5 5 5" />
+    </>
+  ),
+  star: (fill) => <path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8L3.5 9.7l5.9-.8L12 3.5Z" fill={fill} />,
+  clear: () => (
+    <>
+      <circle cx="12" cy="12" r="9" fill="currentColor" stroke="none" />
+      <path d="m9 9 6 6m0-6-6 6" stroke="var(--surface)" />
+    </>
+  ),
   mic: (fill) => (
     <>
       <rect x="9" y="3" width="6" height="11" rx="3" fill={fill} />
@@ -59,7 +73,7 @@ export function Icon({ name, active = false, className }: { name: IconName; acti
       aria-hidden
       className={className}
     >
-      {shapes[name](active ? 'color-mix(in srgb, currentColor 18%, transparent)' : 'none')}
+      {shapes[name](active ? (name === 'star' ? 'currentColor' : 'color-mix(in srgb, currentColor 18%, transparent)') : 'none')}
     </svg>
   )
 }

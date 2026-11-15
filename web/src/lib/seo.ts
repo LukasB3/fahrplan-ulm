@@ -3,9 +3,6 @@ import { t, type Locale } from './i18n'
 
 export const SITE_ORIGIN = 'https://fahrplan-ulm.de'
 
-// The site is under construction: nothing is offered to search engines yet.
-const INDEXABLE = false
-
 export const siteMetadata = (locale: Locale): Metadata => {
   const { site } = t(locale)
   return {
@@ -15,7 +12,6 @@ export const siteMetadata = (locale: Locale): Metadata => {
     applicationName: site.name,
     appleWebApp: { capable: true, title: site.name, statusBarStyle: 'default' },
     formatDetection: { telephone: false },
-    robots: INDEXABLE ? undefined : { index: false, follow: false },
   }
 }
 
@@ -30,4 +26,9 @@ export const siteViewport: Viewport = {
   ],
 }
 
-export const robotsRules = INDEXABLE ? { userAgent: '*', allow: '/' } : { userAgent: '*', disallow: '/' }
+// For pages that exist but have nothing for a searcher yet.
+export const notIndexed = { index: false, follow: true }
+
+// A page's own metadata: every page names its one address, so copies under
+// other addresses (www, query strings) count for it.
+export const pageMetadata = (path: string, title?: Metadata['title'], description?: string): Metadata => ({ title, description, alternates: { canonical: path } })

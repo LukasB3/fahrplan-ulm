@@ -1,23 +1,72 @@
 import Link from 'next/link'
+import { StopRow } from '@/features/departures/StopRow'
+import { StopSearch } from '@/features/departures/StopSearch'
+import { busiestStops, lines, lineStyles, stops } from '@/lib/data'
 import { t, type Locale } from '@/lib/i18n'
-import { href } from '@/lib/routes'
+import { href, lineHref } from '@/lib/routes'
+import { SITE_ORIGIN } from '@/lib/seo'
 import { ComingSoon } from '@/shell/ComingSoon'
 import { Icon } from '@/shell/icons'
+import { JsonLd } from '@/shell/JsonLd'
+import { LineBadge } from '@/shell/LineBadge'
 import { ScreenHeader } from '@/shell/ScreenHeader'
+import { groupHeading } from '@/shell/styles'
+import { listed } from './StopScreen'
+
+const POPULAR = 8
+
+function MoreLink({ to, label }: { to: string; label: string }) {
+  return (
+    <li className="border-t border-separator first:border-t-0">
+      <Link href={to} className="pressable flex min-h-11 items-center justify-between px-4 py-2.5">
+        {label}
+        <Icon name="chevron" className="size-4 text-label-3" />
+      </Link>
+    </li>
+  )
+}
 
 export function RouteScreen({ locale }: { locale: Locale }) {
-  const { route, lab } = t(locale)
+  const { route, lab, site, departures } = t(locale)
   return (
     <>
       <ScreenHeader locale={locale} title={route.title} />
-      <main className="space-y-4 px-4">
-        <p className="text-label-2">{route.lead}</p>
-        <ComingSoon icon="route" title={route.soonTitle} text={route.soonText} />
-        <Link href={href(locale, 'lab')} className="pressable flex min-h-11 items-center justify-between rounded-card bg-surface px-4 py-3">
-          {lab.link}
-          <Icon name="chevron" className="size-4 text-label-3" />
-        </Link>
+      <main className="space-y-7 px-4">
+        <div className="space-y-4">
+          <p className="-mt-2 text-label-2">{route.lead}</p>
+          <ComingSoon icon="route" title={route.soonTitle} text={route.soonText} />
+        </div>
+
+        <section>
+          <h2 className={groupHeading}>{route.popularStops}</h2>
+          <ul className="overflow-hidden rounded-card bg-surface">
+            {busiestStops(POPULAR).map((stop) => (
+              <StopRow key={stop.code} stop={listed(locale, stop)} lineStyles={lineStyles} />
+            ))}
+            <MoreLink to={href(locale, 'stops')} label={departures.allStops} />
+          </ul>
+        </section>
+
+        <section>
+          <h2 className={groupHeading}>{route.lines}</h2>
+          <div className="rounded-card bg-surface p-4">
+            <ul className="flex flex-wrap gap-x-2">
+              {lines.map((line) => (
+                <li key={line.id}>
+                  <Link href={lineHref(locale, line.id)} prefetch={false} className="pressable inline-flex py-1.5">
+                    <LineBadge line={line.id} style={lineStyles[line.id]} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <ul className="overflow-hidden rounded-card bg-surface">
+          <MoreLink to={href(locale, 'lab')} label={lab.link} />
+        </ul>
       </main>
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebSite', name: site.name, url: SITE_ORIGIN, inLanguage: locale, description: site.description }} />
     </>
   )
 }
@@ -27,8 +76,28 @@ export function DeparturesScreen({ locale }: { locale: Locale }) {
   return (
     <>
       <ScreenHeader locale={locale} title={departures.title} />
-      <main className="px-4">
-        <ComingSoon icon="departures" title={departures.soonTitle} text={departures.soonText} />
+      <main className="space-y-6 px-4">
+        <StopSearch
+          stops={busiestStops(stops.length).map((stop) => listed(locale, stop))}
+          lineStyles={lineStyles}
+          labels={{
+            searchLabel: departures.searchLabel,
+            searchPlaceholder: departures.searchPlaceholder,
+            clear: departures.clear,
+            noMatch: departures.noMatch,
+            favourites: departures.favourites,
+            nearby: departures.nearby,
+            nearbyStart: departures.nearbyStart,
+            nearbyFailed: departures.nearbyFailed,
+            nearbyNone: departures.nearbyNone,
+            popular: departures.popular,
+            metres: 'm',
+          }}
+        />
+        <ul className="overflow-hidden rounded-card bg-surface">
+          <MoreLink to={href(locale, 'stops')} label={departures.allStops} />
+          <MoreLink to={href(locale, 'lines')} label={departures.allLines} />
+        </ul>
       </main>
     </>
   )
