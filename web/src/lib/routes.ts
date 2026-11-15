@@ -20,5 +20,6 @@ export const href = (locale: Locale, route: Exclude<RouteName, 'stop' | 'line'>)
 export const stopHref = (locale: Locale, slug: string) => `${paths.stop[locale]}/${slug}`
 export const lineHref = (locale: Locale, id: string) => `${paths.line[locale]}/${id.toLowerCase()}`
 
-// The pages that belong to the departures tab without living under its address.
-export const departuresSection = (locale: Locale) => [paths.stops[locale], paths.stop[locale], paths.lines[locale], paths.line[locale]]
+// The pages that belong to a tab without living under its address: lines to the route planner, stops to the departures.
+export const routeSection = (locale: Locale) => [paths.lines[locale], paths.line[locale]]
+export const departuresSection = (locale: Locale) => [paths.stops[locale], paths.stop[locale]]

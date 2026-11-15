@@ -20,7 +20,7 @@ const NEARBY = 4
 export const listed = (locale: Locale, stop: Stop) => ({ code: stop.code, href: stopHref(locale, stop.slug), name: stop.name, town: stop.town === 'Ulm' ? null : stop.town, lines: stop.lines, lat: stop.lat, lon: stop.lon })
 
 export async function StopScreen({ locale, stop }: { locale: Locale; stop: Stop }) {
-  const { stop: copy, board, site, hubs, alerts } = t(locale)
+  const { stop: copy, board, site, hubs, alerts, tabs } = t(locale)
   const tables = await timetableOf(stop)
   const validUntil = new Date(meta.validUntil).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
   const url = `${SITE_ORIGIN}${stopHref(locale, stop.slug)}`
@@ -30,7 +30,7 @@ export async function StopScreen({ locale, stop }: { locale: Locale; stop: Stop 
       <ScreenHeader
         locale={locale}
         title={stop.name}
-        back={{ href: href(locale, 'departures'), label: copy.back }}
+        back={{ href: href(locale, 'departures'), label: tabs.departures }}
         actions={<FavouriteButton stop={{ code: stop.code, dhid: stop.dhid, lines: stop.lines }} labels={{ add: copy.favourite, remove: copy.unfavourite }} />}
       />
       <main className="space-y-7 px-4">

@@ -14,12 +14,12 @@ import { groupHeading } from '@/shell/styles'
 const DAY_ORDER: DayType[] = ['mofr', 'moth', 'fr', 'sa', 'su']
 
 export function LineScreen({ locale, line }: { locale: Locale; line: Line }) {
-  const { line: copy, stop: stopCopy, site, hubs, alerts } = t(locale)
+  const { line: copy, stop: stopCopy, site, hubs, alerts, tabs } = t(locale)
   const url = `${SITE_ORIGIN}${lineHref(locale, line.id)}`
 
   return (
     <>
-      <ScreenHeader locale={locale} title={copy.heading(line.id)} back={{ href: href(locale, 'lines'), label: copy.back }} />
+      <ScreenHeader locale={locale} title={copy.heading(line.id)} back={{ href: href(locale, 'route'), label: tabs.route }} />
       <main className="space-y-7 px-4">
         <p className="-mt-2 flex items-center gap-2 text-label-2">
           <LineBadge line={line.id} style={lineStyles[line.id]} />

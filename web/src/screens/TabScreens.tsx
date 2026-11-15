@@ -14,6 +14,7 @@ import { InfoButton } from '@/shell/InfoButton'
 import { JsonLd } from '@/shell/JsonLd'
 import { LineBadge } from '@/shell/LineBadge'
 import { ScreenHeader } from '@/shell/ScreenHeader'
+import { Visit } from '@/shell/Visit'
 import { groupHeading } from '@/shell/styles'
 import { listed } from './StopScreen'
 
@@ -27,10 +28,10 @@ function MoreLink({ to, label, className }: { to: string; label: string; classNa
 }
 
 export function RouteScreen({ locale }: { locale: Locale }) {
-  const { route, site, planner } = t(locale)
+  const { route, site, planner, tabs } = t(locale)
   return (
     <>
-      <ScreenHeader locale={locale} title={route.title} />
+      <ScreenHeader locale={locale} title={route.title} root crumb={tabs.route} />
       <main className="space-y-7 px-4">
         <Planner stops={busiestStops(stops.length).map((stop) => ({ kind: 'stop', stop: stop.dhid, name: stop.name, town: stop.town, lat: stop.lat, lon: stop.lon }))} lineStyles={lineStyles} labels={planner} privacyHref={href(locale, 'privacy')} />
 
@@ -62,7 +63,7 @@ export function DeparturesScreen({ locale }: { locale: Locale }) {
   const { departures } = t(locale)
   return (
     <>
-      <ScreenHeader locale={locale} title={departures.title} />
+      <ScreenHeader locale={locale} title={departures.title} root />
       <main className="space-y-6 px-4">
         <StopSearch
           stops={busiestStops(stops.length).map((stop) => listed(locale, stop))}
@@ -88,11 +89,12 @@ export function DeparturesScreen({ locale }: { locale: Locale }) {
 }
 
 export function MapScreen({ locale }: { locale: Locale }) {
-  const { map, board } = t(locale)
+  const { map, board, tabs } = t(locale)
   // The map's style, tiles and lettering come from there; the connection can open while the map's code loads.
   preconnect('https://tiles.stadiamaps.com', { crossOrigin: 'anonymous' })
   return (
     <main>
+      <Visit label={tabs.map} root />
       {/* The map is the page; its heading is there for screen readers and search engines. */}
       <h1 className="sr-only">{map.heading}</h1>
       <MapLoader
@@ -113,7 +115,7 @@ export async function AlertsScreen({ locale }: { locale: Locale }) {
   const { alerts, now } = await fetchAlerts()
   return (
     <>
-      <ScreenHeader locale={locale} title={copy.title} />
+      <ScreenHeader locale={locale} title={copy.title} root />
       <main className="space-y-4 px-4">
         <p className="-mt-2 text-label-2">{copy.heading}</p>
         <AlertList

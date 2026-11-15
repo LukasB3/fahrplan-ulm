@@ -14,11 +14,11 @@ import { listed } from './StopScreen'
 const initial = (name: string) => name[0]!.normalize('NFD')[0]!.toUpperCase()
 
 export function StopsHubScreen({ locale }: { locale: Locale }) {
-  const { hubs, stop } = t(locale)
+  const { hubs, tabs } = t(locale)
   const letters = [...new Set(stops.map((entry) => initial(entry.name)))]
   return (
     <>
-      <ScreenHeader locale={locale} title={hubs.stopsHeading} back={{ href: href(locale, 'departures'), label: stop.back }} />
+      <ScreenHeader locale={locale} title={hubs.stopsHeading} crumb={hubs.stopsTitle} back={{ href: href(locale, 'departures'), label: tabs.departures }} />
       <main className="space-y-6 px-4">
         {letters.map((letter) => (
           <section key={letter}>
@@ -41,10 +41,10 @@ export function StopsHubScreen({ locale }: { locale: Locale }) {
 const KINDS: LineKind[] = ['tram', 'bus', 'night']
 
 export function LinesHubScreen({ locale }: { locale: Locale }) {
-  const { hubs, line: copy, stop } = t(locale)
+  const { hubs, line: copy, tabs } = t(locale)
   return (
     <>
-      <ScreenHeader locale={locale} title={hubs.linesHeading} back={{ href: href(locale, 'departures'), label: stop.back }} />
+      <ScreenHeader locale={locale} title={hubs.linesHeading} crumb={hubs.linesTitle} back={{ href: href(locale, 'route'), label: tabs.route }} />
       <main className="space-y-6 px-4">
         {KINDS.map((kind) => (
           <section key={kind}>
