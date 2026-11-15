@@ -52,7 +52,19 @@ export const legalDe = {
       },
       {
         heading: 'Favoriten und gespeicherte Orte',
-        text: 'Haltestellen, die Sie als Favorit merken, Ihre Orte „Zuhause“ und „Arbeit“, die zuletzt gewählten Orte und welche Meldungen Sie schon gesehen haben, werden nur im Speicher Ihres Browsers auf diesem Gerät abgelegt. Das ist nötig, um die von Ihnen gewünschte Funktion bereitzustellen (§ 25 Abs. 2 Nr. 2 TDDDG). Übertragen werden sie nur, wenn Sie sie als Start oder Ziel einer Verbindung wählen. Sie verschwinden, wenn Sie die Websitedaten im Browser löschen.',
+        text: 'Haltestellen, die Sie als Favorit merken, Ihre Orte „Zuhause“ und „Arbeit“, die zuletzt gewählten Orte und welche Meldungen Sie schon gesehen haben, werden im Speicher Ihres Browsers auf diesem Gerät abgelegt. Das ist nötig, um die von Ihnen gewünschte Funktion bereitzustellen (§ 25 Abs. 2 Nr. 2 TDDDG). Ohne Konto werden sie nur übertragen, wenn Sie sie als Start oder Ziel einer Verbindung wählen. Sie verschwinden, wenn Sie die Websitedaten im Browser löschen.',
+      },
+      {
+        heading: 'Konto',
+        text: 'Ein Konto ist freiwillig; alle Funktionen stehen auch ohne Konto zur Verfügung. Wenn Sie sich anmelden, werden Ihre E-Mail-Adresse, Ihre Favoriten und Ihre Orte „Zuhause“ und „Arbeit“ bei der Supabase, Inc. (San Francisco, USA) auf Servern in Frankfurt am Main gespeichert, damit sie auf allen Geräten gleich sind, auf denen Sie angemeldet sind. Ihr Browser verbindet sich dafür direkt mit Supabase; dabei wird Ihre IP-Adresse übermittelt. Die Anmeldung selbst wird im Speicher Ihres Browsers abgelegt, damit Sie angemeldet bleiben. Passwörter gibt es nicht. Rechtsgrundlage ist die Bereitstellung des von Ihnen gewünschten Kontos (Art. 6 Abs. 1 lit. b DSGVO). Sie können Ihr Konto jederzeit in der App löschen; damit wird alles gelöscht, was darin gespeichert ist. Konten, die 90 Tage lang nicht genutzt wurden, werden automatisch gelöscht. Die Favoriten und Orte auf Ihrem Gerät bleiben in beiden Fällen erhalten.',
+      },
+      {
+        heading: 'Anmelde-E-Mail',
+        text: 'Zum Anmelden erhalten Sie eine E-Mail mit einem Code und einem Link. Sie wird in meinem Auftrag von Resend (Plus Five Five, Inc., San Francisco, USA) verschickt, das dafür Ihre E-Mail-Adresse und den Inhalt dieser E-Mail verarbeitet. Andere E-Mails erhalten Sie nicht. Rechtsgrundlage ist die Bereitstellung des von Ihnen gewünschten Kontos (Art. 6 Abs. 1 lit. b DSGVO).',
+      },
+      {
+        heading: 'Schutz vor Missbrauch der Anmeldung',
+        text: 'Bevor eine Anmelde-E-Mail verschickt wird, prüft der Dienst Turnstile der Cloudflare, Inc. (San Francisco, USA), ob die Anfrage von einem Menschen kommt. Er wird erst geladen, wenn Sie im Konto-Fenster in das Feld für die E-Mail-Adresse tippen. Dabei verarbeitet Cloudflare Ihre IP-Adresse und technische Merkmale Ihres Browsers und Geräts; das Ergebnis der Prüfung wird an Supabase übermittelt. Rechtsgrundlage ist mein berechtigtes Interesse, das Verschicken von E-Mails durch Programme zu verhindern (Art. 6 Abs. 1 lit. f DSGVO). Näheres steht in der Datenschutzerklärung von Cloudflare unter cloudflare.com/privacypolicy.',
       },
       {
         heading: 'Spracheingabe',
@@ -60,7 +72,7 @@ export const legalDe = {
       },
       {
         heading: 'Cookies und Tracking',
-        text: 'Diese Seite setzt keine Cookies, nutzt keine Analysewerkzeuge und erstellt keine Nutzerprofile.',
+        text: 'Diese Seite setzt keine Cookies, nutzt keine Analysewerkzeuge und erstellt keine Nutzerprofile. Was sie auf Ihrem Gerät speichert, steht unter „Favoriten und gespeicherte Orte“ und „Konto“.',
       },
       {
         heading: 'E-Mail',

@@ -2,14 +2,14 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import type { Locale } from '@/lib/i18n'
 import { Icon } from './icons'
-import { InfoButton } from './InfoButton'
+import { AccountButton } from '@/features/account/AccountButton'
 
 type Props = {
   locale: Locale
   title: string
   // Where a page below a tab leads back to.
   back?: { href: string; label: string }
-  // Buttons that belong to this page, shown next to the info button.
+  // Buttons that belong to this page, shown next to the account button.
   actions?: ReactNode
 }
 
@@ -33,7 +33,7 @@ export function ScreenHeader({ locale, title, back, actions }: Props) {
         )}
         <div className="relative flex items-center">
           {actions}
-          <InfoButton locale={locale} />
+          <AccountButton locale={locale} />
         </div>
       </header>
       <h1 className="px-4 pb-3 text-[2.125rem] leading-[1.2] font-bold tracking-[-0.022em] [overflow-wrap:anywhere]">{title}</h1>

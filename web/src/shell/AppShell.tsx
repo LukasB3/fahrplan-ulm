@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { t, type Locale } from '@/lib/i18n'
 import { departuresSection, href } from '@/lib/routes'
+import { AccountSync } from '@/features/account/AccountSync'
 import { AlertBadge } from '@/features/alerts/AlertBadge'
 import { TabBar } from './TabBar'
 
@@ -10,6 +11,7 @@ export function AppShell({ locale, children }: { locale: Locale; children: React
     <html lang={locale}>
       <body>
         {children}
+        <AccountSync />
         <TabBar
           label={tabs.label}
           tabs={[
