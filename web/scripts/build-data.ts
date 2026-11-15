@@ -10,7 +10,7 @@ import { strFromU8, unzipSync } from 'fflate'
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { DayType, Grid, Line, LineKind, Meta, Stop, TimetableTable } from '../src/lib/data-types'
+import type { DayType, Grid, Line, LineKind, LineService, Meta, Stop, TimetableTable } from '../src/lib/data-types'
 
 const GTFS_URL = 'https://gtfs.swu.de/daten/SWU.zip'
 const SWU_STOPS_URL = 'https://api.swu.de/mobility/v1/stop/attributes/BaseData'
@@ -93,6 +93,18 @@ const dayOf = (serviceId: string): DayType => {
   return day
 }
 
+// Minutes after midnight as a clock time; trips after midnight count on from 24:00.
+const clock = (minutes: number) => `${String(Math.floor(minutes / 60) % 24).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
+
+// The usual gap between departures: the middle one of all gaps, or nothing for a handful of trips.
+const usualGap = (starts: number[]) => {
+  const gaps = starts
+    .slice(1)
+    .map((start, index) => start - starts[index]!)
+    .sort((a, b) => a - b)
+  return gaps.length >= 3 ? gaps[Math.floor(gaps.length / 2)]! : null
+}
+
 const isoDate = (yyyymmdd: string) => `${yyyymmdd.slice(0, 4)}-${yyyymmdd.slice(4, 6)}-${yyyymmdd.slice(6, 8)}`
 
 const townOf = async (dhid: string): Promise<string> => {
@@ -142,8 +154,27 @@ const build = async () => {
         return count(oneWay.map((trip) => trip.trip_headsign!))
           .filter(([, trips]) => trips >= oneWay.length * REGULAR_SHARE)
           .map(([headsign]) => {
-            const runs = oneWay.filter((trip) => trip.trip_headsign === headsign).map((trip) => (calls.get(trip.trip_id!) ?? []).map((call) => call.station).join(' '))
-            return { headsign, stops: count(runs)[0]![0].split(' ') }
+            const there = oneWay.filter((trip) => trip.trip_headsign === headsign)
+            const runs = there.map((trip) => (calls.get(trip.trip_id!) ?? []).map((call) => call.station).join(' '))
+            // When each trip starts, in minutes after midnight, per day type.
+            const starts = new Map<DayType, number[]>()
+            for (const trip of there) {
+              const first = calls.get(trip.trip_id!)![0]!
+              const day = dayOf(trip.service_id!)
+              starts.set(day, [...(starts.get(day) ?? []), first.hour * 60 + first.minute])
+            }
+            const service = (day: DayType): LineService | undefined => {
+              const times = starts.get(day)?.sort((a, b) => a - b)
+              return times && { first: clock(times[0]!), last: clock(times.at(-1)!), trips: times.length }
+            }
+            const [moth, fr] = [service('moth'), service('fr')]
+            const days = JSON.stringify(moth) === JSON.stringify(fr) ? { mofr: moth, sa: service('sa'), su: service('su') } : { moth, fr, sa: service('sa'), su: service('su') }
+            return {
+              headsign,
+              stops: count(runs)[0]![0].split(' '),
+              days: JSON.parse(JSON.stringify(days)) as Line['directions'][number]['days'],
+              everyMinutes: usualGap((starts.get('moth') ?? []).filter((minutes) => minutes >= 9 * 60 && minutes < 15 * 60)),
+            }
           })
       })
       return {

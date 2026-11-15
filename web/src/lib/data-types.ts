@@ -28,16 +28,29 @@ export type Line = {
   textColor: string
   // The two ends, as in "Söflingen – Böfingen".
   name: string
-  // One entry per destination with a regular service; stops are stop codes in running order.
-  directions: { headsign: string; stops: string[] }[]
+  // One entry per destination with a regular service.
+  directions: {
+    headsign: string
+    // Stop codes in running order.
+    stops: string[]
+    days: Partial<Record<DayType, LineService>>
+    // The usual gap between departures on a weekday around midday.
+    everyMinutes: number | null
+  }[]
 }
+
+export type DayType = 'mofr' | 'moth' | 'fr' | 'sa' | 'su'
+
+// First and last departure at the first stop on one day type, and how many trips run.
+export type LineService = { first: string; last: string; trips: number }
 
 // The departures of one day type, as on the printed timetable: per hour, the minutes.
 // Hours run past 24 for trips after midnight, so they stay in running order.
 export type Grid = [hour: number, minutes: number[]][]
 
-export type DayType = 'mofr' | 'moth' | 'fr' | 'sa' | 'su'
-
 export type TimetableTable = { line: string; headsign: string; days: Partial<Record<DayType, Grid>> }
 
 export type Meta = { feedVersion: string; validFrom: string; validUntil: string }
+
+// What a line's badge is drawn with. Lines of other operators have none.
+export type LineStyle = { color: string; textColor: string; tram: boolean }
