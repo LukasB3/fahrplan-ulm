@@ -166,6 +166,20 @@
   padding: env(safe-area-inset-top) 0.25rem 0;
 }
 
+/* The page's buttons: a row without height right under the bar, which sticks
+   where the bar is. At the top of the page the buttons sit on the large
+   title's line; once the title has scrolled away they sit in the bar. */
+.navbar-actions {
+  position: sticky;
+  top: env(safe-area-inset-top);
+  z-index: 31;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  height: 0;
+  padding-right: 0.25rem;
+}
+
 /* Navigation bar: the large title scrolls away with the page, and the bar's
    material and small title fade in while it leaves. Browsers without
    scroll-driven animations keep a plain translucent bar without the small title. */

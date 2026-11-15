@@ -41,7 +41,7 @@ export function BackLink({ parent, title, backLabel }: Props) {
         {fits(back.label, title) ? back.label : backLabel}
       </Link>
     )
-  if (!parent) return <span />
+  if (!parent) return null
   return (
     <Link href={parent.href} className={style}>
       <Icon name="back" />
