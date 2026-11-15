@@ -31,7 +31,7 @@ systemctl restart fahrplan-ulm
 
 # A Caddyfile that does not validate is not installed; the old one stays.
 if ! cmp --silent Caddyfile /etc/caddy/Caddyfile; then
-  caddy validate --adapter caddyfile --config Caddyfile >/dev/null
+  problems=$(caddy validate --adapter caddyfile --config Caddyfile 2>&1) || { echo "$problems" >&2; exit 1; }
   install -o root -g root -m 644 Caddyfile /etc/caddy/Caddyfile
   systemctl reload caddy || systemctl restart caddy
 fi
