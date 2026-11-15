@@ -180,24 +180,46 @@ function JourneyCard({ journey, now, from, to, open, onToggle, lineStyles, label
   )
 }
 
-type Props = { trips: Trips; skew: number; from: Place; to: Place; onLater: (after: number) => void } & Shared
+// When a journey leaves and arrives, by live data where there is some.
+export const leavesAt = (journey: Journey) => at(journey.legs[0]!.from)
+export const arrivesAt = (journey: Journey) => at(journey.legs.at(-1)!.to)
+export const onFoot = (journey: Journey) => journey.legs.every((leg) => leg.kind === 'walk')
 
-export function Journeys({ trips, skew, from, to, onLater, lineStyles, labels }: Props) {
-  const [open, setOpen] = useState<number | null>(null)
+// The same journey in two answers: same planned times, same lines. Live times change between answers.
+export const sameJourney = (journey: Journey) => `${journey.legs[0]!.from.planned} ${journey.legs.at(-1)!.to.planned} ${journey.legs.map((leg) => (leg.kind === 'ride' ? leg.line : 'walk')).join('>')}`
+
+// What stands at an end of the list: a button for more journeys in that direction, or the word that there are none.
+export type More = { label: string; busy: boolean; onMore: () => void } | { none: string }
+
+function MoreButton({ more, searching }: { more: More | undefined; searching: string }) {
+  if (!more) return null
+  if ('none' in more) return <p className="px-4 py-2 text-center text-[0.9375rem] text-label-2">{more.none}</p>
+  return (
+    <button type="button" disabled={more.busy} onClick={more.onMore} className="pressable mx-auto flex min-h-11 items-center px-4 font-semibold text-tint disabled:text-label-2">
+      {more.busy ? searching : more.label}
+    </button>
+  )
+}
+
+type Props = { journeys: Journey[]; note: Trips['note']; skew: number; from: Place; to: Place; before?: More; after?: More } & Shared
+
+export function Journeys({ journeys, note, skew, from, to, before, after, lineStyles, labels }: Props) {
+  // By the journey, not its place in the list: the list grows at both ends.
+  const [open, setOpen] = useState<string | null>(null)
   const now = Date.now() + skew
-  if (!trips.journeys.length) return <p className="rounded-card bg-surface px-4 py-6 text-center text-label-2">{labels.none}</p>
+  if (!journeys.length) return <p className="rounded-card bg-surface px-4 py-6 text-center text-label-2">{labels.none}</p>
 
   return (
     <div className="space-y-3">
-      {trips.note === 'too_late' && <p className="px-4 text-[0.9375rem] text-late">{labels.tooLate}</p>}
+      {note === 'too_late' && <p className="px-4 text-[0.9375rem] text-late">{labels.tooLate}</p>}
+      <MoreButton more={before} searching={labels.searching} />
       <ol className="space-y-3">
-        {trips.journeys.map((journey, index) => (
-          <JourneyCard key={`${at(journey.legs[0]!.from)} ${index}`} journey={journey} now={now} from={from} to={to} open={open === index} onToggle={() => setOpen(open === index ? null : index)} lineStyles={lineStyles} labels={labels} />
-        ))}
+        {journeys.map((journey) => {
+          const key = sameJourney(journey)
+          return <JourneyCard key={key} journey={journey} now={now} from={from} to={to} open={open === key} onToggle={() => setOpen(open === key ? null : key)} lineStyles={lineStyles} labels={labels} />
+        })}
       </ol>
-      <button type="button" onClick={() => onLater(Math.max(...trips.journeys.map((journey) => at(journey.legs[0]!.from))))} className="pressable mx-auto flex min-h-11 items-center px-4 font-semibold text-tint">
-        {labels.later}
-      </button>
+      <MoreButton more={after} searching={labels.searching} />
     </div>
   )
 }
