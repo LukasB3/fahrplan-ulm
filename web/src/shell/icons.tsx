@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-export type IconName = 'route' | 'departures' | 'map' | 'alerts' | 'info' | 'chevron' | 'back' | 'mic' | 'location' | 'search' | 'star' | 'clear' | 'walk' | 'swap' | 'home' | 'work' | 'pin' | 'recent' | 'stop'
+export type IconName = 'route' | 'departures' | 'map' | 'alerts' | 'info' | 'chevron' | 'back' | 'mic' | 'location' | 'search' | 'star' | 'clear' | 'walk' | 'swap' | 'home' | 'work' | 'pin' | 'recent' | 'stop' | 'send'
 
 // Closed shapes get a soft fill when the icon is active, as in a selected tab.
 const shapes: Record<IconName, (fill: string) => ReactNode> = {
@@ -83,6 +83,7 @@ const shapes: Record<IconName, (fill: string) => ReactNode> = {
       <path d="M9 8v8m6-8v8m-6-4h6" />
     </>
   ),
+  send: () => <path d="M12 19V5m0 0-6 6m6-6 6 6" />,
   recent: () => (
     <>
       <path d="M4 12a8 8 0 1 0 2.6-5.9L4 8.5M4 4.5v4h4" />

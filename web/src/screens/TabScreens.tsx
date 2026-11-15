@@ -35,7 +35,7 @@ export function RouteScreen({ locale }: { locale: Locale }) {
       <main className="space-y-7 px-4">
         <div className="space-y-4">
           <p className="-mt-2 text-label-2">{route.lead}</p>
-          <Planner stops={busiestStops(stops.length).map((stop) => ({ kind: 'stop', stop: stop.dhid, name: stop.name, town: stop.town, lat: stop.lat, lon: stop.lon }))} lineStyles={lineStyles} labels={planner} />
+          <Planner stops={busiestStops(stops.length).map((stop) => ({ kind: 'stop', stop: stop.dhid, name: stop.name, town: stop.town, lat: stop.lat, lon: stop.lon }))} lineStyles={lineStyles} labels={planner} privacyHref={href(locale, 'privacy')} />
         </div>
 
         <section>

@@ -1,18 +1,19 @@
 'use client'
 
-import type { Place, TripRequest, Trips } from '@api/types'
+import type { AskNeed, AskResult, Place, TripRequest, Trips } from '@api/types'
 import { useEffect, useRef, useState } from 'react'
 import { postJson } from '@/lib/api'
 import type { LineStyle } from '@/lib/data-types'
-import { rememberPlace } from '@/lib/store'
+import { rememberPlace, useSavedPlaces } from '@/lib/store'
 import { Icon } from '@/shell/icons'
-import { Journeys, type PlannerLabels } from './Journeys'
+import { AskBar } from './AskBar'
+import { fill, Journeys, type PlannerLabels } from './Journeys'
 import { PlaceSearch } from './PlaceSearch'
 import { setPlanner, usePlanner } from './state'
 
 const REFRESH_MS = 45_000
 
-type Props = { stops: Place[]; lineStyles: Record<string, LineStyle>; labels: PlannerLabels }
+type Props = { stops: Place[]; lineStyles: Record<string, LineStyle>; labels: PlannerLabels; privacyHref: string }
 type Role = 'from' | 'to'
 
 // A moment as the value of a date-and-time field, which works in the phone's own clock.
@@ -21,8 +22,12 @@ const toField = (iso: string) => {
   return new Date(moment.getTime() - moment.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
 }
 
-export function Planner({ stops, lineStyles, labels }: Props) {
+export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
   const { from, to, time } = usePlanner()
+  const saved = useSavedPlaces()
+  // What the last sentence left open, still to be settled, and what to say about it.
+  const [unsettled, setUnsettled] = useState<AskNeed[]>([])
+  const [note, setNote] = useState<string | null>(null)
   const [editing, setEditing] = useState<{ role: Role; query: string; saving: 'home' | 'work' | null }>()
   const [result, setResult] = useState<{ key: string; trips?: Trips; skew: number; failed: boolean }>()
   const input = useRef<HTMLInputElement>(null)
@@ -64,9 +69,48 @@ export function Planner({ stops, lineStyles, labels }: Props) {
     if (editing) input.current?.focus()
   }, [editing?.role, editing?.saving])
 
+  // Settles what a sentence left open, one thing at a time: the position by
+  // asking the phone, everything else by opening the field with what was said.
+  const settle = ([need, ...rest]: AskNeed[]) => {
+    setUnsettled(rest)
+    if (!need) return
+    if (need.why === 'position') {
+      setNote(null)
+      return navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          setPlanner({ [need.slot]: { kind: 'position', stop: null, name: labels.myLocation, town: null, lat: coords.latitude, lon: coords.longitude } })
+          settle(rest)
+        },
+        () => {
+          setNote(labels.askNeedPosition)
+          setEditing({ role: need.slot, query: '', saving: null })
+        },
+        { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
+      )
+    }
+    const saving = need.why === 'home' || need.why === 'work' ? need.why : null
+    setNote(need.why === 'home' ? labels.askNeedHome : need.why === 'work' ? labels.askNeedWork : need.why === 'missing' || !need.said ? labels.askNeedDestination : fill(labels.askNeedPlace, { said: need.said }))
+    setEditing({ role: need.slot, query: saving ? '' : (need.said ?? ''), saving })
+  }
+
+  const understood = (result: AskResult) => {
+    setEditing(undefined)
+    if (result.status !== 'ok') return setNote(result.status === 'other' ? labels.askOther : result.status === 'limit' ? labels.askLimit : labels.askUnavailable)
+    // The server knows the position only as numbers; here it gets its name.
+    const named = (place: Place | null) => (place?.kind === 'position' ? { ...place, name: labels.myLocation } : place)
+    setPlanner({ from: named(result.from), to: named(result.to), time: result.time })
+    setNote(result.timeAssumed ? labels.askAssumed : null)
+    settle(result.needs)
+  }
+
   const pick = (role: Role, place: Place) => {
     rememberPlace(place)
     setPlanner({ [role]: place })
+    setNote(null)
+    if (unsettled.length) {
+      setEditing(undefined)
+      return settle(unsettled)
+    }
     // Straight on to the other field while it is still empty.
     const other: Role = role === 'from' ? 'to' : 'from'
     setEditing((role === 'from' ? to : from) ? undefined : { role: other, query: '', saving: null })
@@ -94,7 +138,15 @@ export function Planner({ stops, lineStyles, labels }: Props) {
               spellCheck={false}
               className="min-w-0 flex-1 bg-transparent py-3 outline-none placeholder:text-label-3 [&::-webkit-search-cancel-button]:hidden"
             />
-            <button type="button" onClick={() => setEditing(undefined)} className="pressable flex min-h-11 shrink-0 items-center px-4 text-tint">
+            <button
+              type="button"
+              onClick={() => {
+                setEditing(undefined)
+                setUnsettled([])
+                setNote(null)
+              }}
+              className="pressable flex min-h-11 shrink-0 items-center px-4 text-tint"
+            >
               {labels.cancel}
             </button>
           </>
@@ -118,6 +170,14 @@ export function Planner({ stops, lineStyles, labels }: Props) {
 
   return (
     <div className="space-y-4">
+      <AskBar
+        // A position already chosen as the start is passed along, so "von hier" needs no second question.
+        context={() => ({ position: from?.kind === 'position' ? { lat: from.lat, lon: from.lon } : null, saved: { home: saved.home ?? null, work: saved.work ?? null } })}
+        onResult={understood}
+        note={note}
+        privacyHref={privacyHref}
+        labels={labels}
+      />
       <div className="relative rounded-card bg-surface">
         {field('from')}
         <div className="mr-14 ml-4 border-t border-separator" />
