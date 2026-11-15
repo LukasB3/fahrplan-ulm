@@ -12,16 +12,14 @@ type Props = {
   // What the server needs besides the sentence: a position that is already known.
   context: () => Pick<AskRequest, 'position'>
   onResult: (result: AskResult) => void
-  // What to tell the person about the last request, if anything.
+  // What to tell the person about the last sentence, if anything.
   note: string | null
-  // Out of sight while a start or destination is being typed.
-  hidden: boolean
   privacyHref: string
   labels: PlannerLabels
 }
 
 // The journey in one sentence, typed or spoken: "in 30 Minuten zum Hauptbahnhof".
-export function AskBar({ context, onResult, note, hidden, privacyHref, labels }: Props) {
+export function AskBar({ context, onResult, note, privacyHref, labels }: Props) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [canSpeak, setCanSpeak] = useState(false)
@@ -67,7 +65,7 @@ export function AskBar({ context, onResult, note, hidden, privacyHref, labels }:
   }
 
   return (
-    <div hidden={hidden} className="space-y-1.5">
+    <div className="space-y-1.5">
       <form
         onSubmit={(event) => {
           event.preventDefault()

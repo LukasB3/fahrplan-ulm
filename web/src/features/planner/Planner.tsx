@@ -24,9 +24,11 @@ const toField = (iso: string) => {
 
 export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
   const { from, to, time } = usePlanner()
-  // What the last sentence left open, still to be settled, and what to say about it.
+  // What the last sentence left open, still to be settled, and what to say about it: `note` belongs
+  // to the form (a question about a field, how a time was taken), `askNote` to the sentence itself.
   const [unsettled, setUnsettled] = useState<AskNeed[]>([])
   const [note, setNote] = useState<string | null>(null)
+  const [askNote, setAskNote] = useState<string | null>(null)
   const [editing, setEditing] = useState<{ role: Role; query: string }>()
   const [result, setResult] = useState<{ key: string; trips?: Trips; skew: number; failed: boolean }>()
   const input = useRef<HTMLInputElement>(null)
@@ -97,7 +99,11 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
 
   const understood = (result: AskResult) => {
     setEditing(undefined)
-    if (result.status !== 'ok') return setNote(result.status === 'other' ? labels.askOther : result.status === 'limit' ? labels.askLimit : labels.askUnavailable)
+    setNote(null)
+    if (result.status !== 'ok') return setAskNote(result.status === 'other' ? labels.askOther : result.status === 'limit' ? labels.askLimit : labels.askUnavailable)
+    setAskNote(null)
+    // The sentence field is the last thing in the planner; what it filled in is at the top.
+    window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
     // The server knows the position only as numbers; here it gets its name.
     const named = (place: Place | null) => (place?.kind === 'position' ? { ...place, name: labels.myLocation } : place)
     setPlanner({ from: named(result.from), to: named(result.to), time: result.time })
@@ -229,20 +235,14 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
               </>
             )}
           </div>
+          {note && (
+            <p role="status" className="px-4 text-[0.9375rem]">
+              {note}
+            </p>
+          )}
           {!key && <p className="px-4 text-label-2">{labels.hint}</p>}
         </>
       )}
-
-      {/* The form comes first; the sentence is the other way to fill it. It stays mounted while a field is edited, so a recording is not cut off. */}
-      <AskBar
-        // A position already chosen as the start is passed along, so "von hier" needs no second question.
-        context={() => ({ position: from?.kind === 'position' ? { lat: from.lat, lon: from.lon } : null })}
-        onResult={understood}
-        note={editing ? null : note}
-        hidden={editing !== undefined}
-        privacyHref={privacyHref}
-        labels={labels}
-      />
 
       {!editing && key && (
         <>
@@ -265,6 +265,16 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
           )}
         </>
       )}
+
+      {/* The form and what it found come first. The sentence, the other way to fill the form, is always the last thing in the planner. */}
+      <AskBar
+        // A position already chosen as the start is passed along, so "von hier" needs no second question.
+        context={() => ({ position: from?.kind === 'position' ? { lat: from.lat, lon: from.lon } : null })}
+        onResult={understood}
+        note={askNote}
+        privacyHref={privacyHref}
+        labels={labels}
+      />
     </div>
   )
 }
