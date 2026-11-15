@@ -1,0 +1,28 @@
+name: Data check
+
+# The pages are built from the snapshot in web/data. This fails, and GitHub
+# mails the owner, when SWU's sources no longer match it or the timetable is
+# about to expire. The fix is `npm run data` in web/ and a pull request.
+on:
+  schedule:
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  data:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run data -- --check

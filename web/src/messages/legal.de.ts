@@ -36,7 +36,11 @@ export const legalDe = {
       },
       {
         heading: 'Standort',
-        text: 'Die Seite fragt Ihren Standort nur ab, wenn Sie das selbst auslösen und im Browser zustimmen. Der Standort wird derzeit nur auf Ihrem Gerät angezeigt und nicht übertragen.',
+        text: 'Die Seite fragt Ihren Standort nur ab, wenn Sie das selbst auslösen und im Browser zustimmen, etwa für die Haltestellen in der Nähe. Die Entfernungen werden auf Ihrem Gerät berechnet; der Standort wird nicht übertragen.',
+      },
+      {
+        heading: 'Favoriten',
+        text: 'Haltestellen, die Sie als Favorit merken, werden nur im Speicher Ihres Browsers auf diesem Gerät abgelegt und nicht übertragen. Das ist nötig, um die von Ihnen gewünschte Funktion bereitzustellen (§ 25 Abs. 2 Nr. 2 TDDDG). Über den Stern entfernen Sie einen Favoriten wieder.',
       },
       {
         heading: 'Spracheingabe',
