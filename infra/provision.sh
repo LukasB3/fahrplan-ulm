@@ -26,6 +26,15 @@ echo "== firewall"
 ufw allow 80/tcp
 ufw allow 443
 
+# Updates install themselves (Ubuntu's default). One that needs a reboot, a new
+# kernel or libc, gets it at night by itself. The server's clock is UTC: 02:30
+# is 03:30 in Ulm in winter and 04:30 in summer.
+echo "== automatic reboots"
+cat > /etc/apt/apt.conf.d/52automatic-reboot <<'CONF'
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "02:30";
+CONF
+
 echo "== service user and directories"
 id -u fahrplan &>/dev/null || useradd --system --home-dir "$data" --shell /usr/sbin/nologin fahrplan
 install -d -o fahrplan -g fahrplan -m 750 "$data"

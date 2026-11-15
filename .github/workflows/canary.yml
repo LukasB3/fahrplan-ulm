@@ -1,8 +1,11 @@
 name: Data check
 
-# The pages are built from the snapshot in web/data. This fails, and GitHub
-# mails the owner, when SWU's sources no longer match it or the timetable is
-# about to expire. The fix is `npm run data` in web/ and a pull request.
+# The pages are built from the snapshot in web/data. Every morning this asks
+# SWU's sources whether the snapshot still matches them. When it does not, it
+# rebuilds the snapshot, checks that the site still builds from it, and opens
+# a pull request with the new data, or brings the open one up to date. It
+# fails, and GitHub mails the owner, when that cannot be done, or when the
+# timetable is about to expire and SWU has not published the next one.
 on:
   schedule:
     - cron: '17 5 * * *'
@@ -11,12 +14,22 @@ on:
 permissions:
   contents: read
 
+concurrency: data-check
+
 jobs:
   data:
     runs-on: ubuntu-latest
+    permissions:
+      # To push the branch with the new data and to open its pull request.
+      contents: write
+      pull-requests: write
     defaults:
       run:
         working-directory: web
+        # With `pipefail`, so a failing check is not hidden by the `tee` after it.
+        shell: bash
+    env:
+      BRANCH: data/refresh
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -25,4 +38,59 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
       - run: npm ci
-      - run: npm run data -- --check
+
+      - name: Does the snapshot match SWU's sources?
+        id: check
+        continue-on-error: true
+        run: npm run data -- --check 2>&1 | tee "$RUNNER_TEMP/check.txt"
+
+      - name: Rebuild the snapshot
+        if: steps.check.outcome == 'failure'
+        run: npm run data
+
+      - name: Open or update the pull request
+        if: steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # The branch this ran on: `main` for the daily run.
+          BASE: ${{ github.ref_name }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          git add -A data
+          if git diff --cached --quiet; then
+            echo "::error::SWU's sources still give the snapshot we have, so there is nothing to update: the timetable is about to expire and the next one is not published yet."
+            exit 1
+          fi
+
+          # A pull request opened by a workflow does not start the usual CI, so the new data is tried here.
+          npm run typecheck
+          npm run build
+
+          if git fetch --quiet origin "$BRANCH" 2>/dev/null && git diff --cached --quiet FETCH_HEAD -- data; then
+            echo "The branch $BRANCH already holds this data."
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git checkout --quiet -B "$BRANCH"
+            git commit --quiet -m "chore(data): SWU's data as of $(date -u +%F)"
+            git push --quiet --force origin "$BRANCH"
+          fi
+
+          if [ -n "$(gh pr list --head "$BRANCH" --base "$BASE" --state open --json number --jq '.[0].number')" ]; then
+            echo "The pull request for $BRANCH is open and now shows this data."
+            exit 0
+          fi
+          {
+            echo "SWU's sources no longer match the snapshot in \`web/data\` that the pages are built from. This is the snapshot rebuilt from them."
+            echo
+            echo "What the daily check found:"
+            echo
+            echo '```text'
+            grep -v '^>' "$RUNNER_TEMP/check.txt" | sed '/^$/d'
+            echo '```'
+            echo
+            echo "Before this was opened, the typecheck and the build of the whole site passed with the new data. The usual CI does not run on a pull request that a workflow opened; the Vercel preview shows the result."
+            echo
+            echo "Worth a look before merging: stops and lines that appeared or vanished (\`stops.json\`, \`lines.json\`) and the timetable's validity (\`meta.json\`). Merging puts the new data live."
+          } > "$RUNNER_TEMP/body.md"
+          gh pr create --base "$BASE" --head "$BRANCH" --assignee "$OWNER" --title "chore(data): new data from SWU" --body-file "$RUNNER_TEMP/body.md"
