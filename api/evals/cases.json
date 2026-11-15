@@ -28,6 +28,7 @@
   {"say": "Ich muss um 9 Uhr am Hauptbahnhof sein", "from": "here", "to": "stop:Hauptbahnhof", "time": "at 09:00 arrive"},
   {"say": "um 17 Uhr vom Science Park II zum Hauptbahnhof", "from": "stop:Science Park II", "to": "stop:Hauptbahnhof", "time": "at 17:00 depart"},
   {"say": "ab 18:30 vom Theater nach Söflingen", "from": "stop:Theater", "to": "stop:Söflingen", "time": "at 18:30 depart"},
+  {"say": "Von der Virchowstraße zum Hauptbahnhof, um 18:50 da sein", "from": "stop:Virchowstraße", "to": "stop:Hauptbahnhof", "time": "at 18:50 arrive"},
   {"say": "heute Abend um 8 zum Congress Centrum", "from": "here", "to": "stop:Congress Centrum", "time": "at 20:00 today unclear"},
   {"say": "am Freitag um 14 Uhr zum Donaustadion", "from": "here", "to": "stop:Donaustadion", "time": "at 14:00 fri unclear"},
   {"say": "morgen früh um viertel nach sieben am Ehinger Tor sein", "from": "here", "to": "stop:Ehinger Tor", "time": "at 07:15 tomorrow arrive"},
