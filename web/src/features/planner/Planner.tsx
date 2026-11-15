@@ -1,17 +1,23 @@
 'use client'
 
-import type { AskNeed, AskResult, Place, TripRequest, Trips } from '@api/types'
+import type { AskNeed, AskResult, Journey, Place, TripRequest, Trips } from '@api/types'
 import { useEffect, useRef, useState } from 'react'
 import { postJson } from '@/lib/api'
 import type { LineStyle } from '@/lib/data-types'
 import { forgetHomeAndWork, rememberPlace } from '@/lib/store'
 import { Icon } from '@/shell/icons'
 import { AskBar } from './AskBar'
-import { fill, Journeys, type PlannerLabels } from './Journeys'
+import { arrivesAt, fill, Journeys, leavesAt, type More, onFoot, type PlannerLabels, sameJourney } from './Journeys'
 import { PlaceSearch } from './PlaceSearch'
 import { setPlanner, usePlanner } from './state'
 
 const REFRESH_MS = 45_000
+const MINUTE = 60_000
+
+// Journeys fetched on top of the first answer, for the search they belong to (`key`).
+// `none` says where asking for more has brought nothing new.
+type Extra = { key: string; earlier: Journey[]; later: Journey[]; loading: 'earlier' | 'later' | null; none: { earlier: boolean; later: boolean }; failed: boolean }
+const noExtra = (key: string): Extra => ({ key, earlier: [], later: [], loading: null, none: { earlier: false, later: false }, failed: false })
 
 type Props = { stops: Place[]; lineStyles: Record<string, LineStyle>; labels: PlannerLabels; privacyHref: string }
 type Role = 'from' | 'to'
@@ -31,6 +37,7 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
   const [askNote, setAskNote] = useState<string | null>(null)
   const [editing, setEditing] = useState<{ role: Role; query: string }>()
   const [result, setResult] = useState<{ key: string; trips?: Trips; skew: number; failed: boolean }>()
+  const [extra, setExtra] = useState<Extra>()
   const input = useRef<HTMLInputElement>(null)
 
   const key = from && to ? JSON.stringify([from, to, time]) : undefined
@@ -176,6 +183,46 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
 
   const shown = result && result.key === key ? result : undefined
 
+  // The first answer stays; earlier and later journeys are added at its ends. A list that leaves
+  // (the usual one) runs forward in time; one that arrives by a time starts with the latest to
+  // take and runs backward, so there the later ones go on top.
+  const more = extra && extra.key === key ? extra : key ? noExtra(key) : undefined
+  const forward = time.mode === 'depart' || shown?.trips?.note === 'too_late'
+  const first = shown?.trips?.journeys ?? []
+  const known = new Set(first.map(sameJourney))
+  const added = (found: Journey[]) => found.filter((journey) => !known.has(sameJourney(journey))).sort((a, b) => (forward ? leavesAt(a) - leavesAt(b) : leavesAt(b) - leavesAt(a)))
+  const [earlier, later] = [added(more?.earlier ?? []), added(more?.later ?? [])]
+  const listed = forward ? [...earlier, ...first, ...later] : [...later, ...first, ...earlier]
+
+  const loadMore = async (direction: 'earlier' | 'later') => {
+    if (!from || !to || !key || !more || more.loading) return
+    // Walking is possible at any time; it does not say where the list ends.
+    const rides = listed.some((journey) => !onFoot(journey)) ? listed.filter((journey) => !onFoot(journey)) : listed
+    const request: TripRequest =
+      direction === 'later'
+        ? { from, to, time: { mode: 'depart', at: new Date(Math.max(...rides.map(leavesAt)) + MINUTE).toISOString() } }
+        : { from, to, time: { mode: 'arrive', at: new Date(Math.min(...rides.map(arrivesAt)) - MINUTE).toISOString() } }
+    setExtra({ ...more, loading: direction, failed: false })
+    try {
+      const trips = await postJson<Trips>('/api/trips', request)
+      const have = new Set(listed.map(sameJourney))
+      // "Too late" means nothing gets there by then that has not left already: there is nothing earlier.
+      const fresh = direction === 'earlier' && trips.note === 'too_late' ? [] : trips.journeys.filter((journey) => !onFoot(journey) && !have.has(sameJourney(journey)))
+      // Unless the search has changed in the meantime: then this answer belongs to nothing on screen.
+      setExtra((before) => (before?.key === key ? { ...before, loading: null, [direction]: [...before[direction], ...fresh], none: { ...before.none, [direction]: fresh.length === 0 } } : before))
+    } catch {
+      setExtra((before) => (before?.key === key ? { ...before, loading: null, failed: true } : before))
+    }
+  }
+
+  const moreAt = (direction: 'earlier' | 'later'): More | undefined => {
+    if (!more) return undefined
+    if (more.none[direction]) return { none: direction === 'earlier' ? labels.noEarlier : labels.noLater }
+    // Earlier than "now" has left; earlier than a chosen time may still be to come.
+    if (direction === 'earlier' && (time.at === null || shown?.trips?.note === 'too_late')) return undefined
+    return { label: direction === 'earlier' ? labels.earlier : labels.later, busy: more.loading === direction, onMore: () => void loadMore(direction) }
+  }
+
   return (
     <div className="space-y-4">
       <div className="relative rounded-card bg-surface">
@@ -248,8 +295,8 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
         <>
           {shown?.trips ? (
             <>
-              <Journeys trips={shown.trips} skew={shown.skew} from={from!} to={to!} onLater={(after) => setPlanner({ time: { mode: 'depart', at: new Date(after + 60_000).toISOString() } })} lineStyles={lineStyles} labels={labels} />
-              {shown.failed && <p className="px-4 text-[0.8125rem] text-label-2">{labels.failed}</p>}
+              <Journeys journeys={listed} note={shown.trips.note} skew={shown.skew} from={from!} to={to!} before={moreAt(forward ? 'earlier' : 'later')} after={moreAt(forward ? 'later' : 'earlier')} lineStyles={lineStyles} labels={labels} />
+              {(shown.failed || more?.failed) && <p className="px-4 text-[0.8125rem] text-label-2">{labels.failed}</p>}
             </>
           ) : shown?.failed ? (
             <p className="rounded-card bg-surface px-4 py-6 text-center text-label-2">{labels.failed}</p>
