@@ -36,6 +36,11 @@ describe('SWU departures, as recorded', () => {
     expect(departures.some((departure) => departure.destination === 'Söflingen')).toBe(false)
   })
 
+  it('are none, not a failure, where nothing leaves in the next hours', async () => {
+    const quiet = answering({ StopPassage: { State: 'no departures found' } })
+    await expect(swuDepartures(quiet, 1675, 6)).resolves.toEqual([])
+  })
+
   it('report a stop SWU does not know', async () => {
     const unknown = answering({ StopPassage: { State: 'no stop found' } })
     await expect(swuDepartures(unknown, 999_999, 6)).rejects.toBeInstanceOf(UnknownStop)
