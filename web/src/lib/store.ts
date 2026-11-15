@@ -84,8 +84,8 @@ export const markAlertsSeen = (ids: string[]) => {
   if (fresh.length) seenAlerts.write([...fresh, ...seen].slice(0, SEEN))
 }
 
-// Home, work and the places chosen last in the planner.
-export type SavedPlaces = { home?: Place; work?: Place; recent: Place[] }
+// The places chosen last in the planner.
+export type SavedPlaces = { recent: Place[] }
 const RECENT = 5
 
 const isPlace = (value: unknown): value is Place => {
@@ -93,16 +93,26 @@ const isPlace = (value: unknown): value is Place => {
   return typeof place === 'object' && place !== null && typeof place.name === 'string' && typeof place.lat === 'number' && typeof place.lon === 'number' && typeof place.kind === 'string'
 }
 
-const places = remembered<SavedPlaces>('fahrplan-ulm:places', { recent: [] }, (stored) => {
+const PLACES = 'fahrplan-ulm:places'
+
+const places = remembered<SavedPlaces>(PLACES, { recent: [] }, (stored) => {
   const saved = (typeof stored === 'object' && stored !== null ? stored : {}) as Partial<Record<keyof SavedPlaces, unknown>>
-  return { home: isPlace(saved.home) ? saved.home : undefined, work: isPlace(saved.work) ? saved.work : undefined, recent: Array.isArray(saved.recent) ? saved.recent.filter(isPlace).slice(0, RECENT) : [] }
+  return { recent: Array.isArray(saved.recent) ? saved.recent.filter(isPlace).slice(0, RECENT) : [] }
 })
 
 export const useSavedPlaces = places.use
 
 const samePlace = (a: Place, b: Place) => (a.stop && b.stop ? a.stop === b.stop : a.name === b.name && a.town === b.town)
 
-export const savePlace = (as: 'home' | 'work', place: Place) => places.write({ ...places.read(), [as]: place })
+// Until 2026-11 a home and a work address were kept here too. What a device still holds of them is removed.
+export const forgetHomeAndWork = () => {
+  try {
+    const stored = JSON.parse(localStorage.getItem(PLACES) ?? 'null') as Record<string, unknown> | null
+    if (stored && ('home' in stored || 'work' in stored)) places.write(places.read())
+  } catch {
+    // Nothing readable is stored: nothing to remove.
+  }
+}
 
 // A position is where someone was, not a place to come back to.
 export const rememberPlace = (place: Place) => {

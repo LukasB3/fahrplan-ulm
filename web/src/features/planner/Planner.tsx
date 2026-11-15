@@ -4,7 +4,7 @@ import type { AskNeed, AskResult, Place, TripRequest, Trips } from '@api/types'
 import { useEffect, useRef, useState } from 'react'
 import { postJson } from '@/lib/api'
 import type { LineStyle } from '@/lib/data-types'
-import { rememberPlace, useSavedPlaces } from '@/lib/store'
+import { forgetHomeAndWork, rememberPlace } from '@/lib/store'
 import { Icon } from '@/shell/icons'
 import { AskBar } from './AskBar'
 import { fill, Journeys, type PlannerLabels } from './Journeys'
@@ -24,11 +24,10 @@ const toField = (iso: string) => {
 
 export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
   const { from, to, time } = usePlanner()
-  const saved = useSavedPlaces()
   // What the last sentence left open, still to be settled, and what to say about it.
   const [unsettled, setUnsettled] = useState<AskNeed[]>([])
   const [note, setNote] = useState<string | null>(null)
-  const [editing, setEditing] = useState<{ role: Role; query: string; saving: 'home' | 'work' | null }>()
+  const [editing, setEditing] = useState<{ role: Role; query: string }>()
   const [result, setResult] = useState<{ key: string; trips?: Trips; skew: number; failed: boolean }>()
   const input = useRef<HTMLInputElement>(null)
 
@@ -67,7 +66,9 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
 
   useEffect(() => {
     if (editing) input.current?.focus()
-  }, [editing?.role, editing?.saving])
+  }, [editing?.role])
+
+  useEffect(forgetHomeAndWork, [])
 
   // Settles what a sentence left open, one thing at a time: the position by
   // asking the phone, everything else by opening the field with what was said.
@@ -83,14 +84,15 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
         },
         () => {
           setNote(labels.askNeedPosition)
-          setEditing({ role: need.slot, query: '', saving: null })
+          setEditing({ role: need.slot, query: '' })
         },
         { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
       )
     }
-    const saving = need.why === 'home' || need.why === 'work' ? need.why : null
+    // "Zuhause" and "Arbeit" are no places to search for: the field opens empty.
+    const own = need.why === 'home' || need.why === 'work'
     setNote(need.why === 'home' ? labels.askNeedHome : need.why === 'work' ? labels.askNeedWork : need.why === 'missing' || !need.said ? labels.askNeedDestination : fill(labels.askNeedPlace, { said: need.said }))
-    setEditing({ role: need.slot, query: saving ? '' : (need.said ?? ''), saving })
+    setEditing({ role: need.slot, query: own ? '' : (need.said ?? '') })
   }
 
   const understood = (result: AskResult) => {
@@ -113,7 +115,7 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
     }
     // Straight on to the other field while it is still empty.
     const other: Role = role === 'from' ? 'to' : 'from'
-    setEditing((role === 'from' ? to : from) ? undefined : { role: other, query: '', saving: null })
+    setEditing((role === 'from' ? to : from) ? undefined : { role: other, query: '' })
   }
 
   const field = (role: Role) => {
@@ -130,7 +132,7 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
               type="search"
               value={editing.query}
               onChange={(event) => setEditing({ ...editing, query: event.target.value })}
-              placeholder={editing.saving === 'home' ? labels.homePlaceholder : editing.saving === 'work' ? labels.workPlaceholder : labels.searchPlaceholder}
+              placeholder={labels.searchPlaceholder}
               aria-label={label}
               enterKeyHint="search"
               autoComplete="off"
@@ -151,7 +153,7 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
             </button>
           </>
         ) : (
-          <button type="button" onClick={() => setEditing({ role, query: '', saving: null })} className="pressable min-w-0 flex-1 truncate py-3 pr-14 text-left">
+          <button type="button" onClick={() => setEditing({ role, query: '' })} className="pressable min-w-0 flex-1 truncate py-3 pr-14 text-left">
             {place ? (
               <>
                 {place.name}
@@ -189,7 +191,7 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
               {note}
             </p>
           )}
-          <PlaceSearch query={editing.query} stops={stops} saving={editing.saving} onSaving={(saving) => setEditing({ ...editing, query: '', saving })} onPick={(place) => pick(editing.role, place)} labels={labels} />
+          <PlaceSearch query={editing.query} stops={stops} onPick={(place) => pick(editing.role, place)} labels={labels} />
         </>
       ) : (
         <>
@@ -234,7 +236,7 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
       {/* The form comes first; the sentence is the other way to fill it. It stays mounted while a field is edited, so a recording is not cut off. */}
       <AskBar
         // A position already chosen as the start is passed along, so "von hier" needs no second question.
-        context={() => ({ position: from?.kind === 'position' ? { lat: from.lat, lon: from.lon } : null, saved: { home: saved.home ?? null, work: saved.work ?? null } })}
+        context={() => ({ position: from?.kind === 'position' ? { lat: from.lat, lon: from.lon } : null })}
         onResult={understood}
         note={editing ? null : note}
         hidden={editing !== undefined}

@@ -40,7 +40,7 @@ export const legalDe = {
       },
       {
         heading: 'Fahrtwunsch in einem Satz',
-        text: 'Wenn Sie Ihren Fahrtwunsch als Satz eingeben oder sprechen, wird dieser Satz an meinen Server übermittelt und von dort an die Anthropic PBC (San Francisco, USA) weitergegeben. Deren Sprachmodell Claude entnimmt dem Satz Start, Ziel und Zeit. Ihr Standort und Ihre gespeicherten Orte werden nicht an Anthropic übermittelt; der Satz enthält aber, was Sie hineinschreiben, etwa eine Adresse. Mein Server speichert und protokolliert den Satz nicht. Für gleiche Sätze merkt er sich das Ergebnis bis zu einer Stunde ohne Bezug zu Ihnen. Rechtsgrundlage ist mein berechtigtes Interesse an einer einfachen Bedienung (Art. 6 Abs. 1 lit. f DSGVO). Wer das nicht möchte, nutzt das Formular darunter: Es kommt ohne das Sprachmodell aus.',
+        text: 'Wenn Sie Ihren Fahrtwunsch als Satz eingeben oder sprechen, wird dieser Satz an meinen Server übermittelt und von dort an die Anthropic PBC (San Francisco, USA) weitergegeben. Deren Sprachmodell Claude entnimmt dem Satz Start, Ziel und Zeit. Ihr Standort wird nicht an Anthropic übermittelt; der Satz enthält aber, was Sie hineinschreiben, etwa eine Adresse. Mein Server speichert und protokolliert den Satz nicht. Für gleiche Sätze merkt er sich das Ergebnis bis zu einer Stunde ohne Bezug zu Ihnen. Rechtsgrundlage ist mein berechtigtes Interesse an einer einfachen Bedienung (Art. 6 Abs. 1 lit. f DSGVO). Wer das nicht möchte, nutzt das Formular darunter: Es kommt ohne das Sprachmodell aus.',
       },
       {
         heading: 'Standort',
@@ -51,8 +51,8 @@ export const legalDe = {
         text: 'Die Live-Karte und die kleinen Karten der Fußwege verwenden Kartendaten von Stadia Maps, Inc. (USA). Sie werden erst geladen, wenn Sie die Karte öffnen oder eine Verbindung aufklappen. Dabei überträgt Ihr Browser Ihre IP-Adresse, den angezeigten Kartenausschnitt und die Adresse dieser Seite an Stadia Maps. Rechtsgrundlage ist mein berechtigtes Interesse an einer Kartendarstellung (Art. 6 Abs. 1 lit. f DSGVO). Näheres steht in der Datenschutzerklärung von Stadia Maps unter stadiamaps.com/privacy-policy.',
       },
       {
-        heading: 'Favoriten und gespeicherte Orte',
-        text: 'Haltestellen, die Sie als Favorit merken, Ihre Orte „Zuhause“ und „Arbeit“, die zuletzt gewählten Orte und welche Meldungen Sie schon gesehen haben, werden nur im Speicher Ihres Browsers auf diesem Gerät abgelegt. Das ist nötig, um die von Ihnen gewünschte Funktion bereitzustellen (§ 25 Abs. 2 Nr. 2 TDDDG). Übertragen werden sie nur, wenn Sie sie als Start oder Ziel einer Verbindung wählen. Sie verschwinden, wenn Sie die Websitedaten im Browser löschen.',
+        heading: 'Favoriten und zuletzt gewählte Orte',
+        text: 'Haltestellen, die Sie als Favorit merken, die zuletzt gewählten Orte und welche Meldungen Sie schon gesehen haben, werden nur im Speicher Ihres Browsers auf diesem Gerät abgelegt. Das ist nötig, um die von Ihnen gewünschte Funktion bereitzustellen (§ 25 Abs. 2 Nr. 2 TDDDG). Übertragen werden sie nur, wenn Sie sie als Start oder Ziel einer Verbindung wählen. Sie verschwinden, wenn Sie die Websitedaten im Browser löschen.',
       },
       {
         heading: 'Spracheingabe',

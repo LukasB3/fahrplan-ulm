@@ -9,8 +9,8 @@ import type { AskNeed, AskRequest, AskResult, Place, TripRequest } from './types
 
 // --- What the language model is asked for -----------------------------------
 //
-// The model only reads the sentence. It gets no clock, no position and no
-// saved places: times come back as said ("in 30 minutes", "tomorrow 7:30")
+// The model only reads the sentence. It gets no clock and no position:
+// times come back as said ("in 30 minutes", "tomorrow 7:30")
 // and places as names. Everything else is worked out below, in code.
 
 const spoken = z.object({
@@ -211,10 +211,11 @@ export const asker = ({ read, stops, matches, limits, log }: Deps) => {
     switch (said.kind) {
       case 'here':
         return request.position ? { kind: 'position', stop: null, name: '', town: null, ...request.position } : need('position')
+      // Whose home or workplace is not known here: the person is asked for the place.
       case 'home':
-        return request.saved.home ?? need('home')
+        return need('home')
       case 'work':
-        return request.saved.work ?? need('work')
+        return need('work')
       case 'none':
         return need('missing')
       case 'named': {

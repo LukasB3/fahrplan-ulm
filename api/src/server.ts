@@ -59,7 +59,6 @@ const tripRequest = z.object({
 const askRequest = z.object({
   text: z.string().trim().min(1).max(300),
   position: z.object({ lat: z.number().min(47).max(50), lon: z.number().min(8).max(12) }).nullable(),
-  saved: z.object({ home: place.nullable(), work: place.nullable() }),
 })
 
 // One IPv6 customer usually owns a whole /64, so that is what gets limited.
@@ -166,7 +165,7 @@ export const buildServer = async ({ cfg, departures, planner, ask, alerts, vehic
   // hence the tightest limit. The sentence itself is never logged.
   app.post('/api/ask', { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (req, reply): Promise<AskResult | ApiError> => {
     const request = askRequest.safeParse(req.body)
-    if (!request.success) return reply.code(400).send({ error: 'text of 1 to 300 characters, position and saved are required' })
+    if (!request.success) return reply.code(400).send({ error: 'text of 1 to 300 characters and position are required' })
     return ask(request.data, visitorKey(req.ip))
   })
 

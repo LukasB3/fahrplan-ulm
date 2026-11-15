@@ -186,7 +186,7 @@ describe('a request in plain words', () => {
   const post = (payload: unknown, remoteAddress?: string) => app.inject({ method: 'POST', url: '/api/ask', payload: payload as object, remoteAddress })
 
   it('is passed on with the visitor it came from', async () => {
-    const request: AskRequest = { text: 'in 30 Minuten zum Hauptbahnhof', position: null, saved: { home, work: null } }
+    const request: AskRequest = { text: 'in 30 Minuten zum Hauptbahnhof', position: null }
     const res = await post(request, '2001:db8:1:2:3:4:5:6')
     expect(res.statusCode).toBe(200)
     expect(res.json()).toEqual(understood)
@@ -194,11 +194,17 @@ describe('a request in plain words', () => {
     expect(sentences.at(-1)).toEqual([request, '2001:db8:1:2'])
   })
 
+  it('takes a request from a page loaded before this change, which still sends saved places, and leaves them out', async () => {
+    const res = await post({ text: 'nach Hause', position: null, saved: { home, work: null } })
+    expect(res.statusCode).toBe(200)
+    expect(sentences.at(-1)?.[0]).toEqual({ text: 'nach Hause', position: null })
+  })
+
   it.each([
     ['nothing', {}],
-    ['an empty sentence', { text: '  ', position: null, saved: { home: null, work: null } }],
-    ['a novel', { text: 'x'.repeat(301), position: null, saved: { home: null, work: null } }],
-    ['a position on another continent', { text: 'zum Bahnhof', position: { lat: 40.7, lon: -74 }, saved: { home: null, work: null } }],
+    ['an empty sentence', { text: '  ', position: null }],
+    ['a novel', { text: 'x'.repeat(301), position: null }],
+    ['a position on another continent', { text: 'zum Bahnhof', position: { lat: 40.7, lon: -74 } }],
   ])('turns %s away', async (_, payload) => {
     expect((await post(payload)).statusCode).toBe(400)
   })
