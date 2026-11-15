@@ -1,3 +1,6 @@
+// One sentence with everything the sentence request takes: start, destination and time.
+const askExample = 'Von der Virchowstraße zum Hauptbahnhof, um 18:50 da sein'
+
 export const de = {
   site: {
     name: 'Fahrplan Ulm',
@@ -15,12 +18,12 @@ export const de = {
   route: {
     title: 'Fahrplan Ulm',
     lead: 'Bus und Straßenbahn in Ulm und Neu-Ulm: Abfahrten in Echtzeit und der Fahrplan jeder Haltestelle.',
-    popularStops: 'Meistgenutzte Haltestellen',
     lines: 'Linien',
+    allLines: 'Alle Linien',
   },
   planner: {
     askLabel: 'Fahrtwunsch in einem Satz',
-    askPlaceholder: 'In 30 Minuten zum Hauptbahnhof',
+    askPlaceholder: askExample,
     askSend: 'Verbindung suchen',
     askMic: 'Fahrtwunsch sprechen',
     askMicStop: 'Aufnahme beenden',
@@ -28,7 +31,7 @@ export const de = {
     askBusy: 'Einen Moment …',
     askNotice: 'Schreib oder sag, wohin du willst. Der Satz wird von einer KI gelesen.',
     askNoticeLink: 'Datenschutz',
-    askOther: 'Das habe ich nicht als Fahrtwunsch verstanden. Versuch es so: „In 30 Minuten zum Hauptbahnhof“.',
+    askOther: `Das habe ich nicht als Fahrtwunsch verstanden. Versuch es so: „${askExample}“.`,
     askLimit: 'Für heute ist die Eingabe per Satz aufgebraucht. Das Formular funktioniert weiter.',
     askUnavailable: 'Die Eingabe per Satz ist gerade nicht verfügbar. Nimm bitte das Formular.',
     askSpeechFailed: 'Die Spracheingabe hat nicht geklappt. Du kannst den Satz auch tippen.',
@@ -108,7 +111,6 @@ export const de = {
     nearbyNone: 'Im Umkreis von 2 km liegt keine Haltestelle der SWU.',
     popular: 'Meistgenutzt',
     allStops: 'Alle Haltestellen',
-    allLines: 'Alle Linien',
   },
   board: {
     heading: 'Nächste Abfahrten',

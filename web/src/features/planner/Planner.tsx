@@ -170,14 +170,6 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
 
   return (
     <div className="space-y-4">
-      <AskBar
-        // A position already chosen as the start is passed along, so "von hier" needs no second question.
-        context={() => ({ position: from?.kind === 'position' ? { lat: from.lat, lon: from.lon } : null, saved: { home: saved.home ?? null, work: saved.work ?? null } })}
-        onResult={understood}
-        note={note}
-        privacyHref={privacyHref}
-        labels={labels}
-      />
       <div className="relative rounded-card bg-surface">
         {field('from')}
         <div className="mr-14 ml-4 border-t border-separator" />
@@ -190,7 +182,15 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
       </div>
 
       {editing ? (
-        <PlaceSearch query={editing.query} stops={stops} saving={editing.saving} onSaving={(saving) => setEditing({ ...editing, query: '', saving })} onPick={(place) => pick(editing.role, place)} labels={labels} />
+        <>
+          {/* What a sentence left open is asked here, next to the field that answers it. */}
+          {note && (
+            <p role="status" className="px-4 text-[0.9375rem]">
+              {note}
+            </p>
+          )}
+          <PlaceSearch query={editing.query} stops={stops} saving={editing.saving} onSaving={(saving) => setEditing({ ...editing, query: '', saving })} onPick={(place) => pick(editing.role, place)} labels={labels} />
+        </>
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-2">
@@ -227,10 +227,24 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
               </>
             )}
           </div>
+          {!key && <p className="px-4 text-label-2">{labels.hint}</p>}
+        </>
+      )}
 
-          {!key ? (
-            <p className="px-4 text-label-2">{labels.hint}</p>
-          ) : shown?.trips ? (
+      {/* The form comes first; the sentence is the other way to fill it. It stays mounted while a field is edited, so a recording is not cut off. */}
+      <AskBar
+        // A position already chosen as the start is passed along, so "von hier" needs no second question.
+        context={() => ({ position: from?.kind === 'position' ? { lat: from.lat, lon: from.lon } : null, saved: { home: saved.home ?? null, work: saved.work ?? null } })}
+        onResult={understood}
+        note={editing ? null : note}
+        hidden={editing !== undefined}
+        privacyHref={privacyHref}
+        labels={labels}
+      />
+
+      {!editing && key && (
+        <>
+          {shown?.trips ? (
             <>
               <Journeys trips={shown.trips} skew={shown.skew} from={from!} to={to!} onLater={(after) => setPlanner({ time: { mode: 'depart', at: new Date(after + 60_000).toISOString() } })} lineStyles={lineStyles} labels={labels} />
               {shown.failed && <p className="px-4 text-[0.8125rem] text-label-2">{labels.failed}</p>}

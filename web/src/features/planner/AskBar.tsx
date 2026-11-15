@@ -14,12 +14,14 @@ type Props = {
   onResult: (result: AskResult) => void
   // What to tell the person about the last request, if anything.
   note: string | null
+  // Out of sight while a start or destination is being typed.
+  hidden: boolean
   privacyHref: string
   labels: PlannerLabels
 }
 
 // The journey in one sentence, typed or spoken: "in 30 Minuten zum Hauptbahnhof".
-export function AskBar({ context, onResult, note, privacyHref, labels }: Props) {
+export function AskBar({ context, onResult, note, hidden, privacyHref, labels }: Props) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [canSpeak, setCanSpeak] = useState(false)
@@ -65,7 +67,7 @@ export function AskBar({ context, onResult, note, privacyHref, labels }: Props) 
   }
 
   return (
-    <div className="space-y-1.5">
+    <div hidden={hidden} className="space-y-1.5">
       <form
         onSubmit={(event) => {
           event.preventDefault()
@@ -73,16 +75,23 @@ export function AskBar({ context, onResult, note, privacyHref, labels }: Props) 
         }}
         className="flex min-h-[3.25rem] items-center rounded-card bg-surface pl-4"
       >
-        <input
-          type="text"
+        {/* Two lines: the example shows a whole sentence, and a spoken one stays readable. */}
+        <textarea
+          rows={2}
           value={text}
           onChange={(event) => setText(event.target.value)}
+          // Return sends, as in a one-line field.
+          onKeyDown={(event) => {
+            if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return
+            event.preventDefault()
+            void send(text)
+          }}
           placeholder={listening ? labels.askListening : labels.askPlaceholder}
           aria-label={labels.askLabel}
           maxLength={300}
           enterKeyHint="go"
           autoComplete="off"
-          className="min-w-0 flex-1 bg-transparent py-3 outline-none placeholder:text-label-3"
+          className="min-w-0 flex-1 resize-none bg-transparent py-3 outline-none placeholder:text-label-3"
         />
         {text.trim() && !listening ? (
           <button type="submit" disabled={busy} aria-label={labels.askSend} className="pressable mr-1.5 grid size-10 shrink-0 place-items-center rounded-full bg-tint-solid text-on-tint disabled:opacity-50">
