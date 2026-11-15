@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.vercel/
+
+# Claude-related files
+CLAUDE.md
+.claude/
+skills-lock.json
