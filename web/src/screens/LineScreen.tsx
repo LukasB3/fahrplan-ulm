@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
+import { RelevantAlerts } from '@/features/alerts/RelevantAlerts'
 import { lineStyles, stopByCode } from '@/lib/data'
 import type { DayType, Line } from '@/lib/data-types'
 import { t, type Locale } from '@/lib/i18n'
@@ -13,7 +14,7 @@ import { groupHeading } from '@/shell/styles'
 const DAY_ORDER: DayType[] = ['mofr', 'moth', 'fr', 'sa', 'su']
 
 export function LineScreen({ locale, line }: { locale: Locale; line: Line }) {
-  const { line: copy, stop: stopCopy, site, hubs } = t(locale)
+  const { line: copy, stop: stopCopy, site, hubs, alerts } = t(locale)
   const url = `${SITE_ORIGIN}${lineHref(locale, line.id)}`
 
   return (
@@ -26,6 +27,8 @@ export function LineScreen({ locale, line }: { locale: Locale; line: Line }) {
             {copy.kinds[line.kind]} · {line.name}
           </span>
         </p>
+
+        <RelevantAlerts about={{ line: line.id }} href={href(locale, 'alerts')} heading={alerts.forLine} />
 
         {line.directions.map((direction) => (
           <section key={direction.headsign}>

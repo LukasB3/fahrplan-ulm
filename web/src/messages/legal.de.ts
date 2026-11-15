@@ -52,7 +52,7 @@ export const legalDe = {
       },
       {
         heading: 'Favoriten und gespeicherte Orte',
-        text: 'Haltestellen, die Sie als Favorit merken, Ihre Orte „Zuhause“ und „Arbeit“ sowie die zuletzt gewählten Orte werden nur im Speicher Ihres Browsers auf diesem Gerät abgelegt. Das ist nötig, um die von Ihnen gewünschte Funktion bereitzustellen (§ 25 Abs. 2 Nr. 2 TDDDG). Übertragen werden sie nur, wenn Sie sie als Start oder Ziel einer Verbindung wählen. Sie verschwinden, wenn Sie die Websitedaten im Browser löschen.',
+        text: 'Haltestellen, die Sie als Favorit merken, Ihre Orte „Zuhause“ und „Arbeit“, die zuletzt gewählten Orte und welche Meldungen Sie schon gesehen haben, werden nur im Speicher Ihres Browsers auf diesem Gerät abgelegt. Das ist nötig, um die von Ihnen gewünschte Funktion bereitzustellen (§ 25 Abs. 2 Nr. 2 TDDDG). Übertragen werden sie nur, wenn Sie sie als Start oder Ziel einer Verbindung wählen. Sie verschwinden, wenn Sie die Websitedaten im Browser löschen.',
       },
       {
         heading: 'Spracheingabe',

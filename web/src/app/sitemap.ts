@@ -8,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const paths = [
     href('de', 'route'),
     href('de', 'departures'),
+    href('de', 'alerts'),
     href('de', 'stops'),
     href('de', 'lines'),
     ...lines.map((line) => lineHref('de', line.id)),
