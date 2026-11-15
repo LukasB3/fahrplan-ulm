@@ -48,7 +48,7 @@ export const legalDe = {
       },
       {
         heading: 'Karte',
-        text: 'Die kleinen Karten der Fußwege werden aus Kartenkacheln von Stadia Maps, Inc. (USA) zusammengesetzt. Sie werden erst geladen, wenn Sie eine Verbindung aufklappen. Dabei überträgt Ihr Browser Ihre IP-Adresse, den angezeigten Kartenausschnitt und die Adresse dieser Seite an Stadia Maps. Rechtsgrundlage ist mein berechtigtes Interesse an einer Kartendarstellung (Art. 6 Abs. 1 lit. f DSGVO). Näheres steht in der Datenschutzerklärung von Stadia Maps unter stadiamaps.com/privacy-policy.',
+        text: 'Die Live-Karte und die kleinen Karten der Fußwege verwenden Kartendaten von Stadia Maps, Inc. (USA). Sie werden erst geladen, wenn Sie die Karte öffnen oder eine Verbindung aufklappen. Dabei überträgt Ihr Browser Ihre IP-Adresse, den angezeigten Kartenausschnitt und die Adresse dieser Seite an Stadia Maps. Rechtsgrundlage ist mein berechtigtes Interesse an einer Kartendarstellung (Art. 6 Abs. 1 lit. f DSGVO). Näheres steht in der Datenschutzerklärung von Stadia Maps unter stadiamaps.com/privacy-policy.',
       },
       {
         heading: 'Favoriten und gespeicherte Orte',

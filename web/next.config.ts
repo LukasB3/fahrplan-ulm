@@ -11,7 +11,8 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   // Map tiles come from Stadia Maps.
   "img-src 'self' data: blob: https://tiles.stadiamaps.com",
-  `connect-src 'self' ${apiOrigin}`,
+  // The live map fetches its style, tiles and lettering from Stadia Maps.
+  `connect-src 'self' ${apiOrigin} https://tiles.stadiamaps.com`,
   "font-src 'self'",
   "worker-src 'self' blob:",
   "base-uri 'none'",

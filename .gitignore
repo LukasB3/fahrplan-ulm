@@ -3,6 +3,8 @@ dist/
 .next/
 next-env.d.ts
 *.tsbuildinfo
+# Copied from the map library at build time
+web/public/map-worker.mjs
 .env
 .env.*
 !.env.example
