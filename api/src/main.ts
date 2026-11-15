@@ -34,15 +34,6 @@ setInterval(() => void refreshStops(), 24 * 3_600_000).unref()
 
 await app.listen({ host: cfg.HOST, port: cfg.PORT })
 
-// A free Supabase project is paused after a week without requests, and
-// logging in on the website would stop with it. One read an hour keeps it awake.
-const keepAccountsAwake = () =>
-  fetch(`${cfg.SUPABASE_URL}/rest/v1/heartbeat?select=id`, { headers: { apikey: cfg.SUPABASE_KEY }, signal: AbortSignal.timeout(8_000) })
-    .then((res) => res.ok || console.error(`the accounts' heartbeat answered ${res.status}`))
-    .catch((problem: unknown) => console.error("the accounts' heartbeat failed", problem))
-void keepAccountsAwake()
-setInterval(() => void keepAccountsAwake(), 3_600_000).unref()
-
 // The first sentence after a start would wait for the model to prepare its
 // answer format. One sentence now spares a visitor that wait.
 if (read) void read('zum hauptbahnhof').catch(() => {})
