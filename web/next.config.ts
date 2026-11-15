@@ -2,17 +2,23 @@ import type { NextConfig } from 'next'
 
 const apiOrigin = process.env.NEXT_PUBLIC_API_ORIGIN ?? 'https://api.fahrplan-ulm.de'
 
+// Accounts live at Supabase; keep this in step with src/features/account/config.ts.
+const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://wzlshjwymqnnjhoameoa.supabase.co'
+// Cloudflare Turnstile guards the login mails: a script, and a frame it runs its check in.
+const turnstileOrigin = 'https://challenges.cloudflare.com'
+
 // Prebuilt pages carry Next's inline bootstrap scripts, and a nonce would
 // need every page rendered per request. So inline scripts are allowed and
-// everything else is pinned to this site and its API.
+// everything else is pinned to this site and the services it uses.
 const contentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline' ${turnstileOrigin}`,
+  `frame-src ${turnstileOrigin}`,
   "style-src 'self' 'unsafe-inline'",
   // Map tiles come from Stadia Maps.
   "img-src 'self' data: blob: https://tiles.stadiamaps.com",
   // The live map fetches its style, tiles and lettering from Stadia Maps.
-  `connect-src 'self' ${apiOrigin} https://tiles.stadiamaps.com`,
+  `connect-src 'self' ${apiOrigin} https://tiles.stadiamaps.com ${supabaseOrigin}`,
   "font-src 'self'",
   "worker-src 'self' blob:",
   "base-uri 'none'",
