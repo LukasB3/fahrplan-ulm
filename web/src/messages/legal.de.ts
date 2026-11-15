@@ -35,12 +35,20 @@ export const legalDe = {
         text: 'Fahrplandaten kommen von meinem Server bei der Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen. Dabei wird technisch bedingt Ihre IP-Adresse an diesen Anbieter übermittelt. Der Server hält sie nur kurz im Arbeitsspeicher, um Missbrauch zu begrenzen, und schreibt sie in kein Protokoll. Ich werte keine Zugriffe aus und führe keine Nutzerprofile. Rechtsgrundlage ist mein berechtigtes Interesse an der Bereitstellung der Auskunft (Art. 6 Abs. 1 lit. f DSGVO).',
       },
       {
-        heading: 'Standort',
-        text: 'Die Seite fragt Ihren Standort nur ab, wenn Sie das selbst auslösen und im Browser zustimmen, etwa für die Haltestellen in der Nähe. Die Entfernungen werden auf Ihrem Gerät berechnet; der Standort wird nicht übertragen.',
+        heading: 'Verbindungssuche',
+        text: 'Start, Ziel und Zeit einer Verbindungssuche sowie Ihre Eingaben in der Adresssuche werden an meinen Server übermittelt und von dort an die Fahrplanauskunft der Donau-Iller-Nahverkehrsverbund-GmbH (DING) weitergegeben, die die Verbindung berechnet. Der DING sieht dabei meinen Server, nicht Ihre IP-Adresse. Mein Server speichert die Anfragen nicht; Antworten werden für kurze Zeit ohne Bezug zu Ihnen zwischengespeichert. Rechtsgrundlage ist mein berechtigtes Interesse an der Bereitstellung der Auskunft (Art. 6 Abs. 1 lit. f DSGVO).',
       },
       {
-        heading: 'Favoriten',
-        text: 'Haltestellen, die Sie als Favorit merken, werden nur im Speicher Ihres Browsers auf diesem Gerät abgelegt und nicht übertragen. Das ist nötig, um die von Ihnen gewünschte Funktion bereitzustellen (§ 25 Abs. 2 Nr. 2 TDDDG). Über den Stern entfernen Sie einen Favoriten wieder.',
+        heading: 'Standort',
+        text: 'Die Seite fragt Ihren Standort nur ab, wenn Sie das selbst auslösen und im Browser zustimmen. Für die Haltestellen in der Nähe werden die Entfernungen auf Ihrem Gerät berechnet; der Standort wird dabei nicht übertragen. Wählen Sie „Mein Standort“ als Start oder Ziel einer Verbindung, wird er wie jeder andere Ort für die Verbindungssuche übermittelt (siehe oben) und nicht gespeichert.',
+      },
+      {
+        heading: 'Karte',
+        text: 'Die kleinen Karten der Fußwege werden aus Kartenkacheln von Stadia Maps, Inc. (USA) zusammengesetzt. Sie werden erst geladen, wenn Sie eine Verbindung aufklappen. Dabei überträgt Ihr Browser Ihre IP-Adresse, den angezeigten Kartenausschnitt und die Adresse dieser Seite an Stadia Maps. Rechtsgrundlage ist mein berechtigtes Interesse an einer Kartendarstellung (Art. 6 Abs. 1 lit. f DSGVO). Näheres steht in der Datenschutzerklärung von Stadia Maps unter stadiamaps.com/privacy-policy.',
+      },
+      {
+        heading: 'Favoriten und gespeicherte Orte',
+        text: 'Haltestellen, die Sie als Favorit merken, Ihre Orte „Zuhause“ und „Arbeit“ sowie die zuletzt gewählten Orte werden nur im Speicher Ihres Browsers auf diesem Gerät abgelegt. Das ist nötig, um die von Ihnen gewünschte Funktion bereitzustellen (§ 25 Abs. 2 Nr. 2 TDDDG). Übertragen werden sie nur, wenn Sie sie als Start oder Ziel einer Verbindung wählen. Sie verschwinden, wenn Sie die Websitedaten im Browser löschen.',
       },
       {
         heading: 'Spracheingabe',

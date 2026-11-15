@@ -4,12 +4,14 @@ import Fastify from 'fastify'
 import { z } from 'zod'
 import type { Config } from './config.js'
 import type { DepartureBoard } from './departures.js'
-import type { ApiError, Departures, Health } from './types.js'
+import type { TripPlanner } from './trips.js'
+import type { ApiError, Departures, Health, Places, Trips } from './types.js'
 import { UnknownStop } from './upstream.js'
 
 export interface ServerDeps {
   cfg: Config
   departures: DepartureBoard
+  planner: TripPlanner
   // Where the request log goes, if not to standard output.
   logTo?: { write(line: string): void }
 }
@@ -19,7 +21,28 @@ const departuresQuery = z.object({
   limit: z.coerce.number().int().min(1).max(40).default(20),
 })
 
-export const buildServer = async ({ cfg, departures, logTo }: ServerDeps) => {
+const placesQuery = z.object({ q: z.string().trim().min(2).max(80) })
+
+// What the website sends as an end of a journey. The bounds keep requests to the region.
+const place = z.object({
+  kind: z.enum(['stop', 'address', 'poi', 'position']),
+  stop: z
+    .string()
+    .regex(/^[a-z]{2}:\d{1,6}:\d{1,6}$/)
+    .nullable(),
+  name: z.string().max(120),
+  town: z.string().max(80).nullable(),
+  lat: z.number().min(47).max(50),
+  lon: z.number().min(8).max(12),
+})
+
+const tripRequest = z.object({
+  from: place,
+  to: place,
+  time: z.object({ mode: z.enum(['depart', 'arrive']), at: z.iso.datetime().nullable() }),
+})
+
+export const buildServer = async ({ cfg, departures, planner, logTo }: ServerDeps) => {
   // Caddy on the same host is the only client, so its forwarded address is
   // trusted; without it every visitor would share one rate limit.
   // Request logs carry neither the client address nor the query, which can
@@ -43,6 +66,30 @@ export const buildServer = async ({ cfg, departures, logTo }: ServerDeps) => {
       if (problem instanceof UnknownStop) return reply.code(404).send({ error: 'unknown stop' })
       req.log.error(problem)
       return reply.code(502).send({ error: 'departures are unavailable' })
+    }
+  })
+
+  app.get('/api/places', async (req, reply): Promise<Places | ApiError> => {
+    const query = placesQuery.safeParse(req.query)
+    if (!query.success) return reply.code(400).send({ error: 'q must be 2 to 80 characters' })
+    try {
+      return { places: await planner.places(query.data.q) }
+    } catch (problem) {
+      req.log.error(problem)
+      return reply.code(502).send({ error: 'the place search is unavailable' })
+    }
+  })
+
+  // The ends of a journey travel in the body, so they stay out of logs and addresses.
+  // Each request is a heavy one for the planner, hence the tighter limit.
+  app.post('/api/trips', { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req, reply): Promise<Trips | ApiError> => {
+    const request = tripRequest.safeParse(req.body)
+    if (!request.success) return reply.code(400).send({ error: 'from, to and time are required' })
+    try {
+      return await planner.trips(request.data)
+    } catch (problem) {
+      req.log.error(problem)
+      return reply.code(502).send({ error: 'the journey planner is unavailable' })
     }
   })
 

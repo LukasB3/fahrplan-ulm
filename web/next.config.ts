@@ -9,7 +9,8 @@ const contentSecurityPolicy = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  // Map tiles come from Stadia Maps.
+  "img-src 'self' data: blob: https://tiles.stadiamaps.com",
   `connect-src 'self' ${apiOrigin}`,
   "font-src 'self'",
   "worker-src 'self' blob:",

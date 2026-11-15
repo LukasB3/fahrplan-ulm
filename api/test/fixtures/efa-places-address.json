@@ -1,0 +1,73 @@
+{
+ "version": "11.0.6.72",
+ "locations": [
+  {
+   "id": "poiID:1160641:8421000:-1:dm (Frauenstraße 1):Ulm:dm (Frauenstraße 1):ANY:POI:1112716:5826711:MRCV:DIN",
+   "name": "Ulm, dm (Frauenstraße 1)",
+   "disassembledName": "dm (Frauenstraße 1)",
+   "coord": [
+    48.397785,
+    9.995698
+   ],
+   "type": "poi",
+   "matchQuality": 255,
+   "isBest": false,
+   "parent": {
+    "id": "placeID:8421000:-1",
+    "name": "Ulm",
+    "type": "locality"
+   }
+  },
+  {
+   "id": "poiID:1238513:8421000:-1:Müller (Frauenstraße 51):Ulm:Müller (Frauenstraße 51):ANY:POI:1112793:5826134:MRCV:DIN",
+   "name": "Ulm, Müller (Frauenstraße 51)",
+   "disassembledName": "Müller (Frauenstraße 51)",
+   "coord": [
+    48.401226,
+    9.99639
+   ],
+   "type": "poi",
+   "matchQuality": 238,
+   "isBest": false,
+   "parent": {
+    "id": "placeID:8421000:-1",
+    "name": "Ulm",
+    "type": "locality"
+   }
+  },
+  {
+   "id": "streetID:1500000002:20:8421000:-1:Frauenstraße:Ulm:Frauenstraße::Frauenstraße:89073:ANY:DIVA_SINGLEHOUSE:1112804:5826582:MRCV:DIN:0",
+   "name": "Ulm, Frauenstraße 20",
+   "disassembledName": "Frauenstraße 20",
+   "coord": [
+    48.398554,
+    9.996488
+   ],
+   "type": "singlehouse",
+   "matchQuality": 1000,
+   "isBest": true,
+   "parent": {
+    "id": "placeID:8421000:-1",
+    "name": "Ulm",
+    "type": "locality"
+   }
+  },
+  {
+   "id": "streetID:1500000218:20:9775162:-1:Frauenstraße:Vöhringen (Kreis Neu-Ulm):Frauenstraße::Frauenstraße:89269:ANY:DIVA_SINGLEHOUSE:1121648:5846634:MRCV:DIN:0",
+   "name": "Vöhringen (Kreis Neu-Ulm), Frauenstraße 20",
+   "disassembledName": "Frauenstraße 20",
+   "coord": [
+    48.278817,
+    10.075935
+   ],
+   "type": "singlehouse",
+   "matchQuality": 800,
+   "isBest": false,
+   "parent": {
+    "id": "placeID:9775162:-1",
+    "name": "Vöhringen (Kreis Neu-Ulm)",
+    "type": "locality"
+   }
+  }
+ ]
+}
