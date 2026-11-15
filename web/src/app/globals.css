@@ -391,6 +391,8 @@
 
 .map-note {
   left: 0.75rem;
+  /* Beside the button at the right, however long the note. */
+  right: 4.25rem;
   /* Above the map's credits. */
   bottom: calc(max(0.75rem, env(safe-area-inset-bottom) - 0.625rem) + 7.25rem);
 }

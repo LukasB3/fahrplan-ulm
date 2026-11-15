@@ -3,6 +3,7 @@
 import type { Place, Places } from '@api/types'
 import { useEffect, useMemo, useState } from 'react'
 import { getJson } from '@/lib/api'
+import { locate, type LocateProblem } from '@/lib/geo'
 import { matchRank, plain, searchable } from '@/lib/search'
 import { useSavedPlaces } from '@/lib/store'
 import { Icon, type IconName } from '@/shell/icons'
@@ -41,7 +42,7 @@ function Row({ icon, title, detail, onPick }: { icon: IconName; title: string; d
 // typed, then stops from the phone at once and addresses from the server shortly after.
 export function PlaceSearch({ query, stops, onPick, labels }: Props) {
   const saved = useSavedPlaces()
-  const [located, setLocated] = useState<'locating' | 'failed'>()
+  const [located, setLocated] = useState<'locating' | LocateProblem>()
   const [remote, setRemote] = useState<{ query: string; places: Place[] | 'failed' }>()
 
   const index = useMemo(() => stops.map((stop) => searchable(stop.name, stop.town ?? '')), [stops])
@@ -70,12 +71,11 @@ export function PlaceSearch({ query, stops, onPick, labels }: Props) {
     }
   }, [query, wanted])
 
-  const locate = () => {
+  const fromHere = () => {
     setLocated('locating')
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => onPick({ kind: 'position', stop: null, name: labels.myLocation, town: null, lat: coords.latitude, lon: coords.longitude }),
-      () => setLocated('failed'),
-      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
+    locate().then(
+      (here) => onPick({ kind: 'position', stop: null, name: labels.myLocation, town: null, ...here }),
+      (problem: LocateProblem) => setLocated(problem),
     )
   }
 
@@ -83,12 +83,12 @@ export function PlaceSearch({ query, stops, onPick, labels }: Props) {
     return (
       <div className="space-y-2">
         <ul className="overflow-hidden rounded-card bg-surface">
-          <Row icon="location" title={located === 'locating' ? labels.locating : labels.myLocation} onPick={locate} />
+          <Row icon="location" title={located === 'locating' ? labels.locating : labels.myLocation} onPick={fromHere} />
           {saved.recent.map((place) => (
             <Row key={`${place.kind} ${place.stop ?? place.name} ${place.town}`} icon="recent" title={place.name} detail={place.town === 'Ulm' ? null : place.town} onPick={() => onPick(place)} />
           ))}
         </ul>
-        {located === 'failed' && <p className="px-4 text-[0.8125rem] text-late">{labels.locationFailed}</p>}
+        {located && located !== 'locating' && <p className="px-4 text-[0.8125rem] text-late">{located === 'denied' ? labels.locationDenied : labels.locationUnavailable}</p>}
       </div>
     )
   }

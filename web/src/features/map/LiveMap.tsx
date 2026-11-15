@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react'
 import { type BoardLabels, DepartureBoard } from '@/features/departures/DepartureBoard'
 import { RunTitle, StopTimes } from '@/features/departures/Run'
 import { getJson } from '@/lib/api'
+import { locate, type LocateProblem } from '@/lib/geo'
 import type { LineStyle } from '@/lib/data-types'
 import type { Messages } from '@/lib/i18n'
 import { Icon } from '@/shell/icons'
@@ -139,7 +140,7 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
   const [stop, setStop] = useState<MapStop>()
   const [vehicle, setVehicle] = useState<Vehicle>()
   const [trip, setTrip] = useState<VehicleTrip | 'failed'>()
-  const [located, setLocated] = useState<'failed'>()
+  const [located, setLocated] = useState<'locating' | LocateProblem>()
   const selected = useRef<number | undefined>(undefined)
   // The latest report of every vehicle, for the sheet of the one that is tapped.
   const reported = useRef(new Map<number, Vehicle>())
@@ -308,12 +309,13 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
     }
   }, [vehicleId, lineStyles])
 
-  const locate = () =>
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        if (!live) return
+  const showMe = () => {
+    setLocated('locating')
+    locate().then(
+      ({ lat, lon }) => {
         setLocated(undefined)
-        const here: Position = [coords.longitude, coords.latitude]
+        if (!live) return
+        const here: Position = [lon, lat]
         if (!live.here) {
           const dot = document.createElement('div')
           dot.className = 'here'
@@ -321,9 +323,9 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
         } else live.here.setLngLat(here)
         live.map.easeTo({ center: here, zoom: Math.max(live.map.getZoom(), 15) })
       },
-      () => setLocated('failed'),
-      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 30_000 },
+      (problem: LocateProblem) => setLocated(problem),
     )
+  }
 
   const lateBy = vehicle ? Math.round(vehicle.delaySeconds / 60) : 0
 
@@ -332,10 +334,14 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
       <div ref={place} />
       {failed && <p className="fixed inset-x-4 top-1/3 rounded-card bg-surface px-4 py-6 text-center text-label-2">{labels.failed}</p>}
 
-      <button type="button" aria-label={labels.locate} onClick={locate} className="map-control material pressable grid size-11 place-items-center rounded-full text-tint">
-        <Icon name="location" />
+      <button type="button" aria-label={labels.locate} aria-busy={located === 'locating'} onClick={showMe} className="map-control material pressable grid size-11 place-items-center rounded-full text-tint">
+        <Icon name="location" className={located === 'locating' ? 'motion-safe:animate-pulse' : undefined} />
       </button>
-      {located === 'failed' && <p className="map-note material rounded-full px-4 py-2 text-[0.8125rem]">{labels.locateFailed}</p>}
+      {located && located !== 'locating' && (
+        <p role="status" className="map-note material rounded-2xl px-4 py-2 text-[0.8125rem]">
+          {located === 'denied' ? labels.locationDenied : labels.locationUnavailable}
+        </p>
+      )}
 
       <Sheet open={stop !== undefined} onOpenChange={(open) => !open && setStop(undefined)} title={stop?.name} closeLabel={labels.close} passthrough low>
         {stop && (
