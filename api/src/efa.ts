@@ -222,7 +222,9 @@ export const efaAlerts = async (getJson: GetJson, base: string): Promise<Alert[]
     const parsed = efaAlert.safeParse(item)
     if (!parsed.success) return []
     const { id, timestamps, affected, infoLinks } = parsed.data
-    const lines = [...new Set((affected.lines ?? []).filter((line) => line.operator?.name === 'SWU' && line.number).map((line) => line.number!))]
+    // Lines in the order of the network map: numbers first, lettered lines next, night lines last.
+    const rank = (line: string) => (line.startsWith('N') ? 2_000 : /^\d+$/.test(line) ? 0 : 1_000) + (Number(line.replace(/\D/g, '')) || 0)
+    const lines = [...new Set((affected.lines ?? []).filter((line) => line.operator?.name === 'SWU' && line.number).map((line) => line.number!))].sort((a, b) => rank(a) - rank(b))
     const [notice] = infoLinks
     const title = tidy(notice!.urlText ?? notice!.subtitle ?? '')
     if (!lines.length || !title) return []
