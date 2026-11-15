@@ -1,0 +1,275 @@
+@import 'tailwindcss';
+
+/* Colours follow the system palette of iOS, with secondary text and the tint
+   darkened to reach a 4.5:1 contrast on white. */
+:root {
+  color-scheme: light dark;
+  --bg: #f2f2f7;
+  --surface: #ffffff;
+  --label: #000000;
+  --label-2: rgb(60 60 67 / 0.74);
+  --label-3: rgb(60 60 67 / 0.45);
+  --separator: rgb(60 60 67 / 0.18);
+  --fill: rgb(120 120 128 / 0.12);
+  --fill-strong: rgb(120 120 128 / 0.2);
+  --tint: #0068d9;
+  --on-tint: #ffffff;
+  --ok: #1a7f37;
+  --late: #d70015;
+  --material: rgb(255 255 255 / 0.72);
+  --material-edge: rgb(255 255 255 / 0.65);
+  --material-border: rgb(0 0 0 / 0.06);
+  --scrim-opacity: 0.3;
+  --shadow-float: 0 10px 36px rgb(0 0 0 / 0.14), 0 1px 3px rgb(0 0 0 / 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --surface: #1c1c1e;
+    --label: #ffffff;
+    --label-2: rgb(235 235 245 / 0.66);
+    --label-3: rgb(235 235 245 / 0.38);
+    --separator: rgb(84 84 88 / 0.6);
+    --fill: rgb(120 120 128 / 0.24);
+    --fill-strong: rgb(120 120 128 / 0.36);
+    --tint: #0a84ff;
+    --ok: #30d158;
+    --late: #ff453a;
+    --material: rgb(36 36 38 / 0.72);
+    --material-edge: rgb(255 255 255 / 0.1);
+    --material-border: rgb(255 255 255 / 0.08);
+    --scrim-opacity: 0.55;
+    --shadow-float: 0 10px 36px rgb(0 0 0 / 0.5);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --material: var(--surface);
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --material: var(--surface);
+    --material-border: var(--label-2);
+    --separator: var(--label-2);
+  }
+}
+
+@theme inline {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-label: var(--label);
+  --color-label-2: var(--label-2);
+  --color-label-3: var(--label-3);
+  --color-separator: var(--separator);
+  --color-fill: var(--fill);
+  --color-fill-strong: var(--fill-strong);
+  --color-tint: var(--tint);
+  --color-on-tint: var(--on-tint);
+  --color-ok: var(--ok);
+  --color-late: var(--late);
+  --radius-card: 1.25rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    background: var(--bg);
+  }
+
+  body {
+    min-height: 100dvh;
+    background: var(--bg);
+    color: var(--label);
+    font: 1.0625rem/1.4 var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    /* Room for the tab bar, which floats above the page. */
+    padding-bottom: calc(max(0.75rem, env(safe-area-inset-bottom) - 0.625rem) + 5.5rem);
+  }
+
+  a,
+  button {
+    touch-action: manipulation;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--tint);
+    outline-offset: 2px;
+  }
+}
+
+/* A floating translucent layer: tab bar, navigation bar. */
+@utility material {
+  background: var(--material);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+
+  @media (prefers-reduced-transparency: reduce) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Feedback starts with the press, not with the release. */
+@utility pressable {
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
+  user-select: none;
+  -webkit-user-select: none;
+
+  &:active {
+    transform: scale(0.96);
+    opacity: 0.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:active {
+      transform: none;
+    }
+  }
+}
+
+/* Tab bar: a capsule floating above the page, clear of the home indicator. */
+.tabbar {
+  position: fixed;
+  z-index: 40;
+  inset-inline: 0.75rem;
+  bottom: max(0.75rem, env(safe-area-inset-bottom) - 0.625rem);
+  height: 3.875rem;
+  max-width: 28rem;
+  margin-inline: auto;
+  border: 1px solid var(--material-border);
+  border-radius: 9999px;
+  box-shadow: var(--shadow-float), inset 0 1px 0 var(--material-edge);
+}
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: calc(env(safe-area-inset-top) + 2.75rem);
+  padding: env(safe-area-inset-top) 0.25rem 0;
+}
+
+/* Navigation bar: the large title scrolls away with the page, and the bar's
+   material and small title fade in while it leaves. Browsers without
+   scroll-driven animations keep a plain translucent bar without the small title. */
+.navbar-material {
+  opacity: 1;
+}
+
+.navbar-title {
+  opacity: 0;
+}
+
+@supports (animation-timeline: scroll()) {
+  .navbar-material,
+  .navbar-title {
+    opacity: 0;
+    animation: navbar-in linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 1.5rem 3.25rem;
+  }
+}
+
+@keyframes navbar-in {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Bottom sheet. The sheet follows the finger through the swipe variables of
+   the drawer and settles with the curve iOS uses for its own sheets. */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  min-height: 100dvh;
+  background: black;
+  opacity: calc(var(--scrim-opacity) * (1 - var(--drawer-swipe-progress)));
+  transition: opacity 450ms cubic-bezier(0.32, 0.72, 0, 1);
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+  }
+
+  &[data-swiping] {
+    transition-duration: 0ms;
+  }
+
+  &[data-ending-style] {
+    transition-duration: calc(var(--drawer-swipe-strength) * 400ms);
+  }
+}
+
+.sheet-viewport {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  /* A sheet that leaves the page usable must not catch its touches. */
+  &[data-passthrough] {
+    pointer-events: none;
+  }
+}
+
+.sheet-popup {
+  /* The sheet is longer than it looks, so pulling it up never shows a gap below. */
+  --bleed: 3rem;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 32rem;
+  max-height: calc(100dvh - env(safe-area-inset-top) - 1.5rem + var(--bleed));
+  margin-bottom: calc(-1 * var(--bleed));
+  padding-bottom: calc(env(safe-area-inset-bottom) + var(--bleed));
+  border-radius: 1.75rem 1.75rem 0 0;
+  background: var(--surface);
+  box-shadow: 0 -2px 24px rgb(0 0 0 / 0.12);
+  outline: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  pointer-events: auto;
+  touch-action: auto;
+  transform: translateY(var(--drawer-swipe-movement-y));
+  transition: transform 450ms cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
+
+  &[data-swiping] {
+    transition-duration: 0ms;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    transform: translateY(calc(100% - var(--bleed) + 2px));
+  }
+
+  &[data-ending-style] {
+    transition-duration: calc(var(--drawer-swipe-strength) * 400ms);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-popup,
+  .sheet-backdrop {
+    transition: opacity 200ms ease;
+  }
+
+  .sheet-popup[data-starting-style],
+  .sheet-popup[data-ending-style] {
+    transform: none;
+    opacity: 0;
+  }
+}
