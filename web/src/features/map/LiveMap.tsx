@@ -27,9 +27,11 @@ const REGION: [[number, number], [number, number]] = [
   [10.4, 48.6],
 ]
 const TOUCH_REACH = 14
+// From this many minutes behind, a vehicle says so on the map. Below that it would be noise.
+const LATE_FROM = 2
 
 type Position = [lon: number, lat: number]
-type Moving = { marker: Marker; badge: HTMLElement; from: Position; to: Position; shown: Position; since: number }
+type Moving = { marker: Marker; badge: HTMLElement; delay: HTMLElement; from: Position; to: Position; shown: Position; since: number }
 
 // The map lives outside the page: built on the first visit and kept when the
 // tab is left, so coming back costs neither a new set of tiles nor a new
@@ -206,12 +208,18 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
           const badge = document.createElement('button')
           badge.type = 'button'
           badge.className = 'vehicle'
-          badge.append(document.createElement('i'))
+          const delay = document.createElement('b')
+          badge.append(document.createElement('i'), delay)
           badge.addEventListener('click', (event) => {
             event.stopPropagation()
             current.onVehicle(one.id)
           })
-          moving = { marker: new Marker({ element: badge }).setLngLat(to).addTo(current.map), badge, from: to, to, shown: to, since: now }
+          // The map places a marker by transforming its element, so the badge,
+          // which grows when tapped, sits inside one: scaling the marker itself
+          // would scale its place on the map along with it.
+          const pin = document.createElement('div')
+          pin.append(badge)
+          moving = { marker: new Marker({ element: pin }).setLngLat(to).addTo(current.map), badge, delay, from: to, to, shown: to, since: now }
           current.vehicles.set(one.id, moving)
         }
         const far = Math.abs(to[0] - moving.shown[0]) + Math.abs(to[1] - moving.shown[1]) > JUMP_DEGREES
@@ -230,7 +238,9 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
         badge.style.setProperty('--vehicle-color', style?.color ?? '')
         badge.style.setProperty('--vehicle-text', style?.textColor ?? '')
         badge.style.setProperty('--bearing', `${one.bearing}deg`)
-        badge.setAttribute('aria-label', `${one.line} ${labels.towards} ${one.destination}`)
+        const late = Math.round(one.delaySeconds / 60)
+        moving.delay.textContent = late >= LATE_FROM ? `+${late}` : ''
+        badge.setAttribute('aria-label', `${one.line} ${labels.towards} ${one.destination}${late >= LATE_FROM ? `, ${labels.late.replace('{n}', String(late))}` : ''}`)
       }
       // The sheet of the tapped vehicle follows it.
       setVehicle((shown) => (shown ? reported.current.get(shown.id) : shown))
@@ -269,13 +279,17 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
       cancelAnimationFrame(frame)
       document.removeEventListener('visibilitychange', follow)
     }
-  }, [lineStyles, labels.towards])
+  }, [lineStyles, labels.towards, labels.late])
 
   // The tapped vehicle: marked on the map, with its remaining stops and its way.
   const vehicleId = vehicle?.id
   useEffect(() => {
     selected.current = vehicleId
-    for (const [id, moving] of live?.vehicles ?? []) moving.badge.toggleAttribute('data-selected', id === vehicleId)
+    for (const [id, moving] of live?.vehicles ?? []) {
+      moving.badge.toggleAttribute('data-selected', id === vehicleId)
+      // The tapped one lies on top of its neighbours.
+      moving.marker.getElement().style.zIndex = id === vehicleId ? '1' : ''
+    }
     setTrip(undefined)
     if (vehicleId === undefined) return showTrack(undefined, undefined)
     let shown = true

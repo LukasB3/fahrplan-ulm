@@ -32,7 +32,7 @@ function MoreLink({ to, label }: { to: string; label: string }) {
 }
 
 export function RouteScreen({ locale }: { locale: Locale }) {
-  const { route, lab, site, departures, planner } = t(locale)
+  const { route, site, departures, planner } = t(locale)
   return (
     <>
       <ScreenHeader locale={locale} title={route.title} />
@@ -67,9 +67,6 @@ export function RouteScreen({ locale }: { locale: Locale }) {
           </div>
         </section>
 
-        <ul className="overflow-hidden rounded-card bg-surface">
-          <MoreLink to={href(locale, 'lab')} label={lab.link} />
-        </ul>
       </main>
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'WebSite', name: site.name, url: SITE_ORIGIN, inLanguage: locale, description: site.description }} />
     </>
