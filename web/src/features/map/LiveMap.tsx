@@ -2,7 +2,7 @@
 
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type { Vehicle, Vehicles, VehicleTrip } from '@api/types'
-import { type GeoJSONSource, getVersion, Map as MapLibre, Marker, setWorkerUrl } from 'maplibre-gl'
+import { AttributionControl, type GeoJSONSource, getVersion, Map as MapLibre, Marker, setWorkerUrl } from 'maplibre-gl'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { type BoardLabels, DepartureBoard } from '@/features/departures/DepartureBoard'
@@ -69,8 +69,10 @@ const createMap = (place: HTMLElement, stops: MapStop[]): Live => {
     dragRotate: false,
     pitchWithRotate: false,
     touchPitch: false,
-    attributionControl: { compact: true },
+    attributionControl: false,
   })
+  // The credits go bottom left: the corner on the right belongs to the location button.
+  map.addControl(new AttributionControl({ compact: true }), 'bottom-left')
   map.touchZoomRotate.disableRotation()
   const created: Live = { map, host, vehicles: new Map(), onStop: () => {}, onVehicle: () => {} }
 

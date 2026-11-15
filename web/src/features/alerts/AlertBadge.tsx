@@ -12,7 +12,7 @@ export function AlertBadge({ label }: { label: string }) {
   const unseen = alerts.filter((alert) => !seen.includes(alert.id) && favourites.some((favourite) => concerns(alert, favourite))).length
   if (!unseen) return null
   return (
-    <span aria-label={label.replace('{n}', String(unseen))} className="absolute top-1.5 left-1/2 ml-1.5 grid h-[1.125rem] min-w-[1.125rem] place-items-center rounded-full bg-late px-1 text-[0.6875rem] leading-none font-bold text-white tabular-nums">
+    <span aria-label={label.replace('{n}', String(unseen))} className="absolute top-1.5 left-1/2 ml-1.5 grid h-[1.125rem] min-w-[1.125rem] place-items-center rounded-full bg-late-solid px-1 text-[0.6875rem] leading-none font-bold text-white tabular-nums">
       {unseen}
     </span>
   )

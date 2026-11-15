@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import linesJson from '../../data/lines.json'
 import metaJson from '../../data/meta.json'
 import stopsJson from '../../data/stops.json'
+import { contrast, shaded } from './colour'
 import type { Line, LineStyle, Meta, Stop, TimetableTable } from './data-types'
 import { metresBetween } from './geo'
 
@@ -33,8 +34,21 @@ export const nearestStops = (to: Stop, count: number) =>
     .sort((a, b) => a.metres - b.metres)
     .slice(0, count)
 
+// SWU prints white numbers on every line colour, and on the lighter ones they
+// are too faint to read at the size of a badge. A colour that is nearly dark
+// enough is darkened as far as white needs; a light one stays as it is and
+// gets black numbers.
+const READABLE = 4.5
+const NEARLY = 3.5
+
+const readable = (color: string) => {
+  const white = contrast('#ffffff', color)
+  if (white < NEARLY) return { color, textColor: '#000000' }
+  let shade = color
+  for (let factor = 0.99; contrast('#ffffff', shade) < READABLE; factor -= 0.01) shade = shaded(color, factor)
+  return { color: shade, textColor: '#ffffff' }
+}
+
 // What each line's badge is drawn with. A line SWU colours white (the E line)
 // would vanish on a white card, so it gets the neutral badge instead.
-export const lineStyles: Record<string, LineStyle> = Object.fromEntries(
-  lines.filter((line) => line.color !== '#ffffff').map((line) => [line.id, { color: line.color, textColor: line.textColor, tram: line.kind === 'tram' }]),
-)
+export const lineStyles: Record<string, LineStyle> = Object.fromEntries(lines.filter((line) => line.color !== '#ffffff').map((line) => [line.id, { ...readable(line.color), tram: line.kind === 'tram' }]))

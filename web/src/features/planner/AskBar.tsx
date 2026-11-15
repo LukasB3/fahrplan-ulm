@@ -85,7 +85,7 @@ export function AskBar({ context, onResult, note, privacyHref, labels }: Props) 
           className="min-w-0 flex-1 bg-transparent py-3 outline-none placeholder:text-label-3"
         />
         {text.trim() && !listening ? (
-          <button type="submit" disabled={busy} aria-label={labels.askSend} className="pressable mr-1.5 grid size-10 shrink-0 place-items-center rounded-full bg-tint text-on-tint disabled:opacity-50">
+          <button type="submit" disabled={busy} aria-label={labels.askSend} className="pressable mr-1.5 grid size-10 shrink-0 place-items-center rounded-full bg-tint-solid text-on-tint disabled:opacity-50">
             <Icon name="send" className={busy ? 'motion-safe:animate-pulse' : undefined} />
           </button>
         ) : (
@@ -95,7 +95,7 @@ export function AskBar({ context, onResult, note, privacyHref, labels }: Props) 
               onClick={speak}
               aria-pressed={listening !== undefined}
               aria-label={listening ? labels.askMicStop : labels.askMic}
-              className={`pressable mr-1.5 grid size-10 shrink-0 place-items-center rounded-full ${listening ? 'bg-tint text-on-tint motion-safe:animate-pulse' : 'text-tint'}`}
+              className={`pressable mr-1.5 grid size-10 shrink-0 place-items-center rounded-full ${listening ? 'bg-tint-solid text-on-tint motion-safe:animate-pulse' : 'text-tint'}`}
             >
               <Icon name="mic" active={listening !== undefined} />
             </button>

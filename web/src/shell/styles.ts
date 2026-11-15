@@ -1,7 +1,7 @@
 const buttonBase = 'pressable inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 font-semibold'
 
 export const button = {
-  primary: `${buttonBase} bg-tint text-on-tint`,
+  primary: `${buttonBase} bg-tint-solid text-on-tint`,
   secondary: `${buttonBase} bg-fill text-tint`,
 }
 
