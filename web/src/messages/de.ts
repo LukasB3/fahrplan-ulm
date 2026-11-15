@@ -126,6 +126,10 @@ export const de = {
     failed: 'Die Abfahrten sind gerade nicht erreichbar. Es wird weiter versucht.',
     stale: 'Die Angaben sind nicht mehr ganz aktuell.',
     loading: 'Abfahrten werden geladen',
+    towards: 'Richtung',
+    runStops: 'Nächste Halte',
+    runFailed: 'Der Fahrtverlauf dieser Abfahrt ist gerade nicht abrufbar.',
+    runClose: 'Fertig',
   },
   stop: {
     kind: 'Haltestelle',

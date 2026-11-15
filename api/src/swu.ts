@@ -13,6 +13,7 @@ const departure = z.object({
   DepartureTimeActual: z.iso.datetime({ offset: true }).nullish(),
   DepartureDirectionText: z.string().nullish(),
   PlatformName: z.string().nullish(),
+  StopPointCode: z.string().nullish(),
   VehicleNumber: z.number().int().nullish(),
   VehicleCategory: z.number().int().nullish(),
 })
@@ -34,6 +35,8 @@ const iso = (time: string) => new Date(time).toISOString()
 export const swuDepartures = async (getJson: GetJson, stop: number, limit: number): Promise<Departure[]> => {
   const { StopPassage: answer } = passage.parse(await getJson(`${BASE}/stop/passage/Departures?StopNumber=${stop}&Limit=${limit}`))
   if (answer.State === 'no stop found') throw new UnknownStop(`SWU has no stop ${stop}`)
+  // A stop where nothing leaves in the next hours, at night for one: an empty board, not a failure.
+  if (answer.State === 'no departures found') return []
   if (answer.State !== 'ok') throw new Error(`SWU answered "${answer.State}"`)
   // One entry SWU got wrong must not cost the whole board.
   return (answer.DepartureData ?? []).flatMap((item): Departure[] => {
@@ -49,6 +52,7 @@ export const swuDepartures = async (getJson: GetJson, stop: number, limit: numbe
         planned: iso(entry.DepartureTimeScheduled),
         expected: entry.DepartureTimeActual ? iso(entry.DepartureTimeActual) : null,
         vehicle: entry.VehicleNumber ?? null,
+        platformId: entry.StopPointCode ?? null,
       },
     ]
   })

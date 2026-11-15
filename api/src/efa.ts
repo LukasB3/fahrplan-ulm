@@ -16,7 +16,7 @@ const modeOf = (productClass: number): Mode => (productClass === TRAM_CLASS ? 't
 const stopEvent = z.object({
   departureTimePlanned: z.iso.datetime(),
   departureTimeEstimated: z.iso.datetime().nullish(),
-  location: z.object({ properties: z.object({ platformName: z.string().nullish(), platform: z.string().nullish() }).nullish() }),
+  location: z.object({ id: z.string().nullish(), properties: z.object({ platformName: z.string().nullish(), platform: z.string().nullish() }).nullish() }),
   transportation: z.object({
     number: z.string().nullish(),
     name: z.string().nullish(),
@@ -53,6 +53,7 @@ export const efaDeparturesOfOthers = async (getJson: GetJson, base: string, dhid
         planned: departureTimePlanned,
         expected: departureTimeEstimated ?? null,
         vehicle: null,
+        platformId: location.id ?? null,
       },
     ]
   })
@@ -107,10 +108,11 @@ const FIRST_PSEUDO_CLASS = 97
 
 const time = z.iso.datetime().nullish()
 const point = z.object({
+  id: z.string().nullish(),
   type: z.string().nullish(),
   name: z.string().nullish(),
   disassembledName: z.string().nullish(),
-  parent: z.object({ name: z.string().nullish(), disassembledName: z.string().nullish(), parent: z.object({ name: z.string().nullish() }).nullish() }).nullish(),
+  parent: z.object({ id: z.string().nullish(), name: z.string().nullish(), disassembledName: z.string().nullish(), parent: z.object({ name: z.string().nullish() }).nullish() }).nullish(),
   properties: z.object({ platformName: z.string().nullish(), platform: z.string().nullish() }).nullish(),
   departureTimePlanned: time,
   departureTimeEstimated: time,
@@ -143,7 +145,8 @@ const nameOf = (where: z.infer<typeof point>) => {
   if (where.type !== 'platform' && where.type !== 'stop') return where.disassembledName ?? where.name ?? ''
   const town = where.parent?.parent?.name
   const name = stop ?? where.name ?? ''
-  return town && !HOME_TOWNS.includes(town) && !name.startsWith(town) ? `${town}, ${name}` : name
+  // "Wendlingen (N)" lies in "Wendlingen (Neckar)": the town is in the name already.
+  return town && !HOME_TOWNS.includes(town) && !name.startsWith(town.replace(/\s*\(.*$/, '')) ? `${town}, ${name}` : name
 }
 
 const stopover = (where: z.infer<typeof point>, planned: string, expected: string | null | undefined): Stopover => ({
@@ -197,6 +200,50 @@ export const efaJourneys = async (getJson: GetJson, base: string, { from, to, mo
   const url = `${base}/XML_TRIP_REQUEST2?${COMMON}&${endpoint('origin', from)}&${endpoint('destination', to)}&itdDate=${clock.date}&itdTime=${clock.time}&itdTripDateTimeDepArr=${mode === 'depart' ? 'dep' : 'arr'}&useRealtime=1&calcNumberOfTrips=4&calcOneDirection=1`
   const { journeys = [] } = tripAnswer.parse(await getJson(url))
   return journeys.flatMap((item) => journeyOf(item) ?? [])
+}
+
+// --- Runs -------------------------------------------------------------------
+
+// A departure as DING lists it, with every stop it calls at afterwards. `dhid` is the stop's id at DING.
+export type RunEvent = { platformId: string | null; line: string; planned: string; stops: (Stopover & { dhid: string | null })[] }
+
+const call = (where: z.infer<typeof point>, planned: string, expected: string | null | undefined) => ({ ...stopover(where, planned, expected), dhid: (where.type === 'stop' ? where.id : where.parent?.id) ?? null })
+
+const runEvent = z.object({
+  departureTimePlanned: z.iso.datetime(),
+  departureTimeEstimated: z.iso.datetime().nullish(),
+  location: point,
+  transportation: z.object({ number: z.string().nullish(), name: z.string().nullish(), product: z.object({ class: z.number().int() }) }),
+  onwardLocations: z.array(z.unknown()).nullish(),
+})
+
+// The departures of a stop from a moment on, SWU's lines included, each with
+// its further stops. The answer is large (about 500 KB for 30 departures), so
+// it is asked for only when someone opens a departure.
+export const efaRuns = async (getJson: GetJson, base: string, dhid: string, from: Date): Promise<RunEvent[]> => {
+  const clock = berlinClock(from)
+  const url = `${base}/XML_DM_REQUEST?${COMMON}&type_dm=any&name_dm=${encodeURIComponent(dhid)}&mode=direct&useRealtime=1&depType=stopEvents&limit=30&includeCompleteStopSeq=1&itdDate=${clock.date}&itdTime=${clock.time}`
+  const { stopEvents = [] } = monitor.parse(await getJson(url))
+  return stopEvents.flatMap((item): RunEvent[] => {
+    const parsed = runEvent.safeParse(item)
+    if (!parsed.success) return []
+    const { transportation, location, departureTimePlanned, departureTimeEstimated, onwardLocations } = parsed.data
+    const onward = (onwardLocations ?? []).flatMap((next): RunEvent['stops'] => {
+      const where = point.safeParse(next)
+      if (!where.success) return []
+      // When the vehicle gets there. The last stop has no departure; a stop without any time is left out.
+      const planned = where.data.arrivalTimePlanned ?? where.data.departureTimePlanned
+      return planned ? [call(where.data, planned, where.data.arrivalTimeEstimated ?? where.data.departureTimeEstimated)] : []
+    })
+    return [
+      {
+        platformId: location.id ?? null,
+        line: lineOf(transportation.number ?? '', transportation.name ?? '', modeOf(transportation.product.class)),
+        planned: departureTimePlanned,
+        stops: [call(location, departureTimePlanned, departureTimeEstimated), ...onward],
+      },
+    ]
+  })
 }
 
 // --- Alerts -------------------------------------------------------------------

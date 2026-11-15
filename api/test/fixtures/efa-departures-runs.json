@@ -1,0 +1,845 @@
+{
+ "version": "11.0.6.72",
+ "stopEvents": [
+  {
+   "departureTimePlanned": "2026-11-15T20:20:00Z",
+   "departureTimeEstimated": "2026-11-15T20:20:00Z",
+   "location": {
+    "id": "de:08421:1350:1:E_Bau",
+    "name": "Ulm Ehinger Tor",
+    "disassembledName": "Bstg. E",
+    "type": "platform",
+    "parent": {
+     "id": "de:08421:1350",
+     "name": "Ulm Ehinger Tor",
+     "disassembledName": "Ehinger Tor",
+     "type": "stop",
+     "parent": {
+      "id": "placeID:8421000:20",
+      "name": "Ulm",
+      "type": "locality"
+     }
+    },
+    "properties": {
+     "platform": "E",
+     "platformName": "Bstg. E"
+    }
+   },
+   "transportation": {
+    "id": "din:88049: :H:j26",
+    "name": "Regionalbus Linie 49",
+    "number": "49",
+    "product": {
+     "class": 6,
+     "name": "Regionalbus Linie"
+    },
+    "operator": {
+     "name": "RAB"
+    },
+    "destination": {
+     "name": "Tomerdingen Lindenstraße"
+    }
+   },
+   "onwardLocations": [
+    {
+     "id": "de:08421:1232:0:A",
+     "name": "Ulm Lehrer Tal",
+     "disassembledName": "Bstg. D",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1232",
+      "name": "Ulm Lehrer Tal",
+      "disassembledName": "Lehrer Tal",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "D",
+      "platformName": "Bstg. D"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:24:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:24:00Z",
+     "departureTimePlanned": "2026-11-15T20:24:00Z",
+     "departureTimeEstimated": "2026-11-15T20:24:00Z"
+    },
+    {
+     "id": "de:08421:1233:0:1",
+     "name": "Ulm Schießstände",
+     "disassembledName": "Bstg. B",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1233",
+      "name": "Ulm Schießstände",
+      "disassembledName": "Schießstände",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "B",
+      "platformName": "Bstg. B"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:26:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:26:00Z",
+     "departureTimePlanned": "2026-11-15T20:26:00Z",
+     "departureTimeEstimated": "2026-11-15T20:26:00Z"
+    },
+    {
+     "id": "de:08421:1102:0:2",
+     "name": "Ulm Loherstraße",
+     "disassembledName": "Bstg. C",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1102",
+      "name": "Ulm Loherstraße",
+      "disassembledName": "Loherstraße",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "C",
+      "platformName": "Bstg. C"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:29:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:29:00Z",
+     "departureTimePlanned": "2026-11-15T20:29:00Z",
+     "departureTimeEstimated": "2026-11-15T20:29:00Z"
+    },
+    {
+     "id": "de:08425:2422:0:2",
+     "name": "Tomerdingen Lindenstraße",
+     "disassembledName": "Bstg. 2",
+     "type": "platform",
+     "parent": {
+      "id": "de:08425:2422",
+      "name": "Tomerdingen Lindenstraße",
+      "disassembledName": "Lindenstraße",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8425031:6",
+       "name": "Tomerdingen",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "2",
+      "platformName": "Bstg. 2"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:51:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:51:00Z"
+    }
+   ]
+  },
+  {
+   "departureTimePlanned": "2026-11-15T20:27:00Z",
+   "departureTimeEstimated": "2026-11-15T20:27:00Z",
+   "location": {
+    "id": "de:08421:1350:1:C",
+    "name": "Ulm Ehinger Tor",
+    "disassembledName": "Bstg. C",
+    "type": "platform",
+    "parent": {
+     "id": "de:08421:1350",
+     "name": "Ulm Ehinger Tor",
+     "disassembledName": "Ehinger Tor",
+     "type": "stop",
+     "parent": {
+      "id": "placeID:8421000:20",
+      "name": "Ulm",
+      "type": "locality"
+     }
+    },
+    "properties": {
+     "platform": "C",
+     "platformName": "Bstg. C"
+    }
+   },
+   "transportation": {
+    "id": "din:87001: :H:j26",
+    "name": "Straßenbahn Linie 1",
+    "number": "1",
+    "product": {
+     "class": 4,
+     "name": "Straßenbahn Linie"
+    },
+    "operator": {
+     "name": "SWU"
+    },
+    "destination": {
+     "name": "Böfingen"
+    }
+   },
+   "onwardLocations": [
+    {
+     "id": "de:08421:1008:1:1",
+     "name": "Ulm Hauptbahnhof",
+     "disassembledName": "Bstg. B",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1008",
+      "name": "Ulm Hauptbahnhof",
+      "disassembledName": "Hauptbahnhof",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "B",
+      "platformName": "Bstg. B"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:30:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:30:00Z",
+     "departureTimePlanned": "2026-11-15T20:30:00Z",
+     "departureTimeEstimated": "2026-11-15T20:30:00Z"
+    },
+    {
+     "id": "de:08421:1010:0:A",
+     "name": "Ulm Theater",
+     "disassembledName": "Bstg. B",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1010",
+      "name": "Ulm Theater",
+      "disassembledName": "Theater",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "B",
+      "platformName": "Bstg. B"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:32:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:32:00Z",
+     "departureTimePlanned": "2026-11-15T20:32:00Z",
+     "departureTimeEstimated": "2026-11-15T20:32:00Z"
+    },
+    {
+     "id": "de:08421:1011:0:11",
+     "name": "Ulm Justizgebäude",
+     "disassembledName": "Bstg. C",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1011",
+      "name": "Ulm Justizgebäude",
+      "disassembledName": "Justizgebäude",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "C",
+      "platformName": "Bstg. C"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:34:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:34:00Z",
+     "departureTimePlanned": "2026-11-15T20:34:00Z",
+     "departureTimeEstimated": "2026-11-15T20:34:00Z"
+    },
+    {
+     "id": "de:08421:1070:0:11",
+     "name": "Ulm Ostpreußenweg",
+     "disassembledName": "Bstg. A",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1070",
+      "name": "Ulm Ostpreußenweg",
+      "disassembledName": "Ostpreußenweg",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "A",
+      "platformName": "Bstg. A"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:52:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:52:00Z"
+    }
+   ]
+  },
+  {
+   "departureTimePlanned": "2026-11-15T20:27:00Z",
+   "departureTimeEstimated": "2026-11-15T20:27:00Z",
+   "location": {
+    "id": "de:08421:1350:1:C",
+    "name": "Ulm Ehinger Tor",
+    "disassembledName": "Bstg. C",
+    "type": "platform",
+    "parent": {
+     "id": "de:08421:1350",
+     "name": "Ulm Ehinger Tor",
+     "disassembledName": "Ehinger Tor",
+     "type": "stop",
+     "parent": {
+      "id": "placeID:8421000:20",
+      "name": "Ulm",
+      "type": "locality"
+     }
+    },
+    "properties": {
+     "platform": "C",
+     "platformName": "Bstg. C"
+    }
+   },
+   "transportation": {
+    "id": "din:87002: :H:j26",
+    "name": "Straßenbahn Linie 2",
+    "number": "2",
+    "product": {
+     "class": 4,
+     "name": "Straßenbahn Linie"
+    },
+    "operator": {
+     "name": "SWU"
+    },
+    "destination": {
+     "name": "Science Park II"
+    }
+   },
+   "onwardLocations": [
+    {
+     "id": "de:08421:1008:1:1",
+     "name": "Ulm Hauptbahnhof",
+     "disassembledName": "Bstg. B",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1008",
+      "name": "Ulm Hauptbahnhof",
+      "disassembledName": "Hauptbahnhof",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "B",
+      "platformName": "Bstg. B"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:30:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:30:00Z",
+     "departureTimePlanned": "2026-11-15T20:30:00Z",
+     "departureTimeEstimated": "2026-11-15T20:30:00Z"
+    },
+    {
+     "id": "de:08421:1010:0:A",
+     "name": "Ulm Theater",
+     "disassembledName": "Bstg. B",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1010",
+      "name": "Ulm Theater",
+      "disassembledName": "Theater",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "B",
+      "platformName": "Bstg. B"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:32:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:32:00Z",
+     "departureTimePlanned": "2026-11-15T20:32:00Z",
+     "departureTimeEstimated": "2026-11-15T20:32:00Z"
+    },
+    {
+     "id": "de:08421:1019:0:11",
+     "name": "Ulm Stadtwerke",
+     "disassembledName": "Bstg. C",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1019",
+      "name": "Ulm Stadtwerke",
+      "disassembledName": "Stadtwerke",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "C",
+      "platformName": "Bstg. C"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:33:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:33:00Z",
+     "departureTimePlanned": "2026-11-15T20:33:00Z",
+     "departureTimeEstimated": "2026-11-15T20:33:00Z"
+    },
+    {
+     "id": "de:08421:1250:0:11",
+     "name": "Ulm Science Park II",
+     "disassembledName": "Bstg. A",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1250",
+      "name": "Ulm Science Park II",
+      "disassembledName": "Science Park II",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "A",
+      "platformName": "Bstg. A"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:47:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:47:00Z"
+    }
+   ]
+  },
+  {
+   "departureTimePlanned": "2026-11-15T20:27:00Z",
+   "departureTimeEstimated": "2026-11-15T20:27:00Z",
+   "location": {
+    "id": "de:08421:1350:1:B",
+    "name": "Ulm Ehinger Tor",
+    "disassembledName": "Bstg. B",
+    "type": "platform",
+    "parent": {
+     "id": "de:08421:1350",
+     "name": "Ulm Ehinger Tor",
+     "disassembledName": "Ehinger Tor",
+     "type": "stop",
+     "parent": {
+      "id": "placeID:8421000:20",
+      "name": "Ulm",
+      "type": "locality"
+     }
+    },
+    "properties": {
+     "platform": "B",
+     "platformName": "Bstg. B"
+    }
+   },
+   "transportation": {
+    "id": "din:87007: :H:j26",
+    "name": "Stadtbus UL/NU Linie 7",
+    "number": "7",
+    "product": {
+     "class": 5,
+     "name": "Stadtbus UL/NU Linie"
+    },
+    "operator": {
+     "name": "SWU"
+    },
+    "destination": {
+     "name": "Jungingen"
+    }
+   },
+   "onwardLocations": [
+    {
+     "id": "de:08421:1008:1:1",
+     "name": "Ulm Hauptbahnhof",
+     "disassembledName": "Bstg. B",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1008",
+      "name": "Ulm Hauptbahnhof",
+      "disassembledName": "Hauptbahnhof",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "B",
+      "platformName": "Bstg. B"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:30:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:30:06Z",
+     "departureTimePlanned": "2026-11-15T20:30:00Z",
+     "departureTimeEstimated": "2026-11-15T20:30:06Z"
+    },
+    {
+     "id": "de:08421:1010:0:A",
+     "name": "Ulm Theater",
+     "disassembledName": "Bstg. B",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1010",
+      "name": "Ulm Theater",
+      "disassembledName": "Theater",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "B",
+      "platformName": "Bstg. B"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:32:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:32:06Z",
+     "departureTimePlanned": "2026-11-15T20:32:00Z",
+     "departureTimeEstimated": "2026-11-15T20:32:06Z"
+    },
+    {
+     "id": "de:08421:1019:0:11",
+     "name": "Ulm Stadtwerke",
+     "disassembledName": "Bstg. C",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1019",
+      "name": "Ulm Stadtwerke",
+      "disassembledName": "Stadtwerke",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "C",
+      "platformName": "Bstg. C"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:33:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:33:06Z",
+     "departureTimePlanned": "2026-11-15T20:33:00Z",
+     "departureTimeEstimated": "2026-11-15T20:33:06Z"
+    },
+    {
+     "id": "de:08421:1163:1:1",
+     "name": "Ulm Rathaus Jungingen",
+     "disassembledName": "Bstg. A",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1163",
+      "name": "Ulm Rathaus Jungingen",
+      "disassembledName": "Rathaus Jungingen",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "A",
+      "platformName": "Bstg. A"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:52:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:52:06Z"
+    }
+   ]
+  },
+  {
+   "departureTimePlanned": "2026-11-15T20:27:00Z",
+   "departureTimeEstimated": "2026-11-15T20:27:00Z",
+   "location": {
+    "id": "de:08421:1350:1:B",
+    "name": "Ulm Ehinger Tor",
+    "disassembledName": "Bstg. B",
+    "type": "platform",
+    "parent": {
+     "id": "de:08421:1350",
+     "name": "Ulm Ehinger Tor",
+     "disassembledName": "Ehinger Tor",
+     "type": "stop",
+     "parent": {
+      "id": "placeID:8421000:20",
+      "name": "Ulm",
+      "type": "locality"
+     }
+    },
+    "properties": {
+     "platform": "B",
+     "platformName": "Bstg. B"
+    }
+   },
+   "transportation": {
+    "id": "din:87004: :H:j26",
+    "name": "Stadtbus UL/NU Linie 4",
+    "number": "4",
+    "product": {
+     "class": 5,
+     "name": "Stadtbus UL/NU Linie"
+    },
+    "operator": {
+     "name": "SWU"
+    },
+    "destination": {
+     "name": "Böfingen Süd"
+    }
+   },
+   "onwardLocations": [
+    {
+     "id": "de:08421:1001:0:1",
+     "name": "Ulm Steinerne Brücke",
+     "disassembledName": "Bstg. B",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1001",
+      "name": "Ulm Steinerne Brücke",
+      "disassembledName": "Steinerne Brücke",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "B",
+      "platformName": "Bstg. B"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:28:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:28:00Z",
+     "departureTimePlanned": "2026-11-15T20:28:00Z",
+     "departureTimeEstimated": "2026-11-15T20:28:00Z"
+    },
+    {
+     "id": "de:08421:1002:1:1",
+     "name": "Ulm Rathaus",
+     "disassembledName": "Bstg. B",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1002",
+      "name": "Ulm Rathaus",
+      "disassembledName": "Rathaus Ulm",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "B",
+      "platformName": "Bstg. B"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:31:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:31:00Z",
+     "departureTimePlanned": "2026-11-15T20:31:00Z",
+     "departureTimeEstimated": "2026-11-15T20:31:00Z"
+    },
+    {
+     "id": "de:08421:1009:0:1",
+     "name": "Ulm Hafengasse",
+     "disassembledName": "Bstg. B",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1009",
+      "name": "Ulm Hafengasse",
+      "disassembledName": "Hafengasse",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "B",
+      "platformName": "Bstg. B"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:33:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:33:00Z",
+     "departureTimePlanned": "2026-11-15T20:33:00Z",
+     "departureTimeEstimated": "2026-11-15T20:33:00Z"
+    },
+    {
+     "id": "de:08421:1087:0:B",
+     "name": "Ulm Egertweg",
+     "disassembledName": "Bstg. B",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1087",
+      "name": "Ulm Egertweg",
+      "disassembledName": "Egertweg",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "B",
+      "platformName": "Bstg. B"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:47:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:47:00Z"
+    }
+   ]
+  },
+  {
+   "departureTimePlanned": "2026-11-15T20:30:00Z",
+   "departureTimeEstimated": "2026-11-15T20:30:00Z",
+   "location": {
+    "id": "de:08421:1350:1:D",
+    "name": "Ulm Ehinger Tor",
+    "disassembledName": "Bstg. D",
+    "type": "platform",
+    "parent": {
+     "id": "de:08421:1350",
+     "name": "Ulm Ehinger Tor",
+     "disassembledName": "Ehinger Tor",
+     "type": "stop",
+     "parent": {
+      "id": "placeID:8421000:20",
+      "name": "Ulm",
+      "type": "locality"
+     }
+    },
+    "properties": {
+     "platform": "D",
+     "platformName": "Bstg. D"
+    }
+   },
+   "transportation": {
+    "id": "din:87001: :R:j26",
+    "name": "Straßenbahn Linie 1",
+    "number": "1",
+    "product": {
+     "class": 4,
+     "name": "Straßenbahn Linie"
+    },
+    "operator": {
+     "name": "SWU"
+    },
+    "destination": {
+     "name": "Söflingen"
+    }
+   },
+   "onwardLocations": [
+    {
+     "id": "de:08421:1351:0:2",
+     "name": "Ulm Blücherstraße",
+     "disassembledName": "Bstg. B",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1351",
+      "name": "Ulm Blücherstraße",
+      "disassembledName": "Blücherstraße",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "B",
+      "platformName": "Bstg. B"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:31:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:31:00Z",
+     "departureTimePlanned": "2026-11-15T20:31:00Z",
+     "departureTimeEstimated": "2026-11-15T20:31:00Z"
+    },
+    {
+     "id": "de:08421:1352:0:12",
+     "name": "Ulm Theodor-Heuss-Platz",
+     "disassembledName": "Bstg. C",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1352",
+      "name": "Ulm Theodor-Heuss-Platz",
+      "disassembledName": "Theodor-Heuss-Platz",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "C",
+      "platformName": "Bstg. C"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:33:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:33:00Z",
+     "departureTimePlanned": "2026-11-15T20:33:00Z",
+     "departureTimeEstimated": "2026-11-15T20:33:00Z"
+    },
+    {
+     "id": "de:08421:1353:0:2",
+     "name": "Ulm Magirusstraße",
+     "disassembledName": "Bstg. B",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1353",
+      "name": "Ulm Magirusstraße",
+      "disassembledName": "Magirusstraße",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "B",
+      "platformName": "Bstg. B"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:34:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:34:00Z",
+     "departureTimePlanned": "2026-11-15T20:34:00Z",
+     "departureTimeEstimated": "2026-11-15T20:34:00Z"
+    },
+    {
+     "id": "de:08421:1300:1:11",
+     "name": "Ulm Söflingen",
+     "disassembledName": "Bstg. A",
+     "type": "platform",
+     "parent": {
+      "id": "de:08421:1300",
+      "name": "Ulm Söflingen",
+      "disassembledName": "Söflingen",
+      "type": "stop",
+      "parent": {
+       "id": "placeID:8421000:20",
+       "name": "Ulm",
+       "type": "locality"
+      }
+     },
+     "properties": {
+      "platform": "A",
+      "platformName": "Bstg. A"
+     },
+     "arrivalTimePlanned": "2026-11-15T20:37:00Z",
+     "arrivalTimeEstimated": "2026-11-15T20:37:00Z"
+    }
+   ]
+  }
+ ]
+}

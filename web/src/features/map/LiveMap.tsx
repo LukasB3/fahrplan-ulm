@@ -6,6 +6,7 @@ import { AttributionControl, type GeoJSONSource, getVersion, Map as MapLibre, Ma
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { type BoardLabels, DepartureBoard } from '@/features/departures/DepartureBoard'
+import { RunTitle, StopTimes } from '@/features/departures/Run'
 import { getJson } from '@/lib/api'
 import type { LineStyle } from '@/lib/data-types'
 import type { Messages } from '@/lib/i18n'
@@ -131,8 +132,6 @@ const showTrack = (trip: VehicleTrip | undefined, color: string | undefined) => 
     features: trip?.track.length ? [{ type: 'Feature', geometry: { type: 'LineString', coordinates: trip.track.map(([lat, lon]) => [lon, lat]) }, properties: color ? { color } : {} }] : [],
   })
 }
-
-const clock = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })
 
 export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Props) {
   const place = useRef<HTMLDivElement>(null)
@@ -358,17 +357,7 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
       <Sheet
         open={vehicle !== undefined}
         onOpenChange={(open) => !open && setVehicle(undefined)}
-        title={
-          vehicle && (
-            <span className="flex items-center gap-2">
-              <LineBadge line={vehicle.line} style={lineStyles[vehicle.line]} />
-              <span className="min-w-0 truncate">
-                <span className="font-normal text-label-2">{labels.towards} </span>
-                {vehicle.destination}
-              </span>
-            </span>
-          )
-        }
+        title={vehicle && <RunTitle line={vehicle.line} style={lineStyles[vehicle.line]} towards={labels.towards} destination={vehicle.destination} />}
         closeLabel={labels.close}
         passthrough
         low
@@ -383,15 +372,7 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
             ) : (
               <section>
                 <h3 className="pb-1 text-[0.8125rem] font-semibold text-label-2">{labels.nextStops}</h3>
-                <ol className="overflow-hidden rounded-card bg-bg">
-                  {(trip?.stops ?? []).map((next, index) => (
-                    <li key={`${next.code} ${index}`} className="flex min-h-10 items-center gap-3 border-t border-separator px-4 py-1.5 first:border-t-0">
-                      <span className="w-12 shrink-0 tabular-nums">{clock.format(new Date(next.expected ?? next.planned))}</span>
-                      <span className="min-w-0 flex-1 truncate">{next.name}</span>
-                    </li>
-                  ))}
-                  {!trip && <li className="h-10 motion-safe:animate-pulse" />}
-                </ol>
+                <StopTimes stops={trip?.stops} />
               </section>
             )}
           </div>
