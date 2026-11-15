@@ -160,6 +160,21 @@ describe('what the planner shows', () => {
     expect(asked).toEqual(['arrive', 'depart'])
   })
 
+  it('lists walking all the way after the rides, unless it gets there first', async () => {
+    const walk = (leave: number, arrive: number) => ({
+      interchanges: 0,
+      legs: [{ origin: { type: 'address', name: 'Hier', departureTimePlanned: inMinutes(leave) }, destination: { type: 'address', name: 'Dort', arrivalTimePlanned: inMinutes(arrive) }, transportation: { product: { class: 100 } }, distance: 900 }],
+    })
+    // The rides need a change, so walking is not simply worse and stays in the list.
+    const slowWalk = planning({ depart: [walk(0, 14), journey('5', 3, 9, 1), journey('7', 8, 16, 1)] })
+    expect(lines((await slowWalk.planner.trips(request('depart', null), NOW)).journeys)).toEqual(['5', '7', 'walk'])
+    // A direct ride that leaves later and arrives earlier makes the walk pointless: it is not listed at all.
+    const pointlessWalk = planning({ depart: [walk(0, 14), journey('5', 3, 9)] })
+    expect(lines((await pointlessWalk.planner.trips(request('depart', null), NOW)).journeys)).toEqual(['5'])
+    const quickWalk = planning({ depart: [walk(0, 6), journey('5', 3, 9)] })
+    expect(lines((await quickWalk.planner.trips(request('depart', null), NOW)).journeys)).toEqual(['walk', '5'])
+  })
+
   it('asks the planner once for the same journey within the minute', async () => {
     const { planner, asked } = planning({ depart: [journey('5', 5, 15)] })
     await planner.trips(request('depart', null), NOW)
