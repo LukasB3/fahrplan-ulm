@@ -1,12 +1,12 @@
 'use client'
 
 import 'maplibre-gl/dist/maplibre-gl.css'
-import type { Vehicle, Vehicles, VehicleTrip } from '@api/types'
+import type { Vehicle, VehicleTrip } from '@api/types'
 import { AttributionControl, type GeoJSONSource, getVersion, Map as MapLibre, Marker, setWorkerUrl } from 'maplibre-gl'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { type BoardLabels, DepartureBoard } from '@/features/departures/DepartureBoard'
-import { RunTitle, StopTimes } from '@/features/departures/Run'
+import { minutesOff, RunTitle, StopTimes } from '@/features/departures/Run'
 import { getJson } from '@/lib/api'
 import { locate, type LocateProblem } from '@/lib/geo'
 import type { LineStyle } from '@/lib/data-types'
@@ -14,12 +14,18 @@ import type { Messages } from '@/lib/i18n'
 import { Icon } from '@/shell/icons'
 import { LineBadge } from '@/shell/LineBadge'
 import { Sheet } from '@/shell/Sheet'
+import { vehiclesNow } from './vehicles'
 
 export type MapStop = { id: number; code: string; name: string; href: string; lat: number; lon: number; lines: string[] }
 
 type Props = { stops: MapStop[]; lineStyles: Record<string, LineStyle>; labels: Messages['map']; boardLabels: BoardLabels }
 
 const POLL_MS = 15_000
+// After a question that failed, and while the positions are old, the next one comes sooner.
+const RETRY_MS = 5_000
+// Positions older than this are no longer where the vehicles are: the map says since when it has had no news.
+const STALLED_MS = 60_000
+const clock = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })
 const FRAME_MS = 66
 // A vehicle that moved further than this between two reports was not driving there: it is set down, not slid.
 const JUMP_DEGREES = 0.006
@@ -141,6 +147,8 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
   const [vehicle, setVehicle] = useState<Vehicle>()
   const [trip, setTrip] = useState<VehicleTrip | 'failed'>()
   const [located, setLocated] = useState<'locating' | LocateProblem>()
+  // What there is to say about the positions: none reported, old ones (since when), or not to be had.
+  const [feed, setFeed] = useState<'none' | 'failed' | { since: string }>()
   const selected = useRef<number | undefined>(undefined)
   // The latest report of every vehicle, for the sheet of the one that is tapped.
   const reported = useRef(new Map<number, Vehicle>())
@@ -187,6 +195,10 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
     let frame = 0
     let timer: number | undefined
     let drawn = 0
+    // Counts the times the page came on screen: an answer that arrives for an earlier time is dropped.
+    let watch = 0
+    let watching = false
+    let misses = 0
 
     const moveTo = (moving: Moving, position: Position) => {
       moving.shown = position
@@ -246,11 +258,29 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
       setVehicle((shown) => (shown ? reported.current.get(shown.id) : shown))
     }
 
-    const poll = () =>
-      getJson<Vehicles>('/api/vehicles')
-        .then(({ vehicles }) => report(vehicles))
-        // A missed report leaves the vehicles where they are until the next one.
-        .catch(() => {})
+    // One question at a time; the answer decides when the next one is due.
+    const poll = async (during: number) => {
+      let next = POLL_MS
+      try {
+        const { vehicles, now, asOf } = await vehiclesNow()
+        if (during !== watch) return
+        misses = 0
+        report(vehicles)
+        const stalled = asOf !== null && Date.parse(now) - Date.parse(asOf) > STALLED_MS
+        current.host.toggleAttribute('data-stalled', stalled)
+        setFeed(asOf === null ? 'none' : stalled ? { since: clock.format(new Date(asOf)) } : undefined)
+        if (stalled) next = RETRY_MS
+      } catch {
+        if (during !== watch) return
+        // A missed report leaves the vehicles where they are. One miss is not worth a word.
+        if (++misses > 1) {
+          current.host.toggleAttribute('data-stalled', true)
+          setFeed('failed')
+        }
+        next = RETRY_MS
+      }
+      timer = window.setTimeout(() => void poll(during), next)
+    }
 
     const slide = (now: number) => {
       frame = requestAnimationFrame(slide)
@@ -265,17 +295,21 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
 
     // Nothing is fetched or drawn while the page is not looked at.
     const follow = () => {
-      window.clearInterval(timer)
+      const visible = document.visibilityState === 'visible'
+      if (visible === watching) return
+      watching = visible
+      watch++
+      window.clearTimeout(timer)
       cancelAnimationFrame(frame)
-      if (document.visibilityState !== 'visible') return
-      void poll()
-      timer = window.setInterval(() => void poll(), POLL_MS)
+      if (!visible) return
+      void poll(watch)
       if (!still) frame = requestAnimationFrame(slide)
     }
     follow()
     document.addEventListener('visibilitychange', follow)
     return () => {
-      window.clearInterval(timer)
+      watch++
+      window.clearTimeout(timer)
       cancelAnimationFrame(frame)
       document.removeEventListener('visibilitychange', follow)
     }
@@ -327,7 +361,10 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
     )
   }
 
-  const lateBy = vehicle ? Math.round(vehicle.delaySeconds / 60) : 0
+  // How late the tapped vehicle is: by its next stop once the stops are here, so the line above
+  // them never says something else than they do; until then by what the vehicle itself reports.
+  const lateBy = (trip && trip !== 'failed' ? minutesOff(trip.stops[0]) : undefined) ?? (vehicle ? Math.round(vehicle.delaySeconds / 60) : 0)
+  const note = located && located !== 'locating' ? (located === 'denied' ? labels.locationDenied : labels.locationUnavailable) : feed === 'none' ? labels.noVehicles : feed === 'failed' ? labels.vehiclesFailed : feed ? labels.stalled.replace('{time}', feed.since) : undefined
 
   return (
     <>
@@ -337,9 +374,9 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
       <button type="button" aria-label={labels.locate} aria-busy={located === 'locating'} onClick={showMe} className="map-control material pressable grid size-11 place-items-center rounded-full text-tint">
         <Icon name="location" className={located === 'locating' ? 'motion-safe:animate-pulse' : undefined} />
       </button>
-      {located && located !== 'locating' && (
+      {note && (
         <p role="status" className="map-note material rounded-2xl px-4 py-2 text-[0.8125rem]">
-          {located === 'denied' ? labels.locationDenied : labels.locationUnavailable}
+          {note}
         </p>
       )}
 
@@ -378,7 +415,7 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
             ) : (
               <section>
                 <h3 className="pb-1 text-[0.8125rem] font-semibold text-label-2">{labels.nextStops}</h3>
-                <StopTimes stops={trip?.stops} />
+                <StopTimes stops={trip?.stops} color={lineStyles[vehicle.line]?.color} labels={{ planned: labels.timesPlanned, live: labels.timesLive }} />
               </section>
             )}
           </div>

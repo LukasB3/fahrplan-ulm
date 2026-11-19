@@ -201,7 +201,8 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
     const request: TripRequest =
       direction === 'later'
         ? { from, to, time: { mode: 'depart', at: new Date(Math.max(...rides.map(leavesAt)) + MINUTE).toISOString() } }
-        : { from, to, time: { mode: 'arrive', at: new Date(Math.min(...rides.map(arrivesAt)) - MINUTE).toISOString() } }
+        : // Earlier than a list that starts now is what has left already: the server lists that only when asked to.
+          { from, to, time: { mode: 'arrive', at: new Date(Math.min(...rides.map(arrivesAt)) - MINUTE).toISOString() }, past: true }
     setExtra({ ...more, loading: direction, failed: false })
     try {
       const trips = await postJson<Trips>('/api/trips', request)
@@ -218,8 +219,6 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
   const moreAt = (direction: 'earlier' | 'later'): More | undefined => {
     if (!more) return undefined
     if (more.none[direction]) return { none: direction === 'earlier' ? labels.noEarlier : labels.noLater }
-    // Earlier than "now" has left; earlier than a chosen time may still be to come.
-    if (direction === 'earlier' && (time.at === null || shown?.trips?.note === 'too_late')) return undefined
     return { label: direction === 'earlier' ? labels.earlier : labels.later, busy: more.loading === direction, onMore: () => void loadMore(direction) }
   }
 
@@ -313,7 +312,7 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
         </>
       )}
 
-      {/* The form and what it found come first. The sentence, the other way to fill the form, is always the last thing in the planner. */}
+      {/* The form and what it found come first. The sentence, the other way to fill the form, is always the last thing in the planner, set apart as a part of its own. */}
       <AskBar
         // A position already chosen as the start is passed along, so "von hier" needs no second question.
         context={() => ({ position: from?.kind === 'position' ? { lat: from.lat, lon: from.lon } : null })}

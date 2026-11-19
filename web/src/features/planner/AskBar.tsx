@@ -65,66 +65,81 @@ export function AskBar({ context, onResult, note, privacyHref, labels }: Props) 
   }
 
   return (
-    <div className="space-y-1.5">
-      <form
-        onSubmit={(event) => {
-          event.preventDefault()
-          void send(text)
-        }}
-        className="flex min-h-[3.25rem] items-center rounded-card bg-surface pl-4"
-      >
-        {/* Two lines: the example shows a whole sentence, and a spoken one stays readable. */}
-        <textarea
-          rows={2}
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          // Return sends, as in a one-line field.
-          onKeyDown={(event) => {
-            if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return
+    <section aria-labelledby="ask-title" className="space-y-4 pt-2">
+      {/* Where the form ends and the other way to say where to go begins. */}
+      <p className="flex items-center gap-3 px-4 text-[0.8125rem] text-label-2">
+        <span aria-hidden className="h-px flex-1 bg-separator" />
+        {labels.askDivider}
+        <span aria-hidden className="h-px flex-1 bg-separator" />
+      </p>
+      <div className="space-y-3 rounded-card border border-tint-edge bg-tint-wash p-4">
+        <div className="space-y-1">
+          <h2 id="ask-title" className="flex items-center gap-2 font-semibold text-tint">
+            <Icon name="sparkle" active className="size-5" />
+            {labels.askTitle}
+          </h2>
+          <p className="text-[0.9375rem] text-label-2">{labels.askLead}</p>
+        </div>
+        <form
+          onSubmit={(event) => {
             event.preventDefault()
             void send(text)
           }}
-          placeholder={listening ? labels.askListening : labels.askPlaceholder}
-          aria-label={labels.askLabel}
-          maxLength={300}
-          enterKeyHint="go"
-          autoComplete="off"
-          className="min-w-0 flex-1 resize-none bg-transparent py-3 outline-none placeholder:text-label-3"
-        />
-        {text.trim() && !listening ? (
-          <button type="submit" disabled={busy} aria-label={labels.askSend} className="pressable mr-1.5 grid size-10 shrink-0 place-items-center rounded-full bg-tint-solid text-on-tint disabled:opacity-50">
-            <Icon name="send" className={busy ? 'motion-safe:animate-pulse' : undefined} />
-          </button>
-        ) : (
-          canSpeak && (
-            <button
-              type="button"
-              onClick={speak}
-              aria-pressed={listening !== undefined}
-              aria-label={listening ? labels.askMicStop : labels.askMic}
-              className={`pressable mr-1.5 grid size-10 shrink-0 place-items-center rounded-full ${listening ? 'bg-tint-solid text-on-tint motion-safe:animate-pulse' : 'text-tint'}`}
-            >
-              <Icon name="mic" active={listening !== undefined} />
+          className="flex min-h-[3.25rem] items-center rounded-2xl bg-surface pl-4"
+        >
+          {/* Two lines: the example shows a whole sentence, and a spoken one stays readable. */}
+          <textarea
+            rows={2}
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            // Return sends, as in a one-line field.
+            onKeyDown={(event) => {
+              if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return
+              event.preventDefault()
+              void send(text)
+            }}
+            placeholder={listening ? labels.askListening : labels.askPlaceholder}
+            aria-label={labels.askLabel}
+            maxLength={300}
+            enterKeyHint="go"
+            autoComplete="off"
+            className="min-w-0 flex-1 resize-none bg-transparent py-3 outline-none placeholder:text-label-3"
+          />
+          {text.trim() && !listening ? (
+            <button type="submit" disabled={busy} aria-label={labels.askSend} className="pressable mr-1.5 grid size-10 shrink-0 place-items-center rounded-full bg-tint-solid text-on-tint disabled:opacity-50">
+              <Icon name="send" className={busy ? 'motion-safe:animate-pulse' : undefined} />
             </button>
-          )
+          ) : (
+            canSpeak && (
+              <button
+                type="button"
+                onClick={speak}
+                aria-pressed={listening !== undefined}
+                aria-label={listening ? labels.askMicStop : labels.askMic}
+                className={`pressable mr-1.5 grid size-10 shrink-0 place-items-center rounded-full ${listening ? 'bg-tint-solid text-on-tint motion-safe:animate-pulse' : 'text-tint'}`}
+              >
+                <Icon name="mic" active={listening !== undefined} />
+              </button>
+            )
+          )}
+        </form>
+        {busy ? (
+          <p className="text-[0.8125rem] text-label-2">{labels.askBusy}</p>
+        ) : speechFailed ? (
+          <p className="text-[0.8125rem] text-late">{labels.askSpeechFailed}</p>
+        ) : note ? (
+          <p role="status" className="text-[0.9375rem]">
+            {note}
+          </p>
+        ) : (
+          <p className="text-[0.75rem] text-label-2">
+            {labels.askNotice}{' '}
+            <Link href={privacyHref} className="underline">
+              {labels.askNoticeLink}
+            </Link>
+          </p>
         )}
-      </form>
-      {busy ? (
-        <p className="px-4 text-[0.8125rem] text-label-2">{labels.askBusy}</p>
-      ) : speechFailed ? (
-        <p className="px-4 text-[0.8125rem] text-late">{labels.askSpeechFailed}</p>
-      ) : note ? (
-        <p role="status" className="px-4 text-[0.9375rem]">
-          {note}
-        </p>
-      ) : (
-        <p className="px-4 text-[0.75rem] text-label-2">
-          {labels.askNotice}{' '}
-          <Link href={privacyHref} className="underline">
-            {labels.askNoticeLink}
-          </Link>
-        </p>
-      )}
-    </div>
+      </div>
+    </section>
   )
 }
