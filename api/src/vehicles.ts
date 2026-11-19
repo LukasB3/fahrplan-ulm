@@ -56,6 +56,12 @@ export const vehicleBoard = ({ getJson, stops, log = () => {} }: Deps) => {
         asking = undefined
       }))
 
+  // What is known of a vehicle is worth nothing once it is this old.
+  const forget = () => {
+    const now = Date.now()
+    for (const [id, one] of known) if (now - one.seen > KEEP_MS) known.delete(id)
+  }
+
   const watch = () => {
     watchedUntil = Date.now() + WATCHED_MS
     timer ??= setInterval(() => {
@@ -78,10 +84,11 @@ export const vehicleBoard = ({ getJson, stops, log = () => {} }: Deps) => {
         })
       }
       watch()
+      forget()
       if (waking) await (known.size ? Promise.race([waking, new Promise((done) => setTimeout(done, PATIENCE_MS))]) : waking)
       const now = Date.now()
       if (now - answered > KEEP_MS) throw problem ?? new Error('SWU has not answered')
-      for (const [id, one] of known) if (now - one.seen > KEEP_MS) known.delete(id)
+      forget()
       const sightings = [...known.values()]
       return {
         now: new Date(now).toISOString(),

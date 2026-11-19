@@ -174,6 +174,20 @@ describe('the vehicle board', () => {
     expect(logged).toHaveLength(1)
   })
 
+  it('waits for a slow SWU after a long pause instead of failing over what it knew before', async () => {
+    const source = swu(() => ({ 47: 9 }))
+    let slow = false
+    const getJson: GetJson = (url) => (slow ? new Promise((answer) => setTimeout(() => answer(source.getJson(url)), 8_000)) : source.getJson(url))
+    const board = vehicleBoard({ getJson, stops: { lineOf } })
+    await board.all()
+    // Nobody looks at a map for ten minutes; then SWU takes eight seconds.
+    await vi.advanceTimersByTimeAsync(10 * 60_000)
+    slow = true
+    const answer = board.all()
+    await vi.advanceTimersByTimeAsync(8_000)
+    expect(ids(await answer)).toEqual([47])
+  })
+
   it('fails when SWU cannot be reached and nothing is known', async () => {
     const board = vehicleBoard({ getJson: () => Promise.reject(new Error('SWU is down')), stops: { lineOf } })
     await expect(board.all()).rejects.toThrow('SWU is down')
