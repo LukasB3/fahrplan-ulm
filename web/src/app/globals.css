@@ -17,6 +17,9 @@
   --fill-strong: rgb(120 120 128 / 0.2);
   --tint: #005cbf;
   --tint-solid: #005cbf;
+  /* The ground and the edge of what belongs to the sentence request, set apart from the form's white cards. */
+  --tint-wash: color-mix(in srgb, var(--tint) 7%, var(--surface));
+  --tint-edge: color-mix(in srgb, var(--tint) 24%, transparent);
   --on-tint: #ffffff;
   --ok: #1a7f37;
   --late: #d70015;
@@ -40,6 +43,8 @@
     --fill-strong: rgb(120 120 128 / 0.36);
     --tint: #4da3ff;
     --tint-solid: #0a6fd6;
+    --tint-wash: color-mix(in srgb, var(--tint) 13%, var(--surface));
+    --tint-edge: color-mix(in srgb, var(--tint) 34%, transparent);
     --ok: #30d158;
     --late: #ff453a;
     --material: rgb(36 36 38 / 0.72);
@@ -76,6 +81,8 @@
   --color-fill-strong: var(--fill-strong);
   --color-tint: var(--tint);
   --color-tint-solid: var(--tint-solid);
+  --color-tint-wash: var(--tint-wash);
+  --color-tint-edge: var(--tint-edge);
   --color-on-tint: var(--on-tint);
   --color-ok: var(--ok);
   --color-late: var(--late);
@@ -287,6 +294,47 @@
   }
 }
 
+/* A run's stops along a line in the colour of theirs: one dot per stop. The
+   line starts at the first dot where the run is boarded there (`data-from`),
+   and ends at the last one. */
+.rail {
+  position: relative;
+  align-self: stretch;
+  width: 0.75rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: 50%;
+    width: 0.25rem;
+    translate: -50% 0;
+    background: var(--rail, var(--label-3));
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    box-sizing: border-box;
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 0.15625rem solid var(--label);
+    border-radius: 9999px;
+    background: var(--surface);
+    translate: -50% -50%;
+  }
+
+  li:first-child > &[data-from]::before {
+    top: 50%;
+  }
+
+  li:last-child > &::before {
+    bottom: 50%;
+  }
+}
+
 /* The live map fills the screen under the tab bar. */
 .map-host {
   position: fixed;
@@ -352,6 +400,11 @@
     }
   }
 
+  /* The tapped vehicle's sheet says how late it is, by its next stops. */
+  &[data-selected] > b {
+    display: none;
+  }
+
   & > i {
     position: absolute;
     top: 50%;
@@ -365,6 +418,11 @@
     rotate: var(--bearing, 0deg);
     transform: translateY(-1.2rem);
   }
+}
+
+/* Positions that are minutes old: the vehicles stand back until SWU reports again. */
+.map-host[data-stalled] .vehicle {
+  opacity: 0.55;
 }
 
 /* Buttons floating over the map, clear of the notch and of the tab bar. */

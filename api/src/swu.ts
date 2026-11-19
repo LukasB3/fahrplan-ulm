@@ -96,36 +96,50 @@ export const swuRouteNames = async (getJson: GetJson): Promise<Map<number, strin
 
 // --- Vehicles ----------------------------------------------------------------------
 
-const vehicleList = z.object({ VehicleTrip: z.object({ TripData: z.array(z.unknown()).optional() }) })
+const moment = z.iso.datetime({ offset: true })
+const vehicleList = z.object({ VehicleTrip: z.object({ CurrentTimestamp: moment.nullish().catch(undefined), TripData: z.array(z.unknown()).optional() }) })
 
 // A vehicle between trips is listed without position or route; only what is on a trip is shown.
+// SWU also lists a vehicle that way once its last report is two minutes old.
 const movingVehicle = z.object({
   VehicleNumber: z.number().int(),
   VehicleCategory: z.number().int().nullish(),
   IsActive: z.literal(true),
   PositionData: z.object({ Latitude: z.number(), Longitude: z.number(), Bearing: z.number().nullish() }),
-  TimeData: z.object({ Deviation: z.number().nullish() }).nullish(),
+  TimeData: z.object({ Deviation: z.number().nullish(), ReferenceTime: moment.nullish().catch(undefined) }).nullish(),
   JourneyData: z.object({ RouteNumber: z.number().int(), DepartureDirectionText: z.string().nullish() }),
 })
 
-export const swuVehicles = async (getJson: GetJson, lineOf: (route: number) => string | undefined): Promise<Vehicle[]> => {
-  const { VehicleTrip: answer } = vehicleList.parse(await getJson(`${BASE}/vehicle/trip/Trip`))
-  return (answer.TripData ?? []).flatMap((item): Vehicle[] => {
+// A vehicle and when it last reported where it is, by this server's clock.
+export type Sighting = { vehicle: Vehicle; seen: number }
+
+export const swuVehicles = async (getJson: GetJson, lineOf: (route: number) => string | undefined, timeoutMs?: number): Promise<Sighting[]> => {
+  const { VehicleTrip: answer } = vehicleList.parse(await getJson(`${BASE}/vehicle/trip/Trip`, timeoutMs))
+  const now = Date.now()
+  // SWU says how old a report is by its own clock; that age is what counts here.
+  const asked = answer.CurrentTimestamp ? Date.parse(answer.CurrentTimestamp) : now
+  return (answer.TripData ?? []).flatMap((item): Sighting[] => {
     const parsed = movingVehicle.safeParse(item)
     if (!parsed.success) return []
     const vehicle = parsed.data
     const line = lineOf(vehicle.JourneyData.RouteNumber)
     if (!line) return []
+    const reported = vehicle.TimeData?.ReferenceTime ? Date.parse(vehicle.TimeData.ReferenceTime) : asked
     return [
       {
-        id: vehicle.VehicleNumber,
-        line,
-        mode: vehicle.VehicleCategory === TRAM ? 'tram' : 'bus',
-        lat: vehicle.PositionData.Latitude,
-        lon: vehicle.PositionData.Longitude,
-        bearing: vehicle.PositionData.Bearing ?? 0,
-        delaySeconds: vehicle.TimeData?.Deviation ?? 0,
-        destination: vehicle.JourneyData.DepartureDirectionText ?? '',
+        seen: now - Math.max(0, asked - reported),
+        vehicle: {
+          id: vehicle.VehicleNumber,
+          line,
+          mode: vehicle.VehicleCategory === TRAM ? 'tram' : 'bus',
+          lat: vehicle.PositionData.Latitude,
+          lon: vehicle.PositionData.Longitude,
+          bearing: vehicle.PositionData.Bearing ?? 0,
+          // SWU counts the other way round: its deviation is negative for a vehicle behind the
+          // timetable (checked against the times of the stops ahead, 2026-11-19).
+          delaySeconds: -(vehicle.TimeData?.Deviation ?? 0) || 0,
+          destination: vehicle.JourneyData.DepartureDirectionText ?? '',
+        },
       },
     ]
   })

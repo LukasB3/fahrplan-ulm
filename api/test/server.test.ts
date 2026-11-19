@@ -50,7 +50,7 @@ let alertsDown = false
 const alerts: AlertBoard = () => (alertsDown ? Promise.reject(new Error('DING is down')) : Promise.resolve(notices))
 const tram = { id: 47, line: '1', mode: 'tram' as const, lat: 48.4, lon: 9.99, bearing: 260, delaySeconds: 10, destination: 'Söflingen' }
 const vehicles: VehicleBoard = {
-  all: () => Promise.resolve({ now: '2026-11-15T12:00:00.000Z', vehicles: [tram] }),
+  all: () => Promise.resolve({ now: '2026-11-15T12:00:00.000Z', asOf: '2026-11-15T11:59:50.000Z', vehicles: [tram] }),
   trip: (id) => (id === 47 ? Promise.resolve({ id, line: '1', mode: 'tram', destination: 'Söflingen', stops: [], track: [] }) : Promise.reject(new UnknownVehicle('not on a trip'))),
 }
 let app: Awaited<ReturnType<typeof buildServer>>

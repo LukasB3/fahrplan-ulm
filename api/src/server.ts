@@ -54,6 +54,7 @@ const tripRequest = z.object({
   from: place,
   to: place,
   time: z.object({ mode: z.enum(['depart', 'arrive']), at: z.iso.datetime().nullable() }),
+  past: z.boolean().optional(),
 })
 
 const askRequest = z.object({

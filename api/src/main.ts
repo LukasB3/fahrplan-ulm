@@ -23,7 +23,7 @@ const ask = asker({
   log: (problem) => console.error('reading a sentence failed:', problem instanceof Error ? `${problem.name} ${(problem as { status?: number }).status ?? ''}` : typeof problem),
 })
 const alerts = alertBoard({ getJson, efaBase: cfg.EFA_BASE })
-const vehicles = vehicleBoard({ getJson, stops })
+const vehicles = vehicleBoard({ getJson, stops, log: (problem) => console.error('SWU vehicles failed', problem) })
 const app = await buildServer({ cfg, departures, planner, ask, alerts, vehicles })
 
 // SWU renames stops and lines rarely; once a day is plenty. A failure keeps the last lists.

@@ -47,6 +47,39 @@ function Where({ stopover, name, train, labels }: { stopover: Stopover; name: st
   )
 }
 
+// The stops a ride passes: closed, a line that counts them; opened, each one with its time.
+function Calls({ calls, summary, labels }: { calls: Stopover[]; summary: string; labels: PlannerLabels }) {
+  const [shown, setShown] = useState(false)
+  return (
+    <div>
+      {/* As high as a finger needs, without pushing the stops above and below apart. */}
+      <button type="button" aria-expanded={shown} aria-label={`${labels.showStops}: ${summary}`} onClick={() => setShown(!shown)} className="pressable -my-3 flex min-h-11 w-full items-center gap-3 text-left text-[0.8125rem] text-tint">
+        <span className="flex w-12 shrink-0 justify-start">
+          <Icon name="chevron" className={`size-3.5 transition-transform duration-200 motion-reduce:transition-none ${shown ? 'rotate-90' : ''}`} />
+        </span>
+        {summary}
+      </button>
+      {/* The list opens by growing from nothing to its own height, and can be closed again on its way. */}
+      <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none ${shown ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+        <ol inert={!shown} className="min-h-0 overflow-hidden">
+          {calls.map((call, index) => {
+            const late = lateBy(call)
+            return (
+              <li key={`${call.name} ${index}`} className="flex gap-3 pt-1.5 text-[0.9375rem] first:pt-3 last:pb-1.5">
+                <When stopover={call} />
+                <span className="min-w-0 flex-1">
+                  {call.name}
+                  {late > 0 && <span className="text-late"> · +{late} {labels.minutes}</span>}
+                </span>
+              </li>
+            )
+          })}
+        </ol>
+      </div>
+    </div>
+  )
+}
+
 // One leg written out: a walk with its map, or a ride with where to get on and off.
 function LegDetail({ leg, fromName, toName, showMap, lineStyles, labels }: { leg: Leg; fromName: string; toName: string; showMap: boolean } & Shared) {
   if (leg.kind === 'walk') {
@@ -70,6 +103,7 @@ function LegDetail({ leg, fromName, toName, showMap, lineStyles, labels }: { leg
   }
   const train = leg.mode === 'train'
   const between = leg.stopsBetween === 0 ? labels.noStopsBetween : leg.stopsBetween === 1 ? labels.oneStopBetween : fill(labels.stopsBetween, { n: leg.stopsBetween })
+  const summary = `${between} · ${lasting(minutesBetween(at(leg.from), at(leg.to)), labels)}`
   return (
     <div className="space-y-1.5">
       <p className="flex items-center gap-3">
@@ -85,10 +119,14 @@ function LegDetail({ leg, fromName, toName, showMap, lineStyles, labels }: { leg
         <When stopover={leg.from} />
         <Where stopover={leg.from} name={fromName} train={train} labels={labels} />
       </p>
-      <p className="flex gap-3 text-[0.8125rem] text-label-2">
-        <span className="w-12 shrink-0" />
-        {between} · {lasting(minutesBetween(at(leg.from), at(leg.to)), labels)}
-      </p>
+      {leg.calls.length > 0 ? (
+        <Calls calls={leg.calls} summary={summary} labels={labels} />
+      ) : (
+        <p className="flex gap-3 text-[0.8125rem] text-label-2">
+          <span className="w-12 shrink-0" />
+          {summary}
+        </p>
+      )}
       <p className="flex gap-3">
         <When stopover={leg.to} />
         <Where stopover={leg.to} name={toName} train={train} labels={labels} />
@@ -144,8 +182,9 @@ function JourneyCard({ journey, now, from, to, open, onToggle, lineStyles, label
 
         <span className="mt-2 flex items-center justify-between gap-3 text-[0.9375rem]">
           <span className="min-w-0">
-            <span className={untilLeaving < 10 ? 'font-semibold text-tint' : undefined}>
-              {untilLeaving < 1 ? labels.leaveNow : untilLeaving < 60 ? fill(labels.leaveIn, { n: untilLeaving }) : fill(labels.leaveAt, { time: clock.format(leaves) })}
+            {/* What left more than a minute ago is listed only among the earlier journeys. */}
+            <span className={untilLeaving < -1 ? 'text-label-2' : untilLeaving < 10 ? 'font-semibold text-tint' : undefined}>
+              {untilLeaving < -1 ? labels.left : untilLeaving < 1 ? labels.leaveNow : untilLeaving < 60 ? fill(labels.leaveIn, { n: untilLeaving }) : fill(labels.leaveAt, { time: clock.format(leaves) })}
             </span>
             <span className="text-label-2">
               {rides.length > 0 && ` · ${journey.changes === 0 ? labels.direct : journey.changes === 1 ? labels.oneChange : fill(labels.changes, { n: journey.changes })}`}

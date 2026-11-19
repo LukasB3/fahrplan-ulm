@@ -85,6 +85,27 @@ describe('journeys, as recorded', () => {
     expect([param('itdDate'), param('itdTime'), param('itdTripDateTimeDepArr')]).toEqual(['20261115', '1340', 'arr'])
   })
 
+  it('name the stops a ride passes, each with its time', async () => {
+    const at = (minute: number) => `2026-11-15T13:${String(minute).padStart(2, '0')}:00Z`
+    const platform = (name: string, times: Record<string, string>) => ({ type: 'platform', name: `Ulm ${name}`, parent: { disassembledName: name, parent: { name: 'Ulm' } }, ...times })
+    const sequence = [
+      platform('Hauptbahnhof', { departureTimePlanned: at(0) }),
+      platform('Theater', { arrivalTimePlanned: at(1), departureTimePlanned: at(1), arrivalTimeEstimated: at(3), departureTimeEstimated: at(3) }),
+      // A stop the planner names without a time is counted but cannot be listed.
+      platform('Stadtwerke', {}),
+      platform('Lehrer Tal', { departureTimePlanned: at(4) }),
+      platform('Multscherschule', { arrivalTimePlanned: at(6) }),
+    ]
+    const leg = { origin: sequence[0], destination: sequence.at(-1), transportation: { number: '2', product: { class: 4 }, destination: { name: 'Science Park II' } }, stopSequence: sequence }
+    const [journey] = await efaJourneys(answering({ journeys: [{ legs: [leg] }] }), 'https://efa.example', query)
+    const [ride] = journey!.legs
+    expect(ride).toMatchObject({ kind: 'ride', stopsBetween: 3 })
+    expect(ride?.kind === 'ride' ? ride.calls : []).toEqual([
+      { name: 'Theater', platform: null, planned: at(1), expected: at(3) },
+      { name: 'Lehrer Tal', platform: null, planned: at(4), expected: null },
+    ])
+  })
+
   it('leave out a journey with a leg that has no times, and legs that are no travel', async () => {
     const leg = (productClass: number, from?: string, to?: string) => ({
       origin: { name: 'A', departureTimePlanned: from },
@@ -158,6 +179,16 @@ describe('what the planner shows', () => {
     expect(lines(trips.journeys)).toEqual(['5'])
     expect(leavesAt(trips.journeys[0]!)).toBeGreaterThan(NOW)
     expect(asked).toEqual(['arrive', 'depart'])
+  })
+
+  it('lists journeys that have left when the ones before the list are asked for', async () => {
+    const { planner } = planning({ arrive: [journey('4', -30, -18), journey('5', -12, -2), journey('7', 3, 15)] })
+    // Earlier than a list that started now: whatever arrives before its first journey does.
+    const earlier = await planner.trips({ ...request('arrive', inMinutes(0)), past: true }, NOW)
+    expect(lines(earlier.journeys)).toEqual(['5', '4'])
+    expect(earlier.note).toBe('ok')
+    // Without the word, a time that has passed still gives what leaves next.
+    expect((await planner.trips(request('arrive', inMinutes(0)), NOW)).note).toBe('too_late')
   })
 
   it('lists walking all the way after the rides, unless it gets there first', async () => {

@@ -56,7 +56,8 @@ export const tripPlanner = ({ getJson, efaBase }: Deps) => {
 
     trips: async (request: TripRequest, now = Date.now()): Promise<Trips> => {
       const at = request.time.at ? Date.parse(request.time.at) : now
-      const upcoming = (found: Journey[]) => found.filter((journey) => leavesAt(journey) >= now - MINUTE)
+      // What has left is of no use, unless it was asked for: the journeys before the ones on screen.
+      const upcoming = (found: Journey[]) => (request.past ? found : found.filter((journey) => leavesAt(journey) >= now - MINUTE))
       const leaving = (found: Journey[], from: number) =>
         walkLast(
           upcoming(found)

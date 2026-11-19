@@ -1,7 +1,7 @@
 'use client'
 
 import type { Departure, Run } from '@api/types'
-import { useEffect, useState } from 'react'
+import { type CSSProperties, useEffect, useState } from 'react'
 import { getJson } from '@/lib/api'
 import type { LineStyle } from '@/lib/data-types'
 import { LineBadge } from '@/shell/LineBadge'
@@ -25,27 +25,63 @@ export function RunTitle({ line, style, towards, destination }: { line: string; 
 
 type Call = { name: string; planned: string; expected: string | null }
 
-// The stops of a run, each with the time the vehicle is there; a time that is
-// late is shown as such. Without `stops` the list is still on its way. `here`
-// sets the first stop apart: the one the run was opened at.
-export function StopTimes({ stops, here = false }: { stops: Call[] | undefined; here?: boolean }) {
+// How many minutes off the timetable a vehicle is at a stop, by the minutes the
+// clock shows: above zero late, below zero early. Nothing without live data.
+export const minutesOff = (stop: Call | undefined) => (stop?.expected ? Math.floor(Date.parse(stop.expected) / 60_000) - Math.floor(Date.parse(stop.planned) / 60_000) : undefined)
+
+export type TimesLabels = { planned: string; live: string }
+
+const timeColumn = 'w-[2.875rem] shrink-0 tabular-nums'
+
+// The stops of a run along its line, each with two times: the timetable's and,
+// beside it, the one the vehicle is running to. A time that is not kept is
+// struck out, and the live one says how: red when late, green when on time or
+// early. A run without live data shows the timetable alone. Without `stops`
+// the list is still on its way. `here` sets the first stop apart: the one the
+// run was opened at.
+export function StopTimes({ stops, here = false, color, labels }: { stops: Call[] | undefined; here?: boolean; color?: string; labels: TimesLabels }) {
+  const live = stops?.some((stop) => stop.expected !== null) ?? false
   return (
-    <ol className="overflow-hidden rounded-card bg-bg">
-      {(stops ?? []).map((stop, index) => {
-        const late = stop.expected !== null && Date.parse(stop.expected) - Date.parse(stop.planned) >= 60_000
-        return (
-          <li key={`${stop.name} ${index}`} className={`flex min-h-10 items-center gap-3 border-t border-separator px-4 py-1.5 first:border-t-0 ${here && index === 0 ? 'font-semibold' : ''}`}>
-            <span className={`w-12 shrink-0 tabular-nums ${late ? 'text-late' : ''}`}>{clock.format(new Date(stop.expected ?? stop.planned))}</span>
-            <span className="min-w-0 flex-1 truncate">{stop.name}</span>
-          </li>
-        )
-      })}
-      {!stops && <li className="h-10 motion-safe:animate-pulse" />}
-    </ol>
+    <div className="overflow-hidden rounded-card bg-bg px-4 py-1.5" style={color ? ({ '--rail': color } as CSSProperties) : undefined}>
+      {live && (
+        <p aria-hidden className="flex gap-2 pt-1 pb-0.5 text-[0.75rem] font-semibold text-label-2">
+          <span className={timeColumn}>{labels.planned}</span>
+          <span className={timeColumn}>{labels.live}</span>
+        </p>
+      )}
+      <ol>
+        {(stops ?? []).map((stop, index) => {
+          const off = minutesOff(stop)
+          return (
+            <li key={`${stop.name} ${index}`} className={`flex min-h-10 items-center gap-2 ${here && index === 0 ? 'font-semibold' : ''}`}>
+              <span className={`${timeColumn} ${live ? 'text-label-2' : ''} ${off ? 'line-through' : ''}`}>
+                {live && <span className="sr-only">{labels.planned} </span>}
+                {clock.format(new Date(stop.planned))}
+              </span>
+              {live && (
+                <span className={`${timeColumn} ${off === undefined ? 'text-label-2' : off > 0 ? 'font-semibold text-late' : off < 0 ? 'font-semibold text-ok' : 'text-ok'}`}>
+                  {stop.expected ? (
+                    <>
+                      <span className="sr-only">{labels.live} </span>
+                      {clock.format(new Date(stop.expected))}
+                    </>
+                  ) : (
+                    '–'
+                  )}
+                </span>
+              )}
+              <span className="rail" data-from={here ? '' : undefined} />
+              <span className="min-w-0 flex-1 truncate py-1.5 pl-1">{stop.name}</span>
+            </li>
+          )
+        })}
+        {!stops && <li className="h-10 motion-safe:animate-pulse" />}
+      </ol>
+    </div>
   )
 }
 
-export type RunLabels = { towards: string; stops: string; failed: string; close: string }
+export type RunLabels = { towards: string; stops: string; failed: string; close: string } & TimesLabels
 
 type Props = {
   stopId: number
@@ -94,7 +130,7 @@ export function RunSheet({ stopId, departure, open, onClose, lineStyles, labels 
       ) : (
         <section>
           <h3 className="pb-1 text-[0.8125rem] font-semibold text-label-2">{labels.stops}</h3>
-          <StopTimes stops={stops} here />
+          <StopTimes stops={stops} here color={departure && departure.mode !== 'train' ? lineStyles[departure.line]?.color : undefined} labels={labels} />
         </section>
       )}
     </Sheet>
