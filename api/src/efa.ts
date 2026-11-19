@@ -156,6 +156,14 @@ const stopover = (where: z.infer<typeof point>, planned: string, expected: strin
   expected: expected ?? null,
 })
 
+// A stop a vehicle passes and when it is there: its arrival, or its departure
+// where DING gives no arrival. Nothing for a stop without a time.
+const passed = (item: unknown) => {
+  const where = point.safeParse(item)
+  const planned = where.data?.arrivalTimePlanned ?? where.data?.departureTimePlanned
+  return where.success && planned ? { where: where.data, planned, expected: where.data.arrivalTimeEstimated ?? where.data.departureTimeEstimated } : undefined
+}
+
 const journeyOf = (item: unknown): Journey | undefined => {
   const parsed = efaJourney.safeParse(item)
   if (!parsed.success) return undefined
@@ -177,7 +185,12 @@ const journeyOf = (item: unknown): Journey | undefined => {
     const mode = modeOf(productClass)
     const line = lineOf(leg.transportation.number ?? '', leg.transportation.name ?? '', mode)
     if (!line) return undefined
-    legs.push({ kind: 'ride', from, to, line, mode, destination: leg.transportation.destination?.name ?? '', stopsBetween: Math.max(0, (leg.stopSequence?.length ?? 2) - 2) })
+    // The sequence starts where the ride is boarded and ends where it is left.
+    const calls = (leg.stopSequence ?? []).slice(1, -1).flatMap((stop) => {
+      const call = passed(stop)
+      return call ? [stopover(call.where, call.planned, call.expected)] : []
+    })
+    legs.push({ kind: 'ride', from, to, line, mode, destination: leg.transportation.destination?.name ?? '', stopsBetween: Math.max(0, (leg.stopSequence?.length ?? 2) - 2), calls })
   }
   if (!legs.length) return undefined
   const singles = (parsed.data.fare?.tickets ?? []).filter((ticket) => ticket.person === 'ADULT' && ticket.name?.startsWith('Einzelfahrschein') && typeof ticket.priceBrutto === 'number')
@@ -229,11 +242,8 @@ export const efaRuns = async (getJson: GetJson, base: string, dhid: string, from
     if (!parsed.success) return []
     const { transportation, location, departureTimePlanned, departureTimeEstimated, onwardLocations } = parsed.data
     const onward = (onwardLocations ?? []).flatMap((next): RunEvent['stops'] => {
-      const where = point.safeParse(next)
-      if (!where.success) return []
-      // When the vehicle gets there. The last stop has no departure; a stop without any time is left out.
-      const planned = where.data.arrivalTimePlanned ?? where.data.departureTimePlanned
-      return planned ? [call(where.data, planned, where.data.arrivalTimeEstimated ?? where.data.departureTimeEstimated)] : []
+      const stop = passed(next)
+      return stop ? [call(stop.where, stop.planned, stop.expected)] : []
     })
     return [
       {

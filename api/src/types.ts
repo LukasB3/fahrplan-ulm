@@ -71,6 +71,8 @@ export type Ride = {
   destination: string
   // Stops passed between getting on and getting off.
   stopsBetween: number
+  // Those stops in order, each with the time the vehicle is there. A stop DING names without a time is missing here.
+  calls: Stopover[]
 }
 
 export type Leg = Walk | Ride
@@ -87,6 +89,8 @@ export type TripRequest = {
   to: Place
   // `at: null` means now.
   time: { mode: 'depart' | 'arrive'; at: Iso | null }
+  // True to get journeys that have left already as well: what "earlier journeys" asks for.
+  past?: boolean
 }
 
 export type Trips = {
@@ -111,7 +115,13 @@ export type Vehicle = {
   destination: string
 }
 
-export type Vehicles = { now: Iso; vehicles: Vehicle[] }
+export type Vehicles = {
+  now: Iso
+  // When the newest of these positions was reported; null without vehicles. SWU's reports
+  // stall for minutes at times: the vehicles then stay where they were last, and the map says since when.
+  asOf: Iso | null
+  vehicles: Vehicle[]
+}
 
 // One vehicle's trip: the stops still ahead and the way it takes.
 export type VehicleTrip = {
