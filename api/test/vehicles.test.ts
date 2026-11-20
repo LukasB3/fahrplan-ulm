@@ -94,7 +94,7 @@ describe('the vehicle board', () => {
   })
   afterEach(() => vi.useRealTimers())
 
-  it('asks SWU once for all maps opened together', async () => {
+  it('asks SWU once for all maps opened right after a start', async () => {
     const { getJson, asked } = swu(() => ({ 47: 9, 52: 9, 53: 9 }))
     const board = vehicleBoard({ getJson, stops: { lineOf } })
     const [first, second] = await Promise.all([board.all(), board.all()])
@@ -104,19 +104,28 @@ describe('the vehicle board', () => {
     expect(asked()).toBe(1)
   })
 
-  it('asks SWU on its own clock while a map is open, and stops when none is', async () => {
+  it('asks SWU around the clock, map or no map, and answers a map from memory', async () => {
     const { getJson, asked } = swu(() => ({ 47: 9 }))
     const board = vehicleBoard({ getJson, stops: { lineOf } })
+    await vi.advanceTimersByTimeAsync(60_000)
+    expect(asked()).toBe(5)
     await board.all()
-    await vi.advanceTimersByTimeAsync(30_000)
-    expect(asked()).toBe(4)
-    // The map asks again: answered from memory, without a request of its own.
     await board.all()
-    expect(asked()).toBe(4)
-    await vi.advanceTimersByTimeAsync(5 * 60_000)
-    const whileWatched = asked()
-    await vi.advanceTimersByTimeAsync(5 * 60_000)
-    expect(asked()).toBe(whileWatched)
+    expect(asked()).toBe(5)
+    // Nobody looks at a map for ten minutes.
+    await vi.advanceTimersByTimeAsync(10 * 60_000)
+    expect(asked()).toBe(45)
+  })
+
+  it('leaves a slow SWU alone for a while after each answer', async () => {
+    const source = swu(() => ({ 47: 9 }))
+    const getJson: GetJson = (url) => new Promise((answer) => setTimeout(() => answer(source.getJson(url)), 14_000))
+    vehicleBoard({ getJson, stops: { lineOf } })
+    // Asked at 0, answered at 14; asked again at 19, 38 and 57.
+    await vi.advanceTimersByTimeAsync(60_000)
+    expect(source.asked()).toBe(3)
+    await vi.advanceTimersByTimeAsync(11_000)
+    expect(source.asked()).toBe(4)
   })
 
   it('drops a vehicle that a list with news leaves out', async () => {
@@ -125,7 +134,7 @@ describe('the vehicle board', () => {
     const board = vehicleBoard({ getJson, stops: { lineOf } })
     expect(ids(await board.all())).toEqual([47, 52])
     fleet = { 47: 9, 52: 'parked' }
-    await vi.advanceTimersByTimeAsync(10_000)
+    await vi.advanceTimersByTimeAsync(15_000)
     expect(ids(await board.all())).toEqual([47])
   })
 
@@ -153,8 +162,37 @@ describe('the vehicle board', () => {
     // The reports are back.
     reportedAt = Date.now()
     stalled = false
-    await vi.advanceTimersByTimeAsync(10_000)
+    await vi.advanceTimersByTimeAsync(15_000)
     expect(ids(await board.all())).toEqual([47, 52])
+  })
+
+  // As seen on 2026-11-19 and 2026-11-20: SWU hands out new positions every five minutes and
+  // lists every vehicle as parked once its report is two minutes old.
+  const everyFiveMinutes = () => {
+    const age = () => Math.round(((Date.now() - (START - 9_000)) % 300_000) / 1_000)
+    return swu(() => (age() > 120 ? { 47: 'parked', 52: 'parked' } : { 47: age(), 52: age() }))
+  }
+
+  it('has the vehicles for a map opened after a long pause, in a minute in which SWU lists none', async () => {
+    const { getJson, asked } = everyFiveMinutes()
+    const board = vehicleBoard({ getJson, stops: { lineOf } })
+    // Nobody looks at a map for 23 minutes. The last positions are three minutes old by then.
+    await vi.advanceTimersByTimeAsync(23 * 60_000)
+    const before = asked()
+    const answer = await board.all()
+    expect(ids(answer)).toEqual([47, 52])
+    expect(answer.asOf).toBe('2026-11-19T21:59:51.000Z')
+    expect(asked()).toBe(before)
+  })
+
+  it("notes once an hour what SWU's list did", async () => {
+    const { getJson } = everyFiveMinutes()
+    const notes: string[] = []
+    vehicleBoard({ getJson, stops: { lineOf }, note: (line) => notes.push(line) })
+    await vi.advanceTimersByTimeAsync(59 * 60_000)
+    expect(notes).toEqual([])
+    await vi.advanceTimersByTimeAsync(60_000)
+    expect(notes).toEqual(["SWU's vehicle list in the last hour: asked 241 times, 0 failed, slowest answer 0 s, up to 2 vehicles, longest without a new position 300 s"])
   })
 
   it('shows what it knows while SWU does not answer, and fails once that is seven minutes old', async () => {
@@ -174,22 +212,22 @@ describe('the vehicle board', () => {
     expect(logged).toHaveLength(1)
   })
 
-  it('waits for a slow SWU after a long pause instead of failing over what it knew before', async () => {
+  it("lets a map opened right after a start wait for SWU's first answer", async () => {
     const source = swu(() => ({ 47: 9 }))
-    let slow = false
-    const getJson: GetJson = (url) => (slow ? new Promise((answer) => setTimeout(() => answer(source.getJson(url)), 8_000)) : source.getJson(url))
+    const getJson: GetJson = (url) => new Promise((answer) => setTimeout(() => answer(source.getJson(url)), 8_000))
     const board = vehicleBoard({ getJson, stops: { lineOf } })
-    await board.all()
-    // Nobody looks at a map for ten minutes; then SWU takes eight seconds.
-    await vi.advanceTimersByTimeAsync(10 * 60_000)
-    slow = true
     const answer = board.all()
     await vi.advanceTimersByTimeAsync(8_000)
     expect(ids(await answer)).toEqual([47])
   })
 
-  it('fails when SWU cannot be reached and nothing is known', async () => {
-    const board = vehicleBoard({ getJson: () => Promise.reject(new Error('SWU is down')), stops: { lineOf } })
+  it('fails while SWU cannot be reached and nothing is known, and has the vehicles once it can', async () => {
+    let down = true
+    const source = swu(() => ({ 47: 9 }))
+    const board = vehicleBoard({ getJson: (url) => (down ? Promise.reject(new Error('SWU is down')) : source.getJson(url)), stops: { lineOf } })
     await expect(board.all()).rejects.toThrow('SWU is down')
+    down = false
+    await vi.advanceTimersByTimeAsync(15_000)
+    expect(ids(await board.all())).toEqual([47])
   })
 })

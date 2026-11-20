@@ -4,35 +4,65 @@ import { type Sighting, swuVehicles, swuVehicleTrip } from './swu.js'
 import type { Vehicles, VehicleTrip } from './types.js'
 import type { GetJson } from './upstream.js'
 
-// SWU renews the positions every 15 seconds. While a map is open somewhere, SWU is asked
-// this often on the server's own clock, so that no map waits for SWU's answer.
-const ASK_EVERY_MS = 10_000
-// For this long after the last map asked.
-const WATCHED_MS = 45_000
-// SWU's list takes up to ten seconds at times.
-const SWU_TIMEOUT_MS = 15_000
+// SWU renews the positions every 15 seconds, by its own account, and is asked that often around
+// the clock, whether a map is open or not. A map is answered from memory at once, and what was
+// seen last is there to bridge the minutes in which SWU lists no vehicle at all (see KEEP_MS).
+const ASK_EVERY_MS = 15_000
+// SWU's list takes 5 to 20 seconds at times. After an answer SWU is left alone for at least this long.
+const REST_MS = 5_000
+const SWU_TIMEOUT_MS = 30_000
 // A list whose newest report is older than this has stalled: SWU has had no news from its vehicles ...
 const STALLED_MS = 60_000
 // ... and for this long a vehicle then stays where it was last reported. SWU itself lists a vehicle
-// as parked after two minutes without a report, which emptied the map whenever the reports stalled.
-// On 2026-11-19 they came five minutes apart for a whole evening: this bridges that.
+// as parked after two minutes without a report, and at times hands out new positions only every
+// five minutes (2026-11-19, 2026-11-20): for three minutes of the five its list is empty. This bridges that.
 const KEEP_MS = 7 * 60_000
-// Who opens a map after a pause waits this long for SWU before getting what is known from before.
-const PATIENCE_MS = 3_000
+const HOUR_MS = 3_600_000
 
-type Deps = { getJson: GetJson; stops: Pick<StopDirectory, 'lineOf'>; log?: (problem: unknown) => void }
+type Deps = {
+  getJson: GetJson
+  stops: Pick<StopDirectory, 'lineOf'>
+  log?: (problem: unknown) => void
+  // Gets a line an hour on what SWU's list did.
+  note?: (line: string) => void
+}
 
-// Where SWU's vehicles are.
-export const vehicleBoard = ({ getJson, stops, log = () => {} }: Deps) => {
+// One line an hour on SWU's list: how slow it was, how often it failed and how long its vehicles
+// went without a single new position. Read it in the journal when the map is in doubt: it tells
+// SWU's silences from faults of our own.
+const feedJournal = (note: (line: string) => void) => {
+  const begin = (now: number) => ({ began: now, asked: 0, failed: 0, slowestMs: 0, most: 0, quietMs: 0 })
+  let hour = begin(Date.now())
+  // The newest report seen so far.
+  let newest = Date.now()
+  const seconds = (ms: number) => Math.round(ms / 1_000)
+
+  return (tookMs: number, list?: Sighting[]) => {
+    const now = Date.now()
+    hour.asked++
+    hour.slowestMs = Math.max(hour.slowestMs, tookMs)
+    if (!list) hour.failed++
+    else hour.most = Math.max(hour.most, list.length)
+    const report = Math.max(0, ...(list ?? []).map((one) => one.seen))
+    // The same report is a second older or younger from list to list, by the rounding of SWU's clock.
+    if (report > newest + 2_000) {
+      hour.quietMs = Math.max(hour.quietMs, report - newest)
+      newest = report
+    }
+    if (now - hour.began < HOUR_MS) return
+    const quiet = seconds(Math.max(hour.quietMs, now - newest))
+    note(`SWU's vehicle list in the last hour: asked ${hour.asked} times, ${hour.failed} failed, slowest answer ${seconds(hour.slowestMs)} s, up to ${hour.most} vehicles, longest without a new position ${quiet} s`)
+    hour = begin(now)
+  }
+}
+
+// Where SWU's vehicles are. Asks SWU from the moment it exists, so the stop directory has to know the lines by then.
+export const vehicleBoard = ({ getJson, stops, log = () => {}, note = () => {} }: Deps) => {
   const known = new Map<number, Sighting>()
   // When SWU last answered, and what went wrong since.
   let answered = 0
   let problem: unknown
-  let asking: Promise<void> | undefined
-  // The request that ends a pause.
-  let waking: Promise<void> | undefined
-  let watchedUntil = 0
-  let timer: NodeJS.Timeout | undefined
+  const journal = feedJournal(note)
 
   const take = (sightings: Sighting[]) => {
     const now = Date.now()
@@ -44,17 +74,29 @@ export const vehicleBoard = ({ getJson, stops, log = () => {} }: Deps) => {
     problem = undefined
   }
 
-  // Callers arriving together share one request.
-  const ask = () =>
-    (asking ??= swuVehicles(getJson, stops.lineOf, SWU_TIMEOUT_MS)
-      .then(take, (failure: unknown) => {
-        // The first failure after an answer is worth a line in the log; the following ones are the same story.
-        if (problem === undefined) log(failure)
-        problem = failure
-      })
-      .finally(() => {
-        asking = undefined
-      }))
+  const ask = async () => {
+    const began = Date.now()
+    const sightings = await swuVehicles(getJson, stops.lineOf, SWU_TIMEOUT_MS).catch((failure: unknown) => {
+      // The first failure after an answer is worth a line in the log; the following ones are the same story.
+      if (problem === undefined) log(failure)
+      problem = failure
+      return undefined
+    })
+    if (sightings) take(sightings)
+    journal(Date.now() - began, sightings)
+  }
+
+  // One question at a time, around the clock. Until SWU's first answer there is one on its way to wait for.
+  let first: Promise<void> | undefined
+  const keepAsking = () => {
+    const began = Date.now()
+    const asking = ask().then(() => {
+      first = undefined
+      setTimeout(keepAsking, Math.max(REST_MS, ASK_EVERY_MS - (Date.now() - began))).unref()
+    })
+    if (!answered) first = asking
+  }
+  keepAsking()
 
   // What is known of a vehicle is worth nothing once it is this old.
   const forget = () => {
@@ -62,30 +104,13 @@ export const vehicleBoard = ({ getJson, stops, log = () => {} }: Deps) => {
     for (const [id, one] of known) if (now - one.seen > KEEP_MS) known.delete(id)
   }
 
-  const watch = () => {
-    watchedUntil = Date.now() + WATCHED_MS
-    timer ??= setInterval(() => {
-      if (Date.now() < watchedUntil) return void ask()
-      clearInterval(timer)
-      timer = undefined
-    }, ASK_EVERY_MS).unref()
-  }
-
   // While its reports stall SWU knows no trip for a vehicle either: its last one is shown as long as the vehicle is.
   const trips = cached((vehicle) => swuVehicleTrip(getJson, Number(vehicle)), { freshMs: 10_000, staleMs: KEEP_MS, max: 300 })
 
   return {
+    // Always from memory. Only a map opened right after a start of the server waits, for SWU's first answer.
     all: async (): Promise<Vehicles> => {
-      // While maps are open the answer in memory is seconds old and goes out at once. After a
-      // pause it is not: whoever comes then waits for SWU, but not for long when there is something to show.
-      if (timer === undefined && Date.now() - answered > ASK_EVERY_MS) {
-        waking = ask().finally(() => {
-          waking = undefined
-        })
-      }
-      watch()
-      forget()
-      if (waking) await (known.size ? Promise.race([waking, new Promise((done) => setTimeout(done, PATIENCE_MS))]) : waking)
+      await first
       const now = Date.now()
       if (now - answered > KEEP_MS) throw problem ?? new Error('SWU has not answered')
       forget()

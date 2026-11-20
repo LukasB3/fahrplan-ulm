@@ -23,14 +23,26 @@ const ask = asker({
   log: (problem) => console.error('reading a sentence failed:', problem instanceof Error ? `${problem.name} ${(problem as { status?: number }).status ?? ''}` : typeof problem),
 })
 const alerts = alertBoard({ getJson, efaBase: cfg.EFA_BASE })
-const vehicles = vehicleBoard({ getJson, stops, log: (problem) => console.error('SWU vehicles failed', problem) })
-const app = await buildServer({ cfg, departures, planner, ask, alerts, vehicles })
 
-// SWU renames stops and lines rarely; once a day is plenty. A failure keeps the last lists.
-const refreshStops = () => stops.refresh().catch((problem: unknown) => console.error('loading the stop and line lists failed', problem))
-// Loaded before the first request, so the first boards are complete and the first sentence knows the stops.
+// SWU renames stops and lines rarely; once a day is plenty. A failure keeps the last lists and is
+// followed by another try a minute later: without the lists no vehicle has a line and no stop its id at DING.
+const DAY_MS = 24 * 3_600_000
+const refreshStops = async (): Promise<void> => {
+  const loaded = await stops.refresh().then(
+    () => true,
+    (problem: unknown) => {
+      console.error('loading the stop and line lists failed', problem)
+      return false
+    },
+  )
+  setTimeout(() => void refreshStops(), loaded ? DAY_MS : 60_000).unref()
+}
+// Loaded before the first request, so the first boards are complete and the first sentence knows
+// the stops, and before the vehicles are asked for, which get their lines from these lists.
 await refreshStops()
-setInterval(() => void refreshStops(), 24 * 3_600_000).unref()
+
+const vehicles = vehicleBoard({ getJson, stops, log: (problem) => console.error('SWU vehicles failed', problem), note: (line) => console.log(line) })
+const app = await buildServer({ cfg, departures, planner, ask, alerts, vehicles })
 
 await app.listen({ host: cfg.HOST, port: cfg.PORT })
 
