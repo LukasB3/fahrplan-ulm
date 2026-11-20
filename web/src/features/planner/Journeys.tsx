@@ -41,7 +41,6 @@ function Where({ stopover, name, train, labels }: { stopover: Stopover; name: st
       <span className="text-label-2">
         {stopover.platform && ` · ${train ? labels.track : labels.platform} ${stopover.platform}`}
         {late > 0 && <span className="text-late"> · +{late} {labels.minutes}</span>}
-        {!stopover.expected && ` · ${labels.planned}`}
       </span>
     </span>
   )

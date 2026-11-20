@@ -101,7 +101,6 @@ export const de = {
     connection: 'direkter Anschluss',
     platform: 'Steig',
     track: 'Gleis',
-    planned: 'laut Fahrplan',
     details: 'Einzelheiten',
     mapLabel: 'Karte des Fußwegs',
     mapCredit: '© Stadia Maps © OpenMapTiles © OpenStreetMap',
