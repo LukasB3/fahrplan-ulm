@@ -32,31 +32,32 @@ const monitor = z.object({ stopEvents: z.array(z.unknown()).optional() })
 // trains only a bare number there and the name in front of it ("ICE 515 InterCityExpress").
 const lineOf = (number: string, name: string, mode: Mode) => (mode === 'train' && /^\d+$/.test(number) ? name.split(' ').slice(0, 2).join(' ') : number.replace(/\s+/g, ''))
 
-// Departures of everything but SWU's own lines, which SWU reports better itself.
-export const efaDeparturesOfOthers = async (getJson: GetJson, base: string, dhid: string): Promise<Departure[]> => {
+// The departures of a stop over the next 24 hours, SWU's own lines apart from everything else.
+export type EfaBoard = { swu: Departure[]; others: Departure[] }
+
+export const efaDepartures = async (getJson: GetJson, base: string, dhid: string): Promise<EfaBoard> => {
   const url = `${base}/XML_DM_REQUEST?${COMMON}&type_dm=any&name_dm=${encodeURIComponent(dhid)}&mode=direct&useRealtime=1&depType=stopEvents&limit=40`
   const { stopEvents = [] } = monitor.parse(await getJson(url))
-  return stopEvents.flatMap((item): Departure[] => {
+  const board: EfaBoard = { swu: [], others: [] }
+  for (const item of stopEvents) {
     const parsed = stopEvent.safeParse(item)
-    if (!parsed.success) return []
+    if (!parsed.success) continue
     const { transportation, location, departureTimePlanned, departureTimeEstimated } = parsed.data
-    if (transportation.operator?.name === 'SWU') return []
     const mode = modeOf(transportation.product.class)
     const line = lineOf(transportation.number ?? '', transportation.name ?? '', mode)
-    if (!line) return []
-    return [
-      {
-        line,
-        mode,
-        destination: transportation.destination.name,
-        platform: (location.properties?.platformName ?? location.properties?.platform)?.replace(/^Bstg\.\s*/, '') ?? null,
-        planned: departureTimePlanned,
-        expected: departureTimeEstimated ?? null,
-        vehicle: null,
-        platformId: location.id ?? null,
-      },
-    ]
-  })
+    if (!line) continue
+    board[transportation.operator?.name === 'SWU' ? 'swu' : 'others'].push({
+      line,
+      mode,
+      destination: transportation.destination.name,
+      platform: (location.properties?.platformName ?? location.properties?.platform)?.replace(/^Bstg\.\s*/, '') ?? null,
+      planned: departureTimePlanned,
+      expected: departureTimeEstimated ?? null,
+      vehicle: null,
+      platformId: location.id ?? null,
+    })
+  }
+  return board
 }
 
 // --- Places ---------------------------------------------------------------

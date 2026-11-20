@@ -1,12 +1,11 @@
 import { cached } from './cache.js'
-import { efaDeparturesOfOthers, efaRuns, type RunEvent } from './efa.js'
+import { efaDepartures, efaRuns, type RunEvent } from './efa.js'
 import type { StopDirectory } from './stops.js'
 import { swuDepartures } from './swu.js'
 import type { Departure, Departures, Run } from './types.js'
 import { UnknownStop, type GetJson } from './upstream.js'
 
 const SWU_LIMIT = 40
-const HOUR = 3_600_000
 // A board keeps a departure for a minute after it left, and a late one is listed under its planned time.
 const RUNS_FROM_MS = -3 * 60_000
 
@@ -29,35 +28,38 @@ type Deps = { getJson: GetJson; efaBase: string; stops: Pick<StopDirectory, 'dhi
 
 // The departure board of a stop: SWU's own lines from SWU, which knows the
 // vehicle and the platform, and everything else (regional buses, trains) from DING.
+// SWU lists its lines only about 45 minutes ahead, so a quiet stop, at night
+// for one, would show nothing although a bus comes later. After the last
+// departure SWU lists, SWU's lines are therefore taken from DING, which looks
+// 24 hours ahead. Within SWU's time both list the same departures.
 export const departureBoard = ({ getJson, efaBase, stops, log }: Deps) => {
   const swu = cached((stop) => swuDepartures(getJson, Number(stop), SWU_LIMIT), { freshMs: 10_000, staleMs: 120_000 })
-  const efa = cached((dhid) => efaDeparturesOfOthers(getJson, efaBase, dhid), { freshMs: 30_000, staleMs: 120_000 })
+  const efa = cached((dhid) => efaDepartures(getJson, efaBase, dhid), { freshMs: 30_000, staleMs: 120_000 })
   const runs = cached((dhid) => efaRuns(getJson, efaBase, dhid, new Date(Date.now() + RUNS_FROM_MS)), { freshMs: 20_000, staleMs: 60_000, max: 100 })
-  // Most stops have SWU lines only. DING is not asked again for hours once it has said so.
-  const swuOnlyUntil = new Map<string, number>()
 
   return {
     board: async (stop: number, limit: number): Promise<Departures> => {
       // A stop the directory does not know yet is shown with SWU's lines only.
       const dhid = stops.dhidOf(stop)
-      const askDing = dhid !== undefined && (swuOnlyUntil.get(dhid) ?? 0) < Date.now()
-      const [own, others] = await Promise.all([
+      const [own, ding] = await Promise.all([
         swu(String(stop)),
-        askDing
-          ? efa(dhid).catch((problem: unknown) => {
+        dhid === undefined
+          ? undefined
+          : efa(dhid).catch((problem: unknown) => {
               log(problem)
               return undefined
-            })
-          : undefined,
+            }),
       ])
-      if (dhid && others?.value.length === 0) swuOnlyUntil.set(dhid, Date.now() + 6 * HOUR)
+      // A trip has the same planned minute in both; what SWU lists up to its last minute is SWU's word.
+      const swuUntil = Math.max(...own.value.map((departure) => minute(departure.planned)))
+      const later = (ding?.value.swu ?? []).filter((departure) => minute(departure.planned) > swuUntil)
 
       const now = Date.now()
       const leavesAt = (departure: Departure) => Date.parse(departure.expected ?? departure.planned)
       return {
         now: new Date(now).toISOString(),
         stale: own.stale,
-        departures: [...own.value, ...(others?.value ?? [])]
+        departures: [...own.value, ...later, ...(ding?.value.others ?? [])]
           .filter((departure) => leavesAt(departure) > now - 60_000)
           .sort((a, b) => leavesAt(a) - leavesAt(b))
           .slice(0, limit),

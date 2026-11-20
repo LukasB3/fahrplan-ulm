@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { departureBoard, pickRun } from '../src/departures.js'
-import { efaDeparturesOfOthers, efaRuns } from '../src/efa.js'
+import { efaDepartures, efaRuns } from '../src/efa.js'
 import { stopDirectory } from '../src/stops.js'
 import { swuDepartures, swuStops } from '../src/swu.js'
 import { UnknownStop, type GetJson } from '../src/upstream.js'
@@ -72,13 +72,17 @@ describe('SWU stop list, as recorded', () => {
 })
 
 describe('DING departures, as recorded', () => {
-  it("leave out SWU's own lines", async () => {
-    const departures = await efaDeparturesOfOthers(answering(fixture('efa-departures')), 'https://efa.example', 'de:08421:1008')
-    expect(departures.map((departure) => departure.line)).toEqual(['ICE 515', 'RE55', 'WB 962', expect.stringMatching(/^\d+$/)])
+  const recorded = () => efaDepartures(answering(fixture('efa-departures')), 'https://efa.example', 'de:08421:1008')
+
+  it("keep SWU's own lines apart from everything else", async () => {
+    const { swu, others } = await recorded()
+    expect(others.map((departure) => departure.line)).toEqual(['ICE 515', 'RE55', 'WB 962', expect.stringMatching(/^\d+$/)])
+    expect(swu.map((departure) => departure.line)).toEqual(['5', '1'])
+    expect(swu[0]).toMatchObject({ platform: 'A', planned: '2026-11-15T12:26:00Z', vehicle: null, platformId: 'de:08421:1008:1:2' })
   })
 
   it('name trains, platforms and modes the way they are signed', async () => {
-    const [ice, regional, , bus] = await efaDeparturesOfOthers(answering(fixture('efa-departures')), 'https://efa.example', 'de:08421:1008')
+    const [ice, regional, , bus] = (await recorded()).others
     expect(ice).toMatchObject({ mode: 'train', destination: 'München Hbf', platform: '2', planned: '2026-11-15T12:15:00Z', vehicle: null })
     expect(regional).toMatchObject({ mode: 'train', platform: '7 Nord' })
     expect(bus?.mode).toBe('bus')
@@ -206,9 +210,27 @@ describe('the board of a stop', () => {
     expect(problems).toHaveLength(1)
   })
 
-  it('does not ask DING again about a stop that only SWU serves', async () => {
-    const { board, asked } = await setUp([swuEntry('5', 4)], () => ({ stopEvents: [efaEvent('5', 4, 'SWU')] }))
-    await board.board(1350, 20)
+  it("shows SWU's lines from DING after the last departure SWU lists", async () => {
+    const { board } = await setUp([swuEntry('5', 4)], () => ({ stopEvents: [efaEvent('5', 4, 'SWU'), efaEvent('5', 64, 'SWU'), efaEvent('5', 124, 'SWU')] }))
+    const { departures } = await board.board(1350, 20)
+    expect(departures.map((departure) => departure.line)).toEqual(['5', '5', '5'])
+    // The first is SWU's, with its live time; the later two are DING's timetable.
+    expect(departures.map((departure) => departure.expected !== null)).toEqual([true, false, false])
+  })
+
+  it('shows the next bus of a stop where SWU lists nothing, as at night', async () => {
+    const { board } = await setUp([], () => ({ stopEvents: [efaEvent('N1', 83, 'SWU'), efaEvent('70', 90)] }))
+    expect((await board.board(1350, 20)).departures.map((departure) => departure.line)).toEqual(['N1', '70'])
+  })
+
+  it("takes SWU's word within its own time: a trip only DING lists there is left out", async () => {
+    const { board } = await setUp([swuEntry('5', 4), swuEntry('7', 30)], () => ({ stopEvents: [efaEvent('5', 4, 'SWU'), efaEvent('9', 20, 'SWU'), efaEvent('7', 30, 'SWU'), efaEvent('5', 64, 'SWU')] }))
+    expect((await board.board(1350, 20)).departures.map((departure) => departure.line)).toEqual(['5', '7', '5'])
+  })
+
+  it('asks DING once for boards of the same stop shown together', async () => {
+    const { board, asked } = await setUp([swuEntry('5', 4)], () => ({ stopEvents: [] }))
+    await Promise.all([board.board(1350, 20), board.board(1350, 10)])
     await board.board(1350, 20)
     expect(asked.filter((request) => request === 'XML_DM_REQUEST')).toHaveLength(1)
   })
