@@ -20,6 +20,14 @@ const MINUTE = 60_000
 type Extra = { key: string; earlier: Journey[]; later: Journey[]; loading: 'earlier' | 'later' | null; none: { earlier: boolean; later: boolean }; failed: boolean }
 const noExtra = (key: string): Extra => ({ key, earlier: [], later: [], loading: null, none: { earlier: false, later: false }, failed: false })
 
+const byTime = (a: Journey, b: Journey) => leavesAt(a) - leavesAt(b) || arrivesAt(a) - arrivesAt(b)
+// The rides of an answer in time order. Walking all the way keeps the place the server gave it,
+// before the rides or after them.
+const inTimeOrder = (journeys: Journey[]) => {
+  const rides = journeys.filter((journey) => !onFoot(journey)).sort(byTime)
+  return journeys.map((journey) => (onFoot(journey) ? journey : rides.shift()!))
+}
+
 type Props = { stops: Place[]; lineStyles: Record<string, LineStyle>; labels: PlannerLabels; privacyHref: string }
 type Role = 'from' | 'to'
 
@@ -183,16 +191,15 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
 
   const shown = result && result.key === key ? result : undefined
 
-  // The first answer stays; earlier and later journeys are added at its ends. A list that leaves
-  // (the usual one) runs forward in time; one that arrives by a time starts with the latest to
-  // take and runs backward, so there the later ones go on top.
+  // The first answer stays; earlier and later journeys are added at its ends. Every list runs
+  // forward in time, earliest on top, also one that arrives by a time (the server sends that one
+  // latest first): earlier ones are always asked for above the list, later ones below it.
   const more = extra && extra.key === key ? extra : key ? noExtra(key) : undefined
-  const forward = time.mode === 'depart' || shown?.trips?.note === 'too_late'
-  const first = shown?.trips?.journeys ?? []
+  const first = inTimeOrder(shown?.trips?.journeys ?? [])
   const known = new Set(first.map(sameJourney))
-  const added = (found: Journey[]) => found.filter((journey) => !known.has(sameJourney(journey))).sort((a, b) => (forward ? leavesAt(a) - leavesAt(b) : leavesAt(b) - leavesAt(a)))
+  const added = (found: Journey[]) => found.filter((journey) => !known.has(sameJourney(journey))).sort(byTime)
   const [earlier, later] = [added(more?.earlier ?? []), added(more?.later ?? [])]
-  const listed = forward ? [...earlier, ...first, ...later] : [...later, ...first, ...earlier]
+  const listed = [...earlier, ...first, ...later]
 
   const loadMore = async (direction: 'earlier' | 'later') => {
     if (!from || !to || !key || !more || more.loading) return
@@ -295,7 +302,7 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
         <>
           {shown?.trips ? (
             <>
-              <Journeys journeys={listed} note={shown.trips.note} skew={shown.skew} from={from!} to={to!} before={moreAt(forward ? 'earlier' : 'later')} after={moreAt(forward ? 'later' : 'earlier')} lineStyles={lineStyles} labels={labels} />
+              <Journeys journeys={listed} note={shown.trips.note} skew={shown.skew} from={from!} to={to!} before={moreAt('earlier')} after={moreAt('later')} lineStyles={lineStyles} labels={labels} />
               {(shown.failed || more?.failed) && <p className="px-4 text-[0.8125rem] text-label-2">{labels.failed}</p>}
             </>
           ) : shown?.failed ? (
