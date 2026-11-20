@@ -224,6 +224,8 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
 
   return (
     <div className="space-y-4">
+      {/* What to do, before the fields it is about. It stays while a place is searched, so the fields do not jump. */}
+      {!key && <p className="px-4 text-label-2">{labels.hint}</p>}
       <div className="relative rounded-card bg-surface">
         {field('from')}
         <div className="mr-14 ml-4 border-t border-separator" />
@@ -286,7 +288,6 @@ export function Planner({ stops, lineStyles, labels, privacyHref }: Props) {
               {note}
             </p>
           )}
-          {!key && <p className="px-4 text-label-2">{labels.hint}</p>}
         </>
       )}
 
