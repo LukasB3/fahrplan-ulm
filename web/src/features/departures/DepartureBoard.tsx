@@ -8,7 +8,7 @@ import { Icon } from '@/shell/icons'
 import { LineBadge } from '@/shell/LineBadge'
 import { type RunLabels, RunSheet } from './Run'
 
-export type BoardLabels = { now: string; minutes: string; platform: string; track: string; planned: string; none: string; failed: string; stale: string; loading: string }
+export type BoardLabels = { now: string; minutes: string; platform: string; track: string; none: string; failed: string; stale: string; loading: string }
 
 type Props = {
   stopId: number
@@ -38,7 +38,7 @@ function Row({ departure, now, lineStyles, labels, onOpen }: { departure: Depart
       <span className="min-w-0 flex-1">
         <span className="block truncate">{departure.destination}</span>
         <span className="block truncate text-[0.8125rem] text-label-2">
-          {[where, departure.expected ? null : labels.planned].filter(Boolean).join(' · ')}
+          {where}
           {lateBy !== 0 && (
             <span className={lateBy > 0 ? 'text-late' : 'text-ok'}>
               {where ? ' · ' : ''}
@@ -48,8 +48,7 @@ function Row({ departure, now, lineStyles, labels, onOpen }: { departure: Depart
           )}
         </span>
       </span>
-      {/* A departure without live data is grey: the time is the timetable's, not the vehicle's. */}
-      <span className={`shrink-0 text-right tabular-nums ${departure.expected ? '' : 'text-label-2'}`}>
+      <span className="shrink-0 text-right tabular-nums">
         {minutes < 1 ? (
           <span className="font-semibold">{labels.now}</span>
         ) : minutes < 60 ? (
