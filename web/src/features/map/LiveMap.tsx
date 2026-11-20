@@ -54,6 +54,37 @@ type Live = {
 }
 let live: Live | undefined
 
+// A stop is drawn as the German stop sign (Zeichen 224): a green H on yellow
+// inside a green ring. Drawn here rather than loaded, so it is there with the map.
+// A thin rim in the map's own ground keeps it apart from roads and other signs.
+const SIGN_PX = 24
+const SIGN_SCALE = 3
+const stopSign = (dark: boolean): ImageData => {
+  const size = SIGN_PX * SIGN_SCALE
+  const context = document.createElement('canvas').getContext('2d')!
+  context.canvas.width = context.canvas.height = size
+  context.scale(SIGN_SCALE, SIGN_SCALE)
+  const middle = SIGN_PX / 2
+  const disc = (radius: number, color: string) => {
+    context.beginPath()
+    context.arc(middle, middle, radius, 0, 2 * Math.PI)
+    context.fillStyle = color
+    context.fill()
+  }
+  disc(middle, dark ? '#000000' : '#ffffff')
+  disc(middle - 1, '#008351')
+  disc(middle - 3.25, '#f9c300')
+  // The H: two posts and a bar, as shapes rather than a letter, so no font decides its weight.
+  context.fillStyle = '#008351'
+  const [width, height, stroke] = [8.5, 10, 2.5]
+  const left = middle - width / 2
+  const top = middle - height / 2
+  context.fillRect(left, top, stroke, height)
+  context.fillRect(left + width - stroke, top, stroke, height)
+  context.fillRect(left, middle - stroke / 2, width, stroke)
+  return context.getImageData(0, 0, size, size)
+}
+
 const createMap = (place: HTMLElement, stops: MapStop[]): Live => {
   // The library reads tiles in a worker that it ships as a file of its own.
   // The bundler does not carry that file along, so the build copies it into
@@ -95,16 +126,19 @@ const createMap = (place: HTMLElement, stops: MapStop[]): Live => {
       type: 'geojson',
       data: { type: 'FeatureCollection', features: stops.map((stop) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [stop.lon, stop.lat] }, properties: { code: stop.code, name: stop.name } })) },
     })
+    map.addImage('stop-sign', stopSign(dark), { pixelRatio: SIGN_SCALE })
     map.addLayer({
       id: 'stops',
-      type: 'circle',
+      type: 'symbol',
       source: 'stops',
       minzoom: 12.5,
-      paint: {
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 12.5, 2.5, 16, 6],
-        'circle-color': dark ? '#1c1c1e' : '#ffffff',
-        'circle-stroke-color': dark ? '#d1d1d6' : '#48484a',
-        'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 12.5, 1, 16, 2],
+      layout: {
+        'icon-image': 'stop-sign',
+        // Small from afar, where only the spot matters; a readable sign once the streets are.
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 12.5, 0.4, 15, 0.75, 17, 1],
+        // Every stop is shown, wherever the map's own labels are.
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
       },
     })
     map.addLayer({
@@ -112,12 +146,12 @@ const createMap = (place: HTMLElement, stops: MapStop[]): Live => {
       type: 'symbol',
       source: 'stops',
       minzoom: 15,
-      layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-anchor': 'top', 'text-offset': [0, 0.8], ...(font ? { 'text-font': font } : {}) },
+      layout: { 'text-field': ['get', 'name'], 'text-size': 12, 'text-anchor': 'top', 'text-offset': [0, 1.1], ...(font ? { 'text-font': font } : {}) },
       paint: { 'text-color': dark ? '#f2f2f7' : '#1c1c1e', 'text-halo-color': dark ? '#000000' : '#ffffff', 'text-halo-width': 1.5 },
     })
   })
 
-  // A finger is wider than a stop's dot: anything within reach of the tap counts.
+  // A finger is wider than a stop's sign: anything within reach of the tap counts.
   map.on('click', ({ point }) => {
     if (!map.getLayer('stops')) return
     const [hit] = map.queryRenderedFeatures(
