@@ -1,12 +1,12 @@
 'use client'
 
 import 'maplibre-gl/dist/maplibre-gl.css'
-import type { Vehicle, VehicleTrip } from '@api/types'
+import type { Departure, Vehicle, VehicleTrip } from '@api/types'
 import { AttributionControl, type GeoJSONSource, getVersion, Map as MapLibre, Marker, setWorkerUrl } from 'maplibre-gl'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { type BoardLabels, DepartureBoard } from '@/features/departures/DepartureBoard'
-import { minutesOff, RunTitle, StopTimes } from '@/features/departures/Run'
+import { minutesOff, RunStops, RunTitle, StopTimes } from '@/features/departures/Run'
 import { getJson } from '@/lib/api'
 import { locate, type LocateProblem } from '@/lib/geo'
 import type { LineStyle } from '@/lib/data-types'
@@ -178,6 +178,8 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
   const place = useRef<HTMLDivElement>(null)
   const [failed, setFailed] = useState(false)
   const [stop, setStop] = useState<MapStop>()
+  // A departure tapped in the stop's sheet: the sheet then shows where it goes from there.
+  const [departure, setDeparture] = useState<Departure>()
   const [vehicle, setVehicle] = useState<Vehicle>()
   const [trip, setTrip] = useState<VehicleTrip | 'failed'>()
   const [located, setLocated] = useState<'locating' | LocateProblem>()
@@ -204,6 +206,7 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
     current.onStop = (code) => {
       const tapped = stops.find((candidate) => candidate.code === code)
       setVehicle(undefined)
+      setDeparture(undefined)
       setStop(tapped)
       if (tapped) bringIntoView([tapped.lon, tapped.lat])
     }
@@ -414,20 +417,39 @@ export default function LiveMap({ stops, lineStyles, labels, boardLabels }: Prop
         </p>
       )}
 
-      <Sheet open={stop !== undefined} onOpenChange={(open) => !open && setStop(undefined)} title={stop?.name} closeLabel={labels.close} passthrough low>
+      <Sheet
+        open={stop !== undefined}
+        onOpenChange={(open) => !open && setStop(undefined)}
+        title={departure ? <RunTitle line={departure.line} style={departure.mode === 'train' ? undefined : lineStyles[departure.line]} towards={labels.towards} destination={departure.destination} /> : stop?.name}
+        closeLabel={labels.close}
+        passthrough
+        low
+      >
         {stop && (
-          <div className="space-y-3">
-            <p className="flex flex-wrap gap-1">
-              {stop.lines.map((line) => (
-                <LineBadge key={line} line={line} style={lineStyles[line]} small />
-              ))}
-            </p>
-            <DepartureBoard stopId={stop.id} lineStyles={lineStyles} labels={boardLabels} rows={4} />
-            <Link href={stop.href} className="pressable flex min-h-11 items-center justify-between rounded-card bg-bg px-4 text-tint">
-              {labels.stopPage}
-              <Icon name="chevron" className="size-4" />
-            </Link>
-          </div>
+          <>
+            {/* The board stays while a departure is shown, so going back finds it as it was. */}
+            <div hidden={departure !== undefined} className="space-y-3">
+              <p className="flex flex-wrap gap-1">
+                {stop.lines.map((line) => (
+                  <LineBadge key={line} line={line} style={lineStyles[line]} small />
+                ))}
+              </p>
+              <DepartureBoard stopId={stop.id} lineStyles={lineStyles} labels={boardLabels} rows={4} onOpen={setDeparture} />
+              <Link href={stop.href} className="pressable flex min-h-11 items-center justify-between rounded-card bg-bg px-4 text-tint">
+                {labels.stopPage}
+                <Icon name="chevron" className="size-4" />
+              </Link>
+            </div>
+            {departure && (
+              <div className="space-y-2">
+                <button type="button" onClick={() => setDeparture(undefined)} className="pressable -ml-1.5 flex min-h-11 max-w-full items-center pr-2 text-tint">
+                  <Icon name="back" className="shrink-0" />
+                  <span className="truncate">{stop.name}</span>
+                </button>
+                <RunStops stopId={stop.id} departure={departure} lineStyles={lineStyles} labels={{ stops: labels.nextStops, failed: labels.tripFailed, planned: labels.timesPlanned, live: labels.timesLive }} />
+              </div>
+            )}
+          </>
         )}
       </Sheet>
 

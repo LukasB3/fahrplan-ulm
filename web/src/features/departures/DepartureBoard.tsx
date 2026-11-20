@@ -15,8 +15,10 @@ type Props = {
   lineStyles: Record<string, LineStyle>
   labels: BoardLabels
   rows?: number
-  // With these a departure can be tapped and shows where it goes from here. Left out where the board itself sits in a sheet.
+  // With these a departure can be tapped and shows where it goes from here, in a sheet of its own.
   run?: RunLabels
+  // Where the board itself sits in a sheet, a tapped departure is handed up instead and shown in that sheet.
+  onOpen?: (departure: Departure) => void
 }
 
 const POLL_MS = 20_000
@@ -76,7 +78,7 @@ function Row({ departure, now, lineStyles, labels, onOpen }: { departure: Depart
 
 // The live board of a stop. It asks again every 20 seconds while the page is
 // on screen and counts down in between.
-export function DepartureBoard({ stopId, lineStyles, labels, rows = 10, run }: Props) {
+export function DepartureBoard({ stopId, lineStyles, labels, rows = 10, run, onOpen }: Props) {
   // `skew` is how far the phone's clock is off the server's.
   const [state, setState] = useState<{ board?: Departures; skew: number; failed: boolean }>({ skew: 0, failed: false })
   // The departure whose run is shown. It is kept when the sheet closes, so the sheet leaves with its content.
@@ -147,7 +149,7 @@ export function DepartureBoard({ stopId, lineStyles, labels, rows = 10, run }: P
               now={now}
               lineStyles={lineStyles}
               labels={labels}
-              onOpen={run && (() => setOpened({ departure, open: true }))}
+              onOpen={run ? () => setOpened({ departure, open: true }) : onOpen && (() => onOpen(departure))}
             />
           ))}
         </ol>

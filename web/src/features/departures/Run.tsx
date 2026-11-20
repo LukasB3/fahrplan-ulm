@@ -83,22 +83,14 @@ export function StopTimes({ stops, here = false, color, labels }: { stops: Call[
 
 export type RunLabels = { towards: string; stops: string; failed: string; close: string } & TimesLabels
 
-type Props = {
-  stopId: number
-  // The departure that was tapped. It stays while the sheet closes, so the sheet does not empty on its way out.
-  departure: Departure | undefined
-  open: boolean
-  onClose: () => void
-  lineStyles: Record<string, LineStyle>
-  labels: RunLabels
-}
-
-// Where a departure goes from this stop on: every further stop with its time.
-export function RunSheet({ stopId, departure, open, onClose, lineStyles, labels }: Props) {
+// Where a departure goes from this stop on: every further stop with its time,
+// asked again every 30 seconds while `active`. Shown in its own sheet on a stop's
+// page and inside the stop's sheet on the map.
+export function RunStops({ stopId, departure, active = true, lineStyles, labels }: { stopId: number; departure: Departure | undefined; active?: boolean; lineStyles: Record<string, LineStyle>; labels: Omit<RunLabels, 'towards' | 'close'> }) {
   const [answer, setAnswer] = useState<{ to: Departure; run: Run | 'failed' }>()
 
   useEffect(() => {
-    if (!departure || !open) return
+    if (!departure || !active) return
     let live = true
     const query = new URLSearchParams({ stop: String(stopId), planned: departure.planned, line: departure.line, ...(departure.platformId ? { platform: departure.platformId } : {}) })
     const load = () =>
@@ -113,11 +105,32 @@ export function RunSheet({ stopId, departure, open, onClose, lineStyles, labels 
       live = false
       window.clearInterval(timer)
     }
-  }, [stopId, departure, open])
+  }, [stopId, departure, active])
 
   const run = answer && answer.to === departure ? answer.run : undefined
   // The first stop is this one: it shows the time of the row that was tapped, which is SWU's own for SWU's lines.
   const stops = run && run !== 'failed' && departure ? run.stops.map((stop, index) => (index === 0 ? { ...stop, planned: departure.planned, expected: departure.expected } : stop)) : undefined
+  return run === 'failed' ? (
+    <p className="py-2 text-label-2">{labels.failed}</p>
+  ) : (
+    <section>
+      <h3 className="pb-1 text-[0.8125rem] font-semibold text-label-2">{labels.stops}</h3>
+      <StopTimes stops={stops} here color={departure && departure.mode !== 'train' ? lineStyles[departure.line]?.color : undefined} labels={labels} />
+    </section>
+  )
+}
+
+type Props = {
+  stopId: number
+  // The departure that was tapped. It stays while the sheet closes, so the sheet does not empty on its way out.
+  departure: Departure | undefined
+  open: boolean
+  onClose: () => void
+  lineStyles: Record<string, LineStyle>
+  labels: RunLabels
+}
+
+export function RunSheet({ stopId, departure, open, onClose, lineStyles, labels }: Props) {
   return (
     <Sheet
       open={open}
@@ -125,14 +138,7 @@ export function RunSheet({ stopId, departure, open, onClose, lineStyles, labels 
       title={departure && <RunTitle line={departure.line} style={departure.mode === 'train' ? undefined : lineStyles[departure.line]} towards={labels.towards} destination={departure.destination} />}
       closeLabel={labels.close}
     >
-      {run === 'failed' ? (
-        <p className="py-2 text-label-2">{labels.failed}</p>
-      ) : (
-        <section>
-          <h3 className="pb-1 text-[0.8125rem] font-semibold text-label-2">{labels.stops}</h3>
-          <StopTimes stops={stops} here color={departure && departure.mode !== 'train' ? lineStyles[departure.line]?.color : undefined} labels={labels} />
-        </section>
-      )}
+      <RunStops stopId={stopId} departure={departure} active={open} lineStyles={lineStyles} labels={labels} />
     </Sheet>
   )
 }
