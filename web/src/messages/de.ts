@@ -129,7 +129,6 @@ export const de = {
     minutes: 'min',
     platform: 'Steig',
     track: 'Gleis',
-    planned: 'laut Fahrplan',
     none: 'In den nächsten Stunden fährt hier nichts ab.',
     failed: 'Die Abfahrten sind gerade nicht erreichbar. Es wird weiter versucht.',
     stale: 'Die Angaben sind nicht mehr ganz aktuell.',

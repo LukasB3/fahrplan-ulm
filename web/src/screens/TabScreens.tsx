@@ -103,7 +103,7 @@ export function MapScreen({ locale }: { locale: Locale }) {
         stops={stops.map((stop) => ({ id: stop.id, code: stop.code, name: stop.name, href: stopHref(locale, stop.slug), lat: stop.lat, lon: stop.lon, lines: stop.lines }))}
         lineStyles={lineStyles}
         labels={map}
-        boardLabels={{ now: board.now, minutes: board.minutes, platform: board.platform, track: board.track, planned: board.planned, none: board.none, failed: board.failed, stale: board.stale, loading: board.loading }}
+        boardLabels={{ now: board.now, minutes: board.minutes, platform: board.platform, track: board.track, none: board.none, failed: board.failed, stale: board.stale, loading: board.loading }}
       />
       <div className="map-info material">
         <InfoButton locale={locale} />

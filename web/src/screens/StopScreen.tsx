@@ -56,7 +56,7 @@ export async function StopScreen({ locale, stop }: { locale: Locale; stop: Stop 
           <DepartureBoard
             stopId={stop.id}
             lineStyles={lineStyles}
-            labels={{ now: board.now, minutes: board.minutes, platform: board.platform, track: board.track, planned: board.planned, none: board.none, failed: board.failed, stale: board.stale, loading: board.loading }}
+            labels={{ now: board.now, minutes: board.minutes, platform: board.platform, track: board.track, none: board.none, failed: board.failed, stale: board.stale, loading: board.loading }}
             run={{ towards: board.towards, stops: board.runStops, failed: board.runFailed, close: board.runClose, planned: board.runPlanned, live: board.runLive }}
           />
         </section>
