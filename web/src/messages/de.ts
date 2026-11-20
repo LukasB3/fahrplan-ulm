@@ -39,7 +39,7 @@ export const de = {
     askBusy: 'Einen Moment …',
     askDivider: 'oder',
     askTitle: 'In einem Satz',
-    askLead: 'Schreib oder sag einfach, wohin du willst. Start, Ziel und Zeit werden oben für dich eingetragen.',
+    askLead: 'Schreib oder sag einfach, wohin du willst.',
     askNotice: 'Der Satz wird von einer KI gelesen.',
     askNoticeLink: 'Datenschutz',
     askOther: `Das habe ich nicht als Fahrtwunsch verstanden. Versuch es so: „${askExample}“.`,
