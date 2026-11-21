@@ -16,6 +16,7 @@ import { LineBadge } from '@/shell/LineBadge'
 import { ScreenHeader } from '@/shell/ScreenHeader'
 import { Visit } from '@/shell/Visit'
 import { groupHeading } from '@/shell/styles'
+import { askPrivacyHref } from './LegalScreens'
 import { listed } from './StopScreen'
 
 function MoreLink({ to, label, className }: { to: string; label: string; className: string }) {
@@ -33,7 +34,7 @@ export function RouteScreen({ locale }: { locale: Locale }) {
     <>
       <ScreenHeader locale={locale} title={route.title} root crumb={tabs.route} />
       <main className="space-y-7 px-4">
-        <Planner stops={busiestStops(stops.length).map((stop) => ({ kind: 'stop', stop: stop.dhid, name: stop.name, town: stop.town, lat: stop.lat, lon: stop.lon }))} lineStyles={lineStyles} labels={planner} privacyHref={href(locale, 'privacy')} />
+        <Planner stops={busiestStops(stops.length).map((stop) => ({ kind: 'stop', stop: stop.dhid, name: stop.name, town: stop.town, lat: stop.lat, lon: stop.lon }))} lineStyles={lineStyles} labels={planner} privacyHref={askPrivacyHref(locale)} />
 
         <section>
           <h2 className={groupHeading}>{route.lines}</h2>
